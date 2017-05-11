@@ -1,0 +1,288 @@
+{
+  "InsuranceClaim": {
+    "ClaimHeader": {
+      "AdjudicationClaimStatusCode": "XX",
+      "AdjustmentNumber": "10000000000",
+      "AssignedDepartmentNumber": "XXX",
+      "BillingBeginDate": "1111/11/11",
+      "BillingEndDate": "1111/11/11",
+      "ClaimProcessCompletionCode": "X",
+      "ClaimProcessStateCode": "X",
+      "ClaimProcessSubStateCode": "X",
+      "ClaimStatusReasonCode": "XXX",
+      "CorporateEntityCode": "XXX",
+      "DispositionTimestamp": "1111/11/11 11:11:11 UTC",
+      "DocumentControlNumber": "XXXXXXXXXXXXXXXXXXXX",
+      "GroupNumber": "XXXXXXXXX",
+      "IncrementNumber": "10000000000",
+      "LastUpdateTimestamp": "1111/11/11 11:11:11 UTC",
+      "MemberIdentifier": "10000000000",
+      "PolicyIdentifier": "XXXXXXXXXXXXXXXX",
+      "RecordControlNumber": [
+        "XXXXXXXXXXXXXXXXXXXX"
+      ],
+      "SectionNumber": "XXXX"
+    },
+    "ClaimDetail": {
+      "BillTypeCode": "XXX",
+      "ClaimFinalizedTimestamp": "1111/11/11 11:11:11 UTC",
+      "ClaimOriginCode": "XX",
+      "HCSCInOutNetworkCode": "X",
+      "ICDVersionCode": "XX",
+      "MailRoomReceivedDate": "1111/11/11",
+      "PreadjudicationClaimTypeCode": "XXXXXXXXXX",
+      "PreadjudicationSubTypeCode": "X",
+      "SuppressEOBIndicator": "X",
+      "WorkItemTypeCode": "XXX",
+      "Accumulator": {
+        "CCPCoinsuranceAmount": "100000000000.00000",
+        "CCPDeductibleAmount": "100000000000.00000"
+      },
+      "AdvancePremiumTaxCreditSubsidy": {
+        "SubsidyAmount": "100000000000.00000"
+      },
+      "Amount": {
+        "TotalClaimSubmittedChargeAmount": "100000000000.00000"
+      },
+      "AuxInfo": {
+        "DischargeHour": "XX",
+        "HospitalPaymentIndicator": "X"
+      },
+      "ContractCoverage": {
+        "RelationshipToSubscriber": "XX"
+      },
+      "CostSharingSubsidy": {
+        "BasicCoinsuranceAmount": "100000000000.00000",
+        "BasicCopayAmount": "100000000000.00000",
+        "BasicDeductibleAmount": "100000000000.00000",
+        "PrecalculationThirdPartyPayment": "100000000000.00000"
+      },
+      "Diagnosis": [
+        {
+          "CodeGrouping": "XXX",
+          "DescriptionText": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "DiagnosisCode": "XXXXXXXXXX",
+          "DiagnosisDescription": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "DiagnosisPresentOnAdmissionCode": "X",
+          "DiagnosisTypeCode": "XXX",
+          "HCSCDiagnosisClassificationCode": "X",
+          "LevelOfImportance": "10000000000",
+          "ServiceDiagnosisPointerNumber": "10000000000",
+          "SymptomsPresentOnAdmissionIndicator": "X"
+        }
+      ],
+      "DraftSummary": {
+        "ClaimReleaseDate": "1111/11/11",
+        "ITSReconciliationFormatCode": "X",
+        "TotalDraftAmount": "100000000000.00000",
+        "TotalPriorPaidAmount": "100000000000.00000",
+        "Payee": [
+          {
+            "PayeeName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "PayeeTypeCode": "X"
+          }
+        ]
+      },
+      "FMISAmount": {
+        "BasicCoinsuranceAmount": "100000000000.00000",
+        "BasicDeductibleAmount": "100000000000.00000",
+        "BasicIneligibleAmount": "100000000000.00000",
+        "BasicPostCalculationTPLPaymentAmount": "100000000000.00000",
+        "CoinsuranceAmount": "100000000000.00000",
+        "DeductibleAmount": "100000000000.00000",
+        "IneligibleAmount": "100000000000.00000",
+        "MajorMedicalDeductibleAmount": "100000000000.00000",
+        "PearlPatientShareAmount": "100000000000.00000",
+        "TotalPreCalculationTPLPaymentAmount": "100000000000.00000"
+      },
+      "ITSClaim": {
+        "ClaimIparTransmissionRuleCode": "X",
+        "ITSMemberNumber": "XXXXXXXXXXXXXXXXXXXXXXXXX",
+        "ITSSCCFNumber": "XXXXXXXXXXXXXXXXX",
+        "ITSSFProviderNumber": "XXXXXXXXXXXXX",
+        "LocalPlanControlNumber": "XXXXXXXXXXXXXXXXX",
+        "PaymentOriginatorCode": "X"
+      },
+      "Obsolete": {
+        "InterimCalculationDiscountAmount": "100000000000.00000",
+        "PatientDeductibleReimbursementAmount": "100000000000.00000"
+      },
+      "Patient": {
+        "AccountControlNumber": "XXXXXXXXXXXXXXXXXXXX",
+        "AuthorizedReturnToWorkDate": "1111/11/11",
+        "BenefitAgreementNumber": "10000000000",
+        "CorporateEntityCode": "XXX",
+        "CoverageAccountNumber": "XXXXXXXXXX",
+        "CoverageCancelCode": "XX",
+        "CoverageElementCode": "XXXXX",
+        "DateOfBirth": "1111/11/11",
+        "DisabilityTypeCode": "XX",
+        "DisabledBeginDate": "1111/11/11",
+        "DisabledEndDate": "1111/11/11",
+        "EmailAddressText": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "EmployerSchoolName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "EmploymentStatusCode": "XXXXXXXXXX",
+        "ExtendedMentalHealthIndicator": "X",
+        "GenderCode": "X",
+        "HCSCRelationshipCode": "X",
+        "HIPAACompilanceEffectiveDate": "1111/11/11",
+        "HIPAAEffectiveDate": "1111/11/11",
+        "HippaExemptStatusCode": "X",
+        "LastVisitDate": "1111/11/11",
+        "LastWorkDate": "1111/11/11",
+        "MaritalStatusCode": "X",
+        "MedicaidCareLevelCode": "XXX",
+        "MedicaidCategoryofEligibilityCode": "XXX",
+        "MedicalRecordNumber": "XXXXXXXXXXXXXXXXXX",
+        "MothersMemberIdentifier": "10000000000",
+        "PatientAssessmentDate": "1111/11/11",
+        "PatientEffectiveDate": "1111/11/11",
+        "PatientEligibleForCoverageIndicator": "X",
+        "PatientIdentifier": "10000000000",
+        "PatientLegalRepresentativeIndicator": "X",
+        "PatientSignatureDate": "1111/11/11",
+        "PatientSignatureGenerationCode": "X",
+        "PatientSocialSecurityNumber": "XXXXXXXXX",
+        "PatientStatusCode": "XX",
+        "PatientSubmittedAge": "10000000000",
+        "PatientWeight": "100000000000.00000",
+        "PreferredCommunicationLanguageCode": "XXX",
+        "PregnantIndicator": "X",
+        "QualifiedMedicalChildSupportParentIndicator": "X",
+        "RecipientNumber": "XXXXXXXXXXXXXXXXXXXX",
+        "RelationshipCode": "XX",
+        "StudentCertificationExpireDate": "1111/11/11",
+        "TelephoneNumber": "XXXXXXXXXXXXXXXXXX",
+        "UnableToWorkBeginDate": "1111/11/11",
+        "UnableToWorkEndDate": "1111/11/11",
+        "VariantComponentIdentifier": "XX",
+        "WaitingPeriodCompletionDate": "1111/11/11",
+        "WeightUnitMeasureCode": "XX",
+        "Name": {
+          "FirstName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "LastName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        }
+      },
+      "Pricing": [
+        {
+          "GrouperCode": "XXXX",
+          "SpecialEmployerReductionIndicator": "X",
+          "PricingMetric": {
+            "ApprovedLengthOfStayCount": "XXX",
+            "CopayAmount": "100000000000.00000",
+            "HCSCAlternateProvision": "XXXX",
+            "MedicarePaidAmount": "100000000000.00000",
+            "OtherCarrierPaidAmount": "100000000000.00000",
+            "OtherInsurancePaidAmount": "100000000000.00000",
+            "PPOBasicCoinsuranceAmount": "100000000000.00000",
+            "PPOBasicDeductibleAmount": "100000000000.00000",
+            "PricingSoftwareVersion": "XX",
+            "SpecialEmployerReducedCoinsuranceAmount": "100000000000.00000",
+            "SpecialEmployerReductionAmount": "100000000000.00000",
+            "Weight": "100000000000.00000"
+          }
+        }
+      ],
+      "Provider": [
+        {
+          "HCSCProviderNumber": "XXXXXXXXXX",
+          "NPI": "XXXXXXXXXX",
+          "OrganizationName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "ProviderDesignationCode": "XXXXX",
+          "ProviderFunctionCode": "XXXXXXXXXX",
+          "TaxIdentificationNumber": "XXXXXXXXXX",
+          "Name": {
+            "FirstName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "LastName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+          },
+          "BlueDistinctionCode": [
+            "XXX"
+          ]
+        }
+      ],
+      "ServiceLine": [
+        {
+          "CopayAmount": "100000000000.00000",
+          "HCSCCoverageCategoryCode": "XXX",
+          "HCSCProvisionCode": "XXXX",
+          "HCSCTreatmentLocation": "X",
+          "OriginalBilledAmount": "100000000000.00000",
+          "ServiceBeginDate": "1111/11/11",
+          "ServiceEndDate": "1111/11/11",
+          "ServiceItemCode": "XXXXXXX",
+          "UnitCount": "100000000000.00000",
+          "Amount": {
+            "TotalClaimSubmittedChargeAmount": "100000000000.00000"
+          },
+          "Diagnosis": [
+            {
+              "DiagnosisCode": "XXXXXXXXXX"
+            }
+          ],
+          "FMISAmount": {
+            "BasicEligibleAmount": "100000000000.00000",
+            "BasicPostCalculationTPLPaymentAmount": "100000000000.00000",
+            "IneligibleAmount": "100000000000.00000",
+            "TotalPostCalculationTPLPaymentAmount": "100000000000.00000",
+            "TotalPreCalculationTPLPaymentAmount": "100000000000.00000"
+          },
+          "LineAux": {
+            "AdditionalServiceItemCode": "XXXXXXX"
+          },
+          "LineIneligiblePricing": [
+            {
+              "IneligibleReasonCode": "XXX"
+            }
+          ],
+          "LineObsolete": {
+            "BasicPseudoDeductibleAmount": "100000000000.00000",
+            "LineDuplicateObsolete": {
+              "PaidLevelOneAmount": "100000000000.00000"
+            }
+          },
+          "LinePricing": [
+            {
+              "LinePricingMetric": {
+                "CCPInsteadCalculationBasicCoinsuranceAmount": "100000000000.00000",
+                "CCPInsteadCalculationBasicDeductibleAmount": "100000000000.00000",
+                "CoinsuranceAmount": "100000000000.00000",
+                "DeductibleAmount": "100000000000.00000"
+              }
+            }
+          ],
+          "LineProcedureModifier": [
+            {
+              "ServiceItemModifierCode": "XX"
+            }
+          ],
+          "Provider": [
+            {
+              "HCSCProviderNumber": "XXXXXXXXXX",
+              "NPI": "XXXXXXXXXX"
+            }
+          ]
+        }
+      ],
+      "Subscriber": {
+        "AlphaPrefixCode": "XXX",
+        "DateOfBirth": "1111/11/11",
+        "GenderCode": "X",
+        "Name": {
+          "FirstName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "LastName": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        }
+      },
+      "TPL": [
+        {
+          "StateProgramPaidAmount": "100000000000.00000",
+          "TPLReimbursementSubrogation": {
+            "ReimbursementSubrogationPaidAmount": "100000000000.00000"
+          },
+          "TPLWorkmensComp": {
+            "WorkersCompensationPaidAmount": "100000000000.00000"
+          }
+        }
+      ]
+    }
+  }
+}
