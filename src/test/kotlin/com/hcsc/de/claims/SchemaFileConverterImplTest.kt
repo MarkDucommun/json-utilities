@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.javafaker.Faker
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 import java.io.FileWriter
@@ -384,131 +385,11 @@ class SchemaFileConverterImplTest {
     }
 
     @Test
-    fun `it can size JSON objects`() {
-
-        val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXX")).writeAsString()
-
-        val sizeDescription = jsonString.understandJsonSize()
-
-        assertThat(sizeDescription).isEqualTo(PreJsonSizeNode(
-                name = "top",
-                size = 23,
-                children = listOf(
-                        PreJsonSizeNode(name = "A", size = 6),
-                        PreJsonSizeNode(name = "B", size = 6)
-                )
-        ))
-    }
-
-
-    @Test
-    fun `it can size JSON objects with arrays`() {
-
-        val jsonString: String = mapOf("top" to listOf("XXXX", "XXXXXXX")).writeAsString()
-
-        val sizeDescription = jsonString.understandJsonSize()
-
-        assertThat(sizeDescription).isEqualTo(PreJsonSizeNode(
-                name = "top",
-                size = 18,
-                children = listOf(
-                        PreJsonSizeNode(name = "0", size = 6),
-                        PreJsonSizeNode(name = "1", size = 9)
-                )
-        ))
-    }
-
-    @Test
-    fun `it can size JSON objects with arrays of complex objects`() {
-
-        val jsonString: String = mapOf("top" to listOf(
-                mapOf("A" to "XXXX", "B" to "XXXXX"),
-                mapOf("C" to "XXXX", "D" to "XXXXXX"))).writeAsString()
-
-        val sizeDescription = jsonString.understandJsonSize()
-
-        assertThat(sizeDescription).isEqualTo(PreJsonSizeNode(
-                name = "top",
-                size = 63,
-                children = listOf(
-                        PreJsonSizeNode(name = "0", size = 25,
-                                children = listOf(
-                                        PreJsonSizeNode(name = "A", size = 6),
-                                        PreJsonSizeNode(name = "B", size = 8)
-                                )),
-                        PreJsonSizeNode(name = "1", size = 35,
-                                children = listOf(
-                                        PreJsonSizeNode(name = "C", size = 10),
-                                        PreJsonSizeNode(name = "D", size = 14)
-                                ))
-                )
-        ))
-    }
-
-    @Test
-    fun `it can sum a list of jsonSizeNodes to create an averaged node`() {
-        val node1 = PreJsonSizeNode(
-                name = "top",
-                size = 48,
-                children = listOf(
-                        PreJsonSizeNode(name = "0", size = 20,
-                                children = listOf(
-                                        PreJsonSizeNode(name = "A", size = 4),
-                                        PreJsonSizeNode(name = "B", size = 5)
-                                )),
-                        PreJsonSizeNode(name = "1", size = 25,
-                                children = listOf(
-                                        PreJsonSizeNode(name = "C", size = 6),
-                                        PreJsonSizeNode(name = "D", size = 8)
-                                ))
-                )
-        )
-
-        val node2 = PreJsonSizeNode(
-                name = "top",
-                size = 63,
-                children = listOf(
-                        PreJsonSizeNode(name = "0", size = 25,
-                                children = listOf(
-                                        PreJsonSizeNode(name = "A", size = 6),
-                                        PreJsonSizeNode(name = "B", size = 8)
-                                )),
-                        PreJsonSizeNode(name = "1", size = 35,
-                                children = listOf(
-                                        PreJsonSizeNode(name = "C", size = 10),
-                                        PreJsonSizeNode(name = "D", size = 14)
-                                ))
-                )
-        )
-
-        val averagedNode = listOf(node1, node2).generateAveragedNode()
-
-        assertThat(averagedNode).isEqualTo(
-                PreJsonSizeNode(
-                        name = "top",
-                        size = 63,
-                        children = listOf(
-                                PreJsonSizeNode(name = "0", size = 25,
-                                        children = listOf(
-                                                PreJsonSizeNode(name = "A", size = 6),
-                                                PreJsonSizeNode(name = "B", size = 8)
-                                        )),
-                                PreJsonSizeNode(name = "1", size = 35,
-                                        children = listOf(
-                                                PreJsonSizeNode(name = "C", size = 10),
-                                                PreJsonSizeNode(name = "D", size = 14)
-                                        ))
-                        )
-                )
-        )
-    }
-
-    @Test
     fun `it converts the thing`() {
 
-        val schema = schemaFileConverter.convert("/Users/xpdesktop/workspace/demo/fake-claims-generator/src/main/resources/cts-schema.json")
+        val schema = schemaFileConverter.convert("/Users/pivotal/workspace/json-schema-parser/src/main/resources/cts-schema.json")
 
-        val cinqFieldsFilePath = "/Users/xpdesktop/workspace/demo/fake-claims-generator/src/main/resources/cinq-fields.csv"
+//        val cinqFieldsFilePath = "/Users/xpdesktop/workspace/demo/fake-claims-generator/src/main/resources/cinq-fields.csv"
 
 //        val fieldSetRows = cinqFieldsFilePath.readAndConvertCsvToFieldSetList()
 
@@ -520,9 +401,8 @@ class SchemaFileConverterImplTest {
 
         val objectMapper = ObjectMapper()
 
-        val node = objectMapper.readValue<JsonNode>(schemaString)
-
-        val a = node.get("InsuranceClaim").get("ClaimDetail").get("ServiceLine").map { objectMapper.writeValueAsString(it).length }.average()
+//        val node = objectMapper.readValue<JsonNode>(schemaString)
+//        val a = node.get("InsuranceClaim").get("ClaimDetail").get("ServiceLine").map { objectMapper.writeValueAsString(it).length }.average()
 
         println()
 //        FileWriter("schema-${System.currentTimeMillis()}.json").apply {
@@ -617,6 +497,4 @@ class SchemaFileConverterImplTest {
     }
 
     private inline fun <T, reified U : Any> T.convert() = objectMapper.convertValue(this, U::class.java)
-
-    private fun <T> T.writeAsString() = objectMapper.writeValueAsString(this)
 }

@@ -1,13 +1,10 @@
 package com.hcsc.de.claims
 
-import com.fasterxml.jackson.annotation.JsonGetter
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import java.io.File
 
 interface SchemaFileConverter {
 
@@ -254,12 +251,6 @@ class NodeConverterImpl : NodeConverter {
             }
 }
 
-private val JsonNode.fieldNames: List<String> get() {
-    var fieldNames = emptyList<String>()
-    fieldNames().forEach { fieldNames += it }
-    return fieldNames
-}
-
 data class SchemaObject<out detailType : SchemaDetail>(
         val name: String,
         val detail: detailType
@@ -316,89 +307,6 @@ data class Reference(val type: String) : SchemaDetail() {
     override fun toJsonable(): String {
         throw Exception("I should have been replaced")
     }
-}
-
-fun String.understandJsonSize(): PreJsonSizeNode {
-
-    val jsonNode = objectMapper.readValue<JsonNode>(this)
-
-    return jsonNode.fieldNames.map {
-
-        jsonNode[it].understandSize(name = it)
-
-    }.first()
-}
-
-private fun <T> T.writeAsString() = objectMapper.writeValueAsString(this)
-
-val objectMapper = ObjectMapper().registerKotlinModule()
-
-fun JsonNode.understandSize(name: String): PreJsonSizeNode {
-
-    return if (this.isArray) {
-        generateJsonSizeNode(
-                name = name,
-                size = this.writeAsString().length,
-                children = this.mapIndexed { index, node ->
-                    node.understandSize(name = index.toString())
-                }
-        )
-    } else {
-        this.fieldNames.map {
-            this[it].understandSize(name = it)
-        }.let {
-            PreJsonSizeNode(
-                    name = name,
-                    size = this.writeAsString().length,
-                    children = it
-            )
-        }
-    }
-}
-
-fun List<PreJsonSizeNode>.generateAveragedNode(): PreJsonSizeNode {
-    TODO()
-}
-
-fun List<PreJsonSizeNode>.averageSize() = map(PreJsonSizeNode::size)
-        .ifNotEmptyOtherwiseNull { average() }
-        ?.toInt()
-        ?: 0
-
-fun generateJsonSizeNode(
-        name: String,
-        size: Int,
-        children: List<PreJsonSizeNode>
-) = PreJsonSizeNode(
-        name = name,
-        size = size,
-        children = children
-        //        avgChildSize = children.averageSize()
-)
-
-data class PreJsonSizeNode(
-        val name: String,
-        val size: Int,
-        val children: List<PreJsonSizeNode> = emptyList()
-) {
-
-    val jsonSizeNode = JsonSizeNode(
-            name = name,
-            size = size,
-            children = children,
-            avgChildSize = children.averageSize()
-    )
-}
-
-data class JsonSizeNode(
-        val name: String,
-        val size: Int,
-        val children: List<PreJsonSizeNode> = emptyList(),
-        val avgChildSize: Int = 0
-)
-
-private fun <T, U> Collection<T>.ifNotEmptyOtherwiseNull(fn: Collection<T>.() -> U): U? {
-    return if (this.isNotEmpty()) this.fn() else null
 }
 
 data class Array(
