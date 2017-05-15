@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.Success
+import com.hcsc.de.claims.SingleResult
 import com.hcsc.de.claims.failsAnd
 import com.hcsc.de.claims.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
@@ -17,7 +17,7 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeObject(name = "A", size = 15, children = emptyList(), averageChildSize = 0)
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2).blockingGet() failsAnd { message ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2).blockingGet() failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes are not the same type")
         }
@@ -29,7 +29,7 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeLeafNode(name = "B", size = 15)
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) failsAnd { message ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -51,7 +51,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) failsAnd { message ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -73,7 +73,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) failsAnd { message ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes are not the same type")
         }
@@ -99,7 +99,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) failsAnd { message ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -122,7 +122,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) failsAnd { message ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -134,9 +134,14 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeLeafNode(name = "A", size = 15)
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) succeedsAnd { averageNode ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
-            assertThat(averageNode).isEqualTo(JsonSizeLeafNode(name = "A", size = 13))
+            assertThat(averageNode).isEqualTo(JsonSizeLeafOverview(name = "A", size = Distribution(
+                    average = 13,
+                    minimum = 10,
+                    maximum = 15,
+                    standardDeviation = 2.5495097567963922
+            )))
         }
     }
 
@@ -156,13 +161,22 @@ class JsonSizeAveragerTest {
                 averageChildSize = 19
         )
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) succeedsAnd { averageNode ->
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
-            assertThat(averageNode).isEqualTo(JsonSizeObject(
+            assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
                     name = "A",
-                    size = 19,
-                    children = listOf(JsonSizeLeafNode(name = "B", size = 15)),
-                    averageChildSize = 15
+                    size = Distribution(
+                            average = 19,
+                            minimum = 15,
+                            maximum = 24,
+                            standardDeviation = 4.527692569068709
+                    ),
+                    children = listOf(JsonSizeLeafOverview(name = "B", size = Distribution(
+                            average = 15,
+                            minimum = 10,
+                            maximum = 19,
+                            standardDeviation = 4.527692569068709
+                    )))
             ))
         }
     }
@@ -222,29 +236,55 @@ class JsonSizeAveragerTest {
                 averageChildSize = 9
         )
 
-        val result = jsonSizeAverager.generateAverageJsonSizeNode(node1, node2)
+        val result = jsonSizeAverager.generateJsonSizeOverview(node1, node2)
 
         result succeedsAnd { averagedNode ->
 
-            assertThat(averagedNode).isEqualTo(
-                    JsonSizeArrayAverage(
+            assertThat(averagedNode).isEqualToComparingFieldByFieldRecursively(
+                    JsonSizeArrayOverview(
                             name = "top",
-                            size = 55,
-                            averageChild = JsonSizeObject(
-                                    name = "averageChild",
-                                    size = 27,
-                                    children = listOf(
-                                            JsonSizeLeafNode(name = "A", size = 9),
-                                            JsonSizeLeafNode(name = "B", size = 9)
-                                    ),
-                                    averageChildSize = 9
+                            size = Distribution(
+                                    average = 55,
+                                    minimum = 48,
+                                    maximum = 63,
+                                    standardDeviation = 7.516648189186454
                             ),
-                            averageNumberOfChildren = 3
+                            averageChild = JsonSizeObjectOverview(
+                                    name = "averageChild",
+                                    size = Distribution(
+                                            average = 28,
+                                            minimum = 20,
+                                            maximum = 35,
+                                            standardDeviation = 6.0
+                                    ),
+                                    children = listOf(
+                                            JsonSizeLeafOverview(name = "A", size = Distribution(
+                                                    average = 9,
+                                                    minimum = 4,
+                                                    maximum = 20,
+                                                    standardDeviation = 5.744562646538029
+                                            )),
+                                            JsonSizeLeafOverview(name = "B", size = Distribution(
+                                                    average = 9,
+                                                    minimum = 5,
+                                                    maximum = 14,
+                                                    standardDeviation = 3.687817782917155
+                                            ))
+                                    )
+                            ),
+                            numberOfChildren = Distribution(
+                                    average = 3,
+                                    minimum = 2,
+                                    maximum = 3,
+                                    standardDeviation = 0.7071067811865476
+                            )
                     )
             )
         }
     }
 
+    private fun JsonSizeAverager.generateJsonSizeOverview(vararg nodes: JsonSizeNode): SingleResult<String, JsonSizeOverview> {
 
-
+        return generateJsonSizeOverview(nodes = nodes.asList())
+    }
 }

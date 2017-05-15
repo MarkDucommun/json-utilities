@@ -30,4 +30,19 @@ fun <failureType, successType, newSuccessType> SingleResult<failureType, success
     }
 }
 
+fun <failureType, successType> SingleResult<failureType, successType>.mapSuccess(
+        onSuccess: (successType) -> Result<failureType, successType>
+): SingleResult<failureType, successType> {
+
+    return this.map { result ->
+
+        when (result) {
+            is Success -> onSuccess.invoke(result.content)
+            is Failure -> result
+        }
+    }
+}
+
+fun <failureType, successType> List<SingleResult<failureType, successType>>.concat() = Single.concat(this)
+
 val EMPTY_SUCCESS = Success<String, Unit>(Unit)

@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.javafaker.Faker
+import com.hcsc.de.claims.jsonSizing.JsonSizeAverager
+import com.hcsc.de.claims.jsonSizing.JsonSizeNode
+import com.hcsc.de.claims.jsonSizing.JsonSizer
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 import java.io.FileWriter
@@ -387,7 +390,7 @@ class SchemaFileConverterImplTest {
     @Test
     fun `it converts the thing`() {
 
-        val schema = schemaFileConverter.convert("/Users/pivotal/workspace/json-schema-parser/src/main/resources/cts-schema.json")
+        val schema = schemaFileConverter.convert("/Users/xpdesktop/workspace/json-schema-parser/src/main/resources/cts-schema.json")
 
 //        val cinqFieldsFilePath = "/Users/xpdesktop/workspace/demo/fake-claims-generator/src/main/resources/cinq-fields.csv"
 
@@ -397,9 +400,22 @@ class SchemaFileConverterImplTest {
 
 //        val reducedSchema = SchemaReducerImpl().reduce(schema, reducedSchemaFields)
 
-        val schemaString = schema.toJson()
+        val jsonSizer = JsonSizer()
+        val jsonSizeAverager = JsonSizeAverager()
 
-        val objectMapper = ObjectMapper()
+        fun List<JsonSizeNode>.generateOverview() = jsonSizeAverager.generateJsonSizeOverview(this).blockingGet()
+
+        val start = System.currentTimeMillis()
+
+        val overview = 1.rangeTo(50)
+                .map { schema.toJson() }
+                .map { jsonSizer.calculateSize(it) }
+                .map { when (it) {
+                    is Success -> it.content
+                    is Failure -> throw RuntimeException("Error")
+                }}.generateOverview()
+
+        val end = System.currentTimeMillis() - start
 
 //        val node = objectMapper.readValue<JsonNode>(schemaString)
 //        val a = node.get("InsuranceClaim").get("ClaimDetail").get("ServiceLine").map { objectMapper.writeValueAsString(it).length }.average()

@@ -23,10 +23,3 @@ data class JsonSizeArray(
         val children: List<JsonSizeNode>,
         val averageChildSize: Int
 ): JsonSizeNode()
-
-data class JsonSizeArrayAverage(
-        override val name: String,
-        override val size: Int,
-        val averageChild: JsonSizeNode,
-        val averageNumberOfChildren: Int
-): JsonSizeNode()

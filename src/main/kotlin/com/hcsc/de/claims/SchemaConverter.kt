@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import java.util.*
 
 interface SchemaFileConverter {
 
@@ -270,7 +271,8 @@ data class Text(
 ) : SchemaDetail() {
 
     override fun toJsonable(): String {
-        return 1.rangeTo(maxLength).fold("") { acc, _ -> acc.plus("X") }
+        // TODO randomly choose actual length
+        return 1.rangeTo(random(maxLength)).fold("") { acc, _ -> acc.plus("X") }
     }
 }
 
@@ -309,13 +311,18 @@ data class Reference(val type: String) : SchemaDetail() {
     }
 }
 
+val random = Random()
+
+fun random(i: Int): Int = random.nextInt(i)
+
 data class Array(
         val itemType: SchemaDetail,
         val maxItems: Int?
 ) : SchemaDetail() {
 
     override fun toJsonable(): List<Any> {
-        return List(maxItems?.let { it } ?: 5) {
+        // TODO randomly choose max items and default
+        return List(maxItems?.let { random(it) } ?: random(5)) {
             itemType.toJsonable()
         }
     }
