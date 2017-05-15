@@ -30,6 +30,44 @@ class JsonSizerTest {
     }
 
     @Test
+    fun `it can uses floor for converting doubles that are odd`() {
+
+        val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXXXXX")).writeAsString()
+
+        jsonSizer.calculateSize(jsonString) succeedsAnd { sizeDescription ->
+
+            assertThat(sizeDescription).isEqualTo(JsonSizeObject(
+                    name = "top",
+                    size = 26,
+                    children = listOf(
+                            JsonSizeLeafNode(name = "A", size = 6),
+                            JsonSizeLeafNode(name = "B", size = 9)
+                    ),
+                    averageChildSize = 7
+            ))
+        }
+    }
+
+    @Test
+    fun `it can uses ceiling for converting doubles that are even`() {
+
+        val jsonString: String = mapOf("top" to mapOf("A" to "XXXXX", "B" to "XXXXXXXX")).writeAsString()
+
+        jsonSizer.calculateSize(jsonString) succeedsAnd { sizeDescription ->
+
+            assertThat(sizeDescription).isEqualTo(JsonSizeObject(
+                    name = "top",
+                    size = 28,
+                    children = listOf(
+                            JsonSizeLeafNode(name = "A", size = 7),
+                            JsonSizeLeafNode(name = "B", size = 10)
+                    ),
+                    averageChildSize = 9
+            ))
+        }
+    }
+
+    @Test
     fun `it can size JSON objects with arrays`() {
 
         val jsonString: String = mapOf("top" to listOf("XXXX", "XXXXXXX")).writeAsString()
@@ -43,7 +81,7 @@ class JsonSizerTest {
                             JsonSizeLeafNode(name = "0", size = 6),
                             JsonSizeLeafNode(name = "1", size = 9)
                     ),
-                    averageChildSize = 8
+                    averageChildSize = 7
             ))
         }
     }

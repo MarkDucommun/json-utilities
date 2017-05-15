@@ -1,5 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
+import com.hcsc.de.claims.Success
 import com.hcsc.de.claims.failsAnd
 import com.hcsc.de.claims.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
@@ -14,9 +15,9 @@ class JsonSizeAveragerTest {
     fun `it cannot sum JsonSizeNodes that are different types`() {
 
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
-        val node2 = JsonSizeObject(name = "B", size = 15, children = emptyList(), averageChildSize = 0)
+        val node2 = JsonSizeObject(name = "A", size = 15, children = emptyList(), averageChildSize = 0)
 
-        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2) failsAnd { message ->
+        jsonSizeAverager.generateAverageJsonSizeNode(node1, node2).blockingGet() failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes are not the same type")
         }
@@ -159,7 +160,7 @@ class JsonSizeAveragerTest {
 
             assertThat(averageNode).isEqualTo(JsonSizeObject(
                     name = "A",
-                    size = 20,
+                    size = 19,
                     children = listOf(JsonSizeLeafNode(name = "B", size = 15)),
                     averageChildSize = 15
             ))
@@ -228,13 +229,13 @@ class JsonSizeAveragerTest {
             assertThat(averagedNode).isEqualTo(
                     JsonSizeArrayAverage(
                             name = "top",
-                            size = 56,
+                            size = 55,
                             averageChild = JsonSizeObject(
                                     name = "averageChild",
-                                    size = 28,
+                                    size = 27,
                                     children = listOf(
                                             JsonSizeLeafNode(name = "A", size = 9),
-                                            JsonSizeLeafNode(name = "B", size = 10)
+                                            JsonSizeLeafNode(name = "B", size = 9)
                                     ),
                                     averageChildSize = 9
                             ),
@@ -243,4 +244,7 @@ class JsonSizeAveragerTest {
             )
         }
     }
+
+
+
 }

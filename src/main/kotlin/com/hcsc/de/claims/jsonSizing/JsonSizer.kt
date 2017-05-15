@@ -47,7 +47,7 @@ class JsonSizer {
 
     fun List<JsonSizeNode>.averageSize() = map(JsonSizeNode::size)
             .ifNotEmptyOtherwiseNull { average() }
-            ?.ceiling()
+            ?.ceilingOnEven()
             ?.toInt()
             ?: 0
 

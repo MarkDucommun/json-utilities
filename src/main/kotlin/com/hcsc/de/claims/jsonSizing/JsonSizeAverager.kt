@@ -84,11 +84,15 @@ class JsonSizeAverager {
 
         return Single.just(Unit).subscribeOn(Schedulers.computation()).map {
 
-            val averageLeafNode = first().copy(size = map(JsonSizeLeafNode::size).average().ceiling().toInt())
+            val averageLeafNode = first().copy(size = average(JsonSizeLeafNode::size))
 
             Success<String, JsonSizeNode>(content = averageLeafNode)
         }
     }
+
+    private fun <T> List<T>.average(fn: T.() -> Int): Int = map(fn).averageInt()
+
+    private fun List<Int>.averageInt() = average().ceilingOnEven().toInt()
 
     private fun List<JsonSizeObject>.generateAveragedObjectNode(): SingleResult<String, JsonSizeNode> {
 
@@ -105,8 +109,8 @@ class JsonSizeAverager {
             }.concat().toList().map { results ->
 
                 results.find { it is Failure } ?: Success<String, JsonSizeNode>(content = first().copy(
-                        size = map(JsonSizeObject::size).average().ceiling().toInt(),
-                        averageChildSize = map(JsonSizeObject::averageChildSize).average().ceiling().toInt(),
+                        size = average(JsonSizeObject::size),
+                        averageChildSize = average(JsonSizeObject::averageChildSize),
                         children = (results as List<Success<String, JsonSizeNode>>).map { it.content }
                 ))
             }
@@ -117,31 +121,33 @@ class JsonSizeAverager {
 
     private fun List<JsonSizeArray>.generateAveragedArrayNode(): SingleResult<String, JsonSizeNode> {
 
-        map { array -> array.childrenWithNormalizedNames.generateAveragedNode() }.concat().toList().map { results: MutableList<Result<String, JsonSizeNode>> ->
+        return map { array -> array.childrenWithNormalizedNames.generateAveragedNode() }.concat().toList().flatMap { results ->
 
-//            if (results.find { it is Failure } == null)
+            results
+                    .find { it is Failure }
+                    ?.let { Single.just(Failure<String, JsonSizeNode>(content = (it as Failure).content)) }
+                    ?: {
+
+                val successes = results as List<Success<String, JsonSizeNode>>
+
+                val averageChildren = successes.map(Success<String, JsonSizeNode>::content)
+
+                averageChildren.generateAveragedNode().flatMap { averagedArrayChildResult ->
+
+                    when (averagedArrayChildResult) {
+                        is Success -> {
+                            Single.just(Success<String, JsonSizeNode>(content = JsonSizeArrayAverage(
+                                    name = first().name,
+                                    size = average(JsonSizeArray::size),
+                                    averageChild = averagedArrayChildResult.content,
+                                    averageNumberOfChildren = map { it.children.size }.averageInt()
+                            )))
+                        }
+                        is Failure -> Single.just(Failure<String, JsonSizeNode>(content = averagedArrayChildResult.content))
+                    }
+                }
+            }()
         }
-
-        TODO()
-//
-//        return if (averagedArrayChildrenResults.find { it is Failure } == null) {
-//
-//            val averagedArrayChildResult = (averagedArrayChildrenResults as List<Success<String, JsonSizeNode>>)
-//                    .map(Success<String, JsonSizeNode>::content)
-//                    .generateAveragedNode()
-//
-//            when (averagedArrayChildResult) {
-//                is Success -> Success<String, JsonSizeNode>(content = JsonSizeArrayAverage(
-//                        name = first().name,
-//                        size = map(JsonSizeArray::size).average().ceiling().toInt(),
-//                        averageChild = averagedArrayChildResult.content,
-//                        averageNumberOfChildren = map { it.children.size }.average().ceiling().toInt()
-//                        ))
-//                is Failure -> averagedArrayChildResult
-//            }
-//        } else {
-//            averagedArrayChildrenResults.first()
-//        }
     }
 
     private val JsonSizeArray.childrenWithNormalizedNames: List<JsonSizeNode> get() {
