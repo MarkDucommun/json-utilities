@@ -29,6 +29,7 @@ compileTestKotlin {
 }
 
 repositories {
+	maven { url "https://jcenter.bintray.com" }
 	mavenCentral()
 	maven { url "https://repo.spring.io/snapshot" }
 	maven { url "https://repo.spring.io/milestone" }
@@ -42,6 +43,9 @@ dependencies {
 	compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
 	compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.8.7")
+	compile 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:0.14'
+	compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.14'
+	compile 'org.jetbrains.kotlinx:kotlinx-coroutines-rx2:0.14'
 	compile("com.github.javafaker:javafaker:0.13")
 	compile("com.github.fge:json-schema-validator:2.2.6")
 	runtime('com.h2database:h2')

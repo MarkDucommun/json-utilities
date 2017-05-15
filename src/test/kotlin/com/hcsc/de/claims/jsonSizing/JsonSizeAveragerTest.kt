@@ -3,6 +3,7 @@ package com.hcsc.de.claims.jsonSizing
 import com.hcsc.de.claims.failsAnd
 import com.hcsc.de.claims.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
+import org.junit.Ignore
 import org.junit.Test
 
 class JsonSizeAveragerTest {
@@ -78,6 +79,7 @@ class JsonSizeAveragerTest {
     }
 
     @Test
+    @Ignore("TODO NOT A VALID TEST, DO WE NEED SOME FORM OF ARRAY CHILD TO PROHIBIT THIS SETUP FROM EVER HAPPENING?")
     fun `it cannot sum JsonSizeArrays that have different types of children in any given Array`() {
 
         val node1 = JsonSizeArray(
@@ -103,18 +105,19 @@ class JsonSizeAveragerTest {
     }
 
     @Test
+    @Ignore("TODO NOT A VALID TEST, DO WE NEED SOME FORM OF ARRAY CHILD TO PROHIBIT THIS SETUP FROM EVER HAPPENING?")
     fun `it cannot sum JsonSizeArrays that are shaped differently`() {
 
         val node1 = JsonSizeArray(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "A", size = 10)),
+                children = listOf(JsonSizeLeafNode(name = "0", size = 10)),
                 averageChildSize = 10
         )
         val node2 = JsonSizeArray(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 15)),
+                children = listOf(JsonSizeLeafNode(name = "1", size = 15)),
                 averageChildSize = 10
         )
 
