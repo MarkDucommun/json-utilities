@@ -283,6 +283,93 @@ class JsonSizeAveragerTest {
         }
     }
 
+
+    @Test
+    fun `it can handle empty JsonSizeArrays`() {
+
+        val node1 = JsonSizeArray(
+                name = "top",
+                size = 48,
+                children = emptyList(),
+                averageChildSize = 0
+        )
+
+        val node2 = JsonSizeArray(
+                name = "top",
+                size = 63,
+                children = listOf(
+                        JsonSizeObject(name = "0", size = 25,
+                                children = listOf(
+                                        JsonSizeLeafNode(name = "A", size = 6),
+                                        JsonSizeLeafNode(name = "B", size = 8)
+                                ),
+                                averageChildSize = 7
+                        ),
+                        JsonSizeObject(name = "1", size = 35,
+                                children = listOf(
+                                        JsonSizeLeafNode(name = "A", size = 10),
+                                        JsonSizeLeafNode(name = "B", size = 14)
+                                ),
+                                averageChildSize = 12
+                        ),
+                        JsonSizeObject(name = "1", size = 35,
+                                children = listOf(
+                                        JsonSizeLeafNode(name = "A", size = 20),
+                                        JsonSizeLeafNode(name = "B", size = 14)
+                                ),
+                                averageChildSize = 12
+                        )
+                ),
+                averageChildSize = 9
+        )
+
+        val result = jsonSizeAverager.generateJsonSizeOverview(node1, node2)
+
+        result succeedsAnd { averagedNode ->
+
+            assertThat(averagedNode).isEqualToComparingFieldByFieldRecursively(
+                    JsonSizeArrayOverview(
+                            name = "top",
+                            size = Distribution(
+                                    average = 55,
+                                    minimum = 48,
+                                    maximum = 63,
+                                    standardDeviation = 7.516648189186454
+                            ),
+                            averageChild = JsonSizeObjectOverview(
+                                    name = "averageChild",
+                                    size = Distribution(
+                                            average = 28,
+                                            minimum = 20,
+                                            maximum = 35,
+                                            standardDeviation = 6.0
+                                    ),
+                                    children = listOf(
+                                            JsonSizeLeafOverview(name = "A", size = Distribution(
+                                                    average = 9,
+                                                    minimum = 4,
+                                                    maximum = 20,
+                                                    standardDeviation = 5.744562646538029
+                                            )),
+                                            JsonSizeLeafOverview(name = "B", size = Distribution(
+                                                    average = 9,
+                                                    minimum = 5,
+                                                    maximum = 14,
+                                                    standardDeviation = 3.687817782917155
+                                            ))
+                                    )
+                            ),
+                            numberOfChildren = Distribution(
+                                    average = 3,
+                                    minimum = 2,
+                                    maximum = 3,
+                                    standardDeviation = 0.7071067811865476
+                            )
+                    )
+            )
+        }
+    }
+
     private fun JsonSizeAverager.generateJsonSizeOverview(vararg nodes: JsonSizeNode): SingleResult<String, JsonSizeOverview> {
 
         return generateJsonSizeOverview(nodes = nodes.asList())

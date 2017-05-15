@@ -19,7 +19,14 @@ class JsonSizer {
 
         val jsonNode = objectMapper.readValue<JsonNode>(this)
 
-        return jsonNode.fieldNames.map { fieldName -> jsonNode[fieldName].understandSize(name = fieldName) }.first()
+        val children = jsonNode.fieldNames.map { fieldName -> jsonNode[fieldName].understandSize(name = fieldName) }
+
+        return JsonSizeObject(
+                name = "root",
+                size = children.map { it.size }.sum(),
+                children = children,
+                averageChildSize = children.map { it.size }.averageInt()
+        )
     }
 
     fun JsonNode.understandSize(name: String): JsonSizeNode {

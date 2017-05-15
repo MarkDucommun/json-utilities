@@ -10,6 +10,7 @@ import com.hcsc.de.claims.jsonSizing.JsonSizeNode
 import com.hcsc.de.claims.jsonSizing.JsonSizer
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
+import java.io.File
 import java.io.FileWriter
 import kotlin.Double.Companion.NaN
 
@@ -400,20 +401,22 @@ class SchemaFileConverterImplTest {
 
 //        val reducedSchema = SchemaReducerImpl().reduce(schema, reducedSchemaFields)
 
+        val faker = Faker()
+
         val jsonSizer = JsonSizer()
         val jsonSizeAverager = JsonSizeAverager()
-
-        fun List<JsonSizeNode>.generateOverview() = jsonSizeAverager.generateJsonSizeOverview(this).blockingGet()
 
         val start = System.currentTimeMillis()
 
         val overview = 1.rangeTo(50)
                 .map { schema.toJson() }
                 .map { jsonSizer.calculateSize(it) }
-                .map { when (it) {
-                    is Success -> it.content
-                    is Failure -> throw RuntimeException("Error")
-                }}.generateOverview()
+                .map {
+                    when (it) {
+                        is Success -> it.content
+                        is Failure -> throw RuntimeException("Error")
+                    }
+                }
 
         val end = System.currentTimeMillis() - start
 
@@ -425,6 +428,34 @@ class SchemaFileConverterImplTest {
 //            write(schemaString)
 //            close()
 //        }
+    }
+
+    @Test
+    fun `look at some real claims`() {
+
+        val jsonSizer = JsonSizer()
+        val jsonSizeAverager = JsonSizeAverager()
+
+        val fiveTen = "/Users/xpdesktop/workspace/json-schema-parser/src/main/resources/yan0510.json"
+        val fiveEleven = "/Users/xpdesktop/workspace/json-schema-parser/src/main/resources/yan0511.json"
+
+        val fiveTenClaims = String(File(fiveTen).readBytes()).split("\n")
+        val fiveElevenClaims = String(File(fiveEleven).readBytes()).split("\n")
+
+        val sizes = fiveTenClaims.plus(fiveElevenClaims).map {
+            jsonSizer.calculateSize(it)
+        }.map { result ->
+            when (result) {
+                is Success -> result.content
+                is Failure -> throw RuntimeException()
+            }
+        }
+
+        fun List<JsonSizeNode>.generateOverview() = jsonSizeAverager.generateJsonSizeOverview(this).blockingGet()
+
+        val overview = sizes.generateOverview()
+
+        println()
     }
 
     @Test

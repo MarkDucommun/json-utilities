@@ -14,16 +14,46 @@ class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline(
 
     fun List<JsonSizeNode>.generateOverview(): SingleResult<String, JsonSizeOverview> {
 
-        return ensureNodesHaveSameName()
-                .flatMapSuccess { ensureNodesAreSameType() }
-                .flatMapSuccess { type ->
-                    when (type) {
-                        "JsonSizeLeafNode" -> (this as List<JsonSizeLeafNode>).generateAveragedLeafNode()
-                        "JsonSizeArray" -> (this as List<JsonSizeArray>).generateAveragedArrayNode()
-                        "JsonSizeObject" -> (this as List<JsonSizeObject>).generateAveragedObjectNode()
-                        else -> TODO()
+        val self = this
+
+        return ensureNodesHaveSameName().flatMap { result ->
+
+            val self2 = self
+
+            when (result) {
+
+
+                is Success -> {
+
+                    ensureNodesAreSameType().flatMap { result2 ->
+
+                        when (result2) {
+                            is Success -> {
+                                when (result2.content) {
+                                    "JsonSizeLeafNode" -> (this as List<JsonSizeLeafNode>).generateAveragedLeafNode()
+                                    "JsonSizeArray" -> (this as List<JsonSizeArray>).generateAveragedArrayNode()
+                                    "JsonSizeObject" -> (this as List<JsonSizeObject>).generateAveragedObjectNode()
+                                    else -> TODO()
+                                }
+                            }
+                            is Failure -> {
+                                val self3 = self2
+                                Single.just(Failure<String, JsonSizeOverview>(content = result2.content))
+                            }
+                        }
                     }
                 }
+                is Failure -> Single.just(Failure<String, JsonSizeOverview>(content = result.content))
+            }
+        }
+//                .flatMapSuccess { ensureNodesAreSameType() }
+//                .flatMapSuccess { type ->
+//                    when (type) {
+//                        "JsonSizeLeafNode" -> (this as List<JsonSizeLeafNode>).generateAveragedLeafNode()
+//                        "JsonSizeArray" -> (this as List<JsonSizeArray>).generateAveragedArrayNode()
+//                        "JsonSizeObject" -> (this as List<JsonSizeObject>).generateAveragedObjectNode()
+//                        else -> TODO()
+//                    }
     }
 
     private fun List<JsonSizeLeafNode>.generateAveragedLeafNode(): SingleResult<String, JsonSizeOverview> {
@@ -91,6 +121,10 @@ class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline(
 
         return doOnComputationThread {
 
+            if (this.isEmpty()) {
+                println()
+            }
+
             val associatedByType = associateBy { it::class }
 
             if (associatedByType.size > 1) {
@@ -99,7 +133,14 @@ class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline(
 
             } else {
 
-                Success<String, String>(content = associatedByType.keys.first().simpleName ?: "")
+                val content = associatedByType.keys.firstOrNull()?.simpleName
+
+                if (content == null) {
+                    Failure<String, String>(content = "No associated types")
+                } else {
+                    Success<String, String>(content = content)
+                }
+
             }
         }
     }
