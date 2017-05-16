@@ -46,6 +46,7 @@ class JsonSizer {
                         node.understandSize(name = index.toString())
                     }
             )
+            this.isNull -> generateJsonEmpty(name = name)
             else -> JsonSizeLeafNode(name = name, size = this.writeAsString().length)
         }
     }
@@ -79,4 +80,8 @@ class JsonSizer {
             children = children,
             averageChildSize = children.averageSize()
     )
+
+    fun generateJsonEmpty(
+            name: String
+    ) = JsonSizeEmpty(name = name)
 }

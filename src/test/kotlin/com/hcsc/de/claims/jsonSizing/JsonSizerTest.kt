@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hcsc.de.claims.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
+import org.junit.Assert.fail
 import org.junit.Test
 
 class JsonSizerTest {
@@ -15,7 +16,9 @@ class JsonSizerTest {
 
         val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXX")).writeAsString()
 
-        jsonSizer.calculateSize(jsonString) succeedsAnd { sizeDescription ->
+        jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
+
+            val sizeDescription = rootNode.findChild("top")
 
             assertThat(sizeDescription).isEqualTo(JsonSizeObject(
                     name = "top",
@@ -34,7 +37,9 @@ class JsonSizerTest {
 
         val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXXXXX")).writeAsString()
 
-        jsonSizer.calculateSize(jsonString) succeedsAnd { sizeDescription ->
+        jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
+
+            val sizeDescription = rootNode.findChild("top")
 
             assertThat(sizeDescription).isEqualTo(JsonSizeObject(
                     name = "top",
@@ -53,7 +58,9 @@ class JsonSizerTest {
 
         val jsonString: String = mapOf("top" to mapOf("A" to "XXXXX", "B" to "XXXXXXXX")).writeAsString()
 
-        jsonSizer.calculateSize(jsonString) succeedsAnd { sizeDescription ->
+        jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
+
+            val sizeDescription = rootNode.findChild("top")
 
             assertThat(sizeDescription).isEqualTo(JsonSizeObject(
                     name = "top",
@@ -72,7 +79,9 @@ class JsonSizerTest {
 
         val jsonString: String = mapOf("top" to listOf("XXXX", "XXXXXXX")).writeAsString()
 
-        jsonSizer.calculateSize(jsonString) succeedsAnd { sizeDescription ->
+        jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
+
+            val sizeDescription = rootNode.findChild("top")
 
             assertThat(sizeDescription).isEqualTo(JsonSizeArray(
                     name = "top",
@@ -93,7 +102,9 @@ class JsonSizerTest {
                 mapOf("A" to "XXXX", "B" to "XXXXX"),
                 mapOf("C" to "XXXXXX", "D" to "XXXXXXXX"))).writeAsString()
 
-        jsonSizer.calculateSize(jsonString) succeedsAnd { sizeDescription ->
+        jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
+
+            val sizeDescription = rootNode.findChild("top")
 
             assertThat(sizeDescription).isEqualToComparingFieldByFieldRecursively(JsonSizeArray(
                     name = "top",
@@ -118,6 +129,23 @@ class JsonSizerTest {
                     ),
                     averageChildSize = 27
             ))
+        }
+    }
+
+    @Test
+    fun `it handles null value appropriately`() {
+
+        val jsonString: String = mapOf("top" to null).writeAsString()
+
+        jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
+            assertThat(rootNode.findChild("top")).isEqualTo(JsonSizeEmpty(name = "top"))
+        }
+    }
+
+    private fun JsonSizeNode.findChild(name: String): JsonSizeNode {
+        return when (this) {
+            is JsonSizeObject -> children.find { it.name == name } ?: throw RuntimeException("Node was not found")
+            else -> throw RuntimeException("Root was the wrong type")
         }
     }
 

@@ -459,6 +459,19 @@ class SchemaFileConverterImplTest {
     }
 
     @Test
+    fun `find accumulator key histories`() {
+
+        val fiveTen = "/Users/xpdesktop/workspace/json-schema-parser/src/main/resources/yan0510.json"
+        val fiveEleven = "/Users/xpdesktop/workspace/json-schema-parser/src/main/resources/yan0511.json"
+
+        val allClaims = String(File(fiveTen).readBytes()).split("\n").plus(String(File(fiveEleven).readBytes()).split("\n"))
+
+        val accumulatorKeyHistories = allClaims.map { objectMapper.readValue<JsonNode>(it).get("medicalClaim").get("accumulatorKeyHistory") }
+
+        println()
+    }
+
+    @Test
     fun `it writes a Text as a string`() {
 
         val json = Text(maxLength = 10).toJsonable()

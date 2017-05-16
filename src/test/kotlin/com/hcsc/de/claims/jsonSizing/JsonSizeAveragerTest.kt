@@ -12,16 +12,99 @@ class JsonSizeAveragerTest {
     val jsonSizeAverager = JsonSizeAverager()
 
     @Test
-    fun `it cannot sum JsonSizeNodes that are different types`() {
+    fun `it cannot sum JsonSizeNodes that are different types (except for leaf nodes to empty objects)`() {
 
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
-        val node2 = JsonSizeObject(name = "A", size = 15, children = emptyList(), averageChildSize = 0)
+        val node2 = JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10)), averageChildSize = 0)
 
         jsonSizeAverager.generateJsonSizeOverview(node1, node2).blockingGet() failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes are not the same type")
         }
     }
+
+    @Test
+    fun `it can sum JsonSizeLeafNodes and JsonSizeEmpty`() {
+
+        val node1 = JsonSizeLeafNode(name = "A", size = 10)
+        val node2 = JsonSizeEmpty(name = "A")
+
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+
+            assertThat(averageNode).isEqualTo(JsonSizeLeafOverview(
+                    name = "A",
+                    size = Distribution(
+                            average = 5,
+                            minimum = 0,
+                            maximum = 10,
+                            standardDeviation = 5.0
+                    )
+            ))
+        }
+    }
+
+    @Test
+    fun `it can sum JsonSizeObject with JsonSizeEmpty`() {
+
+        val node1 = JsonSizeObject(name = "A", size = 10, children = emptyList(), averageChildSize = 0)
+        val node2 = JsonSizeEmpty(name = "A")
+
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+
+            assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
+                    name = "A",
+                    size = Distribution(
+                            average = 5,
+                            minimum = 0,
+                            maximum = 10,
+                            standardDeviation = 5.0
+                    ),
+                    children = emptyList()
+            ))
+        }
+
+    }
+
+    @Test
+    fun `it can sum JsonSizeArray and JsonSizeEmpty`() {
+
+        val node1 = JsonSizeEmpty(name = "A")
+        val node2 = JsonSizeArray(
+                name = "A",
+                size = 15,
+                children = listOf(JsonSizeLeafNode(name = "A", size = 10)),
+                averageChildSize = 0
+        )
+
+        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+
+            assertThat(averageNode).isEqualToComparingFieldByFieldRecursively(JsonSizeArrayOverview(
+                    name = "A",
+                    size = Distribution(
+                            average = 7,
+                            minimum = 0,
+                            maximum = 15,
+                            standardDeviation = 7.516648189186454
+                    ),
+                    numberOfChildren = Distribution(
+                            average = 1,
+                            minimum = 0,
+                            maximum = 1,
+                            standardDeviation = 0.7071067811865476
+                    ),
+                    averageChild = JsonSizeLeafOverview(
+                            name = "averageChild",
+                            size = Distribution(
+                                    average = 10,
+                                    minimum = 10,
+                                    maximum = 10,
+                                    standardDeviation = 0.0
+                            )
+                    )
+            ))
+        }
+    }
+
 
     @Test
     fun `it cannot sum JsonSizeNodes that are named differently`() {
@@ -69,7 +152,7 @@ class JsonSizeAveragerTest {
         val node2 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeObject(name = "A", size = 15, children = emptyList(), averageChildSize = 0)),
+                children = listOf(JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10)), averageChildSize = 10)),
                 averageChildSize = 10
         )
 
@@ -339,31 +422,31 @@ class JsonSizeAveragerTest {
                             averageChild = JsonSizeObjectOverview(
                                     name = "averageChild",
                                     size = Distribution(
-                                            average = 28,
-                                            minimum = 20,
+                                            average = 31,
+                                            minimum = 25,
                                             maximum = 35,
-                                            standardDeviation = 6.0
+                                            standardDeviation = 4.760952285695233
                                     ),
                                     children = listOf(
                                             JsonSizeLeafOverview(name = "A", size = Distribution(
-                                                    average = 9,
-                                                    minimum = 4,
+                                                    average = 12,
+                                                    minimum = 6,
                                                     maximum = 20,
-                                                    standardDeviation = 5.744562646538029
+                                                    standardDeviation = 5.887840577551898
                                             )),
                                             JsonSizeLeafOverview(name = "B", size = Distribution(
-                                                    average = 9,
-                                                    minimum = 5,
+                                                    average = 12,
+                                                    minimum = 8,
                                                     maximum = 14,
-                                                    standardDeviation = 3.687817782917155
+                                                    standardDeviation = 2.8284271247461903
                                             ))
                                     )
                             ),
                             numberOfChildren = Distribution(
-                                    average = 3,
-                                    minimum = 2,
+                                    average = 1,
+                                    minimum = 0,
                                     maximum = 3,
-                                    standardDeviation = 0.7071067811865476
+                                    standardDeviation = 1.5811388300841898
                             )
                     )
             )
