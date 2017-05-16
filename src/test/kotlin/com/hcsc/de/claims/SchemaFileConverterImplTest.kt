@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.javafaker.Faker
+import com.hcsc.de.claims.jsonDeIdentifier.FileDeidentifier
 import com.hcsc.de.claims.jsonSizing.JsonSizeAverager
 import com.hcsc.de.claims.jsonSizing.JsonSizeNode
 import com.hcsc.de.claims.jsonSizing.JsonSizer
@@ -469,6 +470,11 @@ class SchemaFileConverterImplTest {
         val accumulatorKeyHistories = allClaims.map { objectMapper.readValue<JsonNode>(it).get("medicalClaim").get("accumulatorKeyHistory") }
 
         println()
+    }
+
+    @Test
+    fun `deidentify some claims`() {
+        FileDeidentifier().deidentify()
     }
 
     @Test
