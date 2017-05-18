@@ -1,4 +1,4 @@
-package com.hcsc.de.claims
+package com.hcsc.de.claims.helpers
 
 import io.reactivex.Scheduler
 import io.reactivex.Single

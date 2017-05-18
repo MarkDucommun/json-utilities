@@ -3,8 +3,7 @@ package com.hcsc.de.claims
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.hcsc.de.claims.schemaConversion.*
 import java.util.*
 
 interface SchemaFileConverter {
@@ -25,7 +24,7 @@ class SchemaReducerImpl : SchemaReducer {
             is ComplexObject -> schemaObject.copy(detail = schemaObject.detail.copy(
                     properties = schemaObject.detail.properties.reduceProperties(fieldObject = fieldObject)
             ))
-            is Array -> {
+            is ArrayDetail -> {
                 when (schemaObject.detail.itemType) {
                     is ComplexObject -> schemaObject.copy(detail = schemaObject.detail.copy(
                             itemType = schemaObject.detail.itemType.copy(
@@ -67,17 +66,6 @@ class SchemaReducerImpl : SchemaReducer {
                     }
         }.filterNotNull()
     }
-}
-
-
-interface ListConverter {
-
-    fun convert(node: JsonNode): List<SchemaObject<*>>
-}
-
-interface NodeConverter {
-
-    fun convert(node: JsonNode): SchemaDetail
 }
 
 interface FileReader {
@@ -164,7 +152,7 @@ private fun SchemaObject<*>.recursivelyReplaceReferences(
 
     return copy(detail = when (this.detail) {
         is ComplexObject -> this.detail.transformProperties { it.recursivelyReplaceReferences(definitions) }
-        is Array -> this.detail.transformItemType { itemType ->
+        is ArrayDetail -> this.detail.transformItemType { itemType ->
             when (itemType) {
                 is Reference -> definitions.findSchemaDetail(itemType.type)
                 is ComplexObject -> itemType.transformProperties { it.recursivelyReplaceReferences(definitions) }
@@ -182,7 +170,7 @@ private fun SchemaObject<*>.recursivelyReplaceReferences(
     })
 }
 
-private fun Array.transformItemType(transform: (SchemaDetail) -> SchemaDetail): SchemaDetail {
+private fun ArrayDetail.transformItemType(transform: (SchemaDetail) -> SchemaDetail): SchemaDetail {
     return copy(itemType = transform(itemType))
 }
 
@@ -197,154 +185,14 @@ private fun OneOf.transformList(transform: (SchemaDetail) -> SchemaDetail): OneO
 private fun List<SchemaObject<*>>.findSchemaDetail(string: String): SchemaDetail =
         this.find { string.contains(it.name) }?.detail ?: throw Exception("Reference matching $string was not found")
 
-private val JsonNode.definitions get() = getOrThrow("definitions")
-
-private val JsonNode.properties get() = getOrThrow("properties")
-
-private val JsonNode.type get() = get("type")?.asText() ?: "other"
-
-private val JsonNode.format get() = get("format")?.asText() ?: "other"
-
-private val JsonNode.maxLength get() = getOrThrow("maxLength")
-
-private val JsonNode.items get() = getOrThrow("items")
-
-private val JsonNode.maxItems get() = get("maxItems")?.asInt()
-
-private val JsonNode.ref get() = get("\$ref")
-
-private val JsonNode.oneOf get() = get("oneOf")
-
-private fun JsonNode.getOrThrow(key: String) = get(key) ?: throw Exception("No $key exist(s) on this node")
-
-class ListConverterImpl(
+class ListConverter(
         val nodeConverter: NodeConverter
-) : ListConverter {
+) {
 
-    override fun convert(node: JsonNode): List<SchemaObject<*>> {
+    fun convert(node: JsonNode): List<SchemaObject<*>> {
         return node.fieldNames.map {
             SchemaObject(name = it, detail = nodeConverter.convert(node.get(it)))
         }
     }
 }
 
-class NodeConverterImpl : NodeConverter {
-
-    override fun convert(node: JsonNode): SchemaDetail =
-            when (node.type) {
-                "string" -> when (node.format) {
-                    "date" -> Date
-                    "date-time" -> DateTime
-                    else -> Text(maxLength = node.maxLength.asInt())
-                }
-                "number" -> Number
-                "integer" -> Integer
-                "object" -> ComplexObject(properties = node.properties.fieldNames.map {
-                    SchemaObject(name = it, detail = convert(node.properties.get(it)))
-                })
-                "array" -> Array(itemType = convert(node.items), maxItems = node.maxItems)
-                "other" -> when {
-                    node.ref != null -> Reference(type = node.ref.asText())
-                    node.oneOf != null -> OneOf(list = (node.oneOf as ArrayNode).map { convert(node = it) })
-                    else -> throw Exception("Unhandled schema type")
-                }
-                else -> throw Exception("Unhandled schema type")
-            }
-}
-
-data class SchemaObject<out detailType : SchemaDetail>(
-        val name: String,
-        val detail: detailType
-) {
-    fun toJson(): String {
-
-        return ObjectMapper().writeValueAsString(mapOf(name to detail.toJsonable()))
-    }
-}
-
-sealed class SchemaDetail {
-    abstract fun toJsonable(): Any
-}
-
-data class Text(
-        val maxLength: Int
-) : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        // TODO randomly choose actual length
-        return 1.rangeTo(random(maxLength)).fold("") { acc, _ -> acc.plus("X") }
-    }
-}
-
-object Date : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        return "1111/11/11"
-    }
-}
-
-object DateTime : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        return "1111/11/11 11:11:11 UTC"
-    }
-}
-
-object Number : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        return "100000000000.00000"
-    }
-}
-
-object Integer : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        return "10000000000"
-    }
-}
-
-data class Reference(val type: String) : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        throw Exception("I should have been replaced")
-    }
-}
-
-val random = Random()
-
-fun random(i: Int): Int = random.nextInt(i)
-
-data class Array(
-        val itemType: SchemaDetail,
-        val maxItems: Int?
-) : SchemaDetail() {
-
-    override fun toJsonable(): List<Any> {
-        // TODO randomly choose max items and default
-        return List(maxItems?.let { random(it) } ?: random(5)) {
-            itemType.toJsonable()
-        }
-    }
-}
-
-data class ComplexObject(
-        val properties: List<SchemaObject<*>>
-) : SchemaDetail() {
-
-    override fun toJsonable(): Map<String, Any> {
-        return properties.map {
-            val toJson = it.detail.toJsonable()
-            it.name to toJson
-        }.toMap()
-    }
-}
-
-data class OneOf(
-        val list: List<SchemaDetail>
-) : SchemaDetail() {
-
-    override fun toJsonable(): Any {
-        return list.first().toJsonable()
-    }
-}

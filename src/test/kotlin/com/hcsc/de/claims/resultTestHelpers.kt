@@ -1,5 +1,8 @@
 package com.hcsc.de.claims
 
+import com.hcsc.de.claims.helpers.Failure
+import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.helpers.Success
 import org.junit.Assert.fail
 
 infix fun <failureType, successType> Result<failureType, successType>.succeedsAnd(onSuccess: (successType) -> Unit) {

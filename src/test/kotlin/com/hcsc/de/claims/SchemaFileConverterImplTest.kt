@@ -3,23 +3,26 @@ package com.hcsc.de.claims
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.javafaker.Faker
+<<<<<<< Updated upstream
 import com.hcsc.de.claims.jsonDeIdentifier.FileDeidentifier
+=======
+import com.hcsc.de.claims.helpers.Failure
+import com.hcsc.de.claims.helpers.Success
+>>>>>>> Stashed changes
 import com.hcsc.de.claims.jsonSizing.JsonSizeAverager
 import com.hcsc.de.claims.jsonSizing.JsonSizeNode
 import com.hcsc.de.claims.jsonSizing.JsonSizer
+import com.hcsc.de.claims.schemaConversion.NodeConverter
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 import java.io.File
-import java.io.FileWriter
-import kotlin.Double.Companion.NaN
 
 class SchemaFileConverterImplTest {
 
     val objectMapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
     val fileReader = JacksonFileReader()
-    val nodeConverter = NodeConverterImpl()
+    val nodeConverter = NodeConverter()
     val listConverter = ListConverterImpl(nodeConverter = nodeConverter)
     val schemaFileConverter = SchemaFileConverterImpl(
             reader = fileReader,
