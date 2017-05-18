@@ -1,15 +1,15 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.SingleResult
 import com.hcsc.de.claims.failsAnd
+import com.hcsc.de.claims.helpers.SingleResult
 import com.hcsc.de.claims.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
 
-class JsonSizeAveragerTest {
+class JsonSizeAnalyzerTest {
 
-    val jsonSizeAverager = JsonSizeAverager()
+    val jsonSizeAnalyzer = JsonSizeAnalyzer()
 
     @Test
     fun `it cannot sum JsonSizeNodes that are different types (except for leaf nodes to empty objects)`() {
@@ -17,7 +17,7 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10)), averageChildSize = 0)
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2).blockingGet() failsAnd { message ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message: String ->
 
             assertThat(message).isEqualTo("Nodes are not the same type")
         }
@@ -29,7 +29,7 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeEmpty(name = "A")
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
             assertThat(averageNode).isEqualTo(JsonSizeLeafOverview(
                     name = "A",
@@ -49,7 +49,7 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeObject(name = "A", size = 10, children = emptyList(), averageChildSize = 0)
         val node2 = JsonSizeEmpty(name = "A")
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
             assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
                     name = "A",
@@ -76,7 +76,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 0
         )
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
             assertThat(averageNode).isEqualToComparingFieldByFieldRecursively(JsonSizeArrayOverview(
                     name = "A",
@@ -112,7 +112,7 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeLeafNode(name = "B", size = 15)
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -134,7 +134,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -156,7 +156,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes are not the same type")
         }
@@ -182,7 +182,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -205,7 +205,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 10
         )
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) failsAnd { message ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
 
             assertThat(message).isEqualTo("Nodes do not match")
         }
@@ -217,7 +217,7 @@ class JsonSizeAveragerTest {
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeLeafNode(name = "A", size = 15)
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
             assertThat(averageNode).isEqualTo(JsonSizeLeafOverview(name = "A", size = Distribution(
                     average = 13,
@@ -244,7 +244,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 19
         )
 
-        jsonSizeAverager.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
             assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
                     name = "A",
@@ -319,7 +319,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 9
         )
 
-        val result = jsonSizeAverager.generateJsonSizeOverview(node1, node2)
+        val result = jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2)
 
         result succeedsAnd { averagedNode ->
 
@@ -406,7 +406,7 @@ class JsonSizeAveragerTest {
                 averageChildSize = 9
         )
 
-        val result = jsonSizeAverager.generateJsonSizeOverview(node1, node2)
+        val result = jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2)
 
         result succeedsAnd { averagedNode ->
 
@@ -453,7 +453,7 @@ class JsonSizeAveragerTest {
         }
     }
 
-    private fun JsonSizeAverager.generateJsonSizeOverview(vararg nodes: JsonSizeNode): SingleResult<String, JsonSizeOverview> {
+    private fun JsonSizeAnalyzer.generateJsonSizeOverview(vararg nodes: JsonSizeNode): SingleResult<String, JsonSizeOverview> {
 
         return generateJsonSizeOverview(nodes = nodes.asList())
     }

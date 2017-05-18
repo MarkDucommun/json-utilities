@@ -1,4 +1,4 @@
-package com.hcsc.de.claims.schemaConversion
+package com.hcsc.de.claims.jsonSchemaConversion
 
 import com.fasterxml.jackson.databind.ObjectMapper
 

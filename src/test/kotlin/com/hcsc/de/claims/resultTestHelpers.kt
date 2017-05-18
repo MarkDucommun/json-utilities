@@ -2,6 +2,7 @@ package com.hcsc.de.claims
 
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.helpers.SingleResult
 import com.hcsc.de.claims.helpers.Success
 import org.junit.Assert.fail
 

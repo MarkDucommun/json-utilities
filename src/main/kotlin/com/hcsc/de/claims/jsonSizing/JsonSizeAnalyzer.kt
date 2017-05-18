@@ -5,9 +5,8 @@ import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlin.reflect.KClass
-import kotlin.reflect.full.cast
 
-class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline()) {
+class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline()) {
 
     fun generateJsonSizeOverview(nodes: List<JsonSizeNode>): SingleResult<String, JsonSizeOverview> {
 
@@ -23,7 +22,7 @@ class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline(
                         "JsonSizeLeafNode" -> this.normalizeNodes<JsonSizeLeafNode>().generateAveragedLeafNode()
                         "JsonSizeArray" -> this.normalizeNodes<JsonSizeArray>().generateAveragedArrayNode()
                         "JsonSizeObject" -> this.normalizeNodes<JsonSizeObject>().generateAveragedObjectNode()
-                        else -> Single.just(Success<String, JsonSizeOverview>(JsonSizeLeafOverview(name = first().name, size = Distribution(average = 0, minimum = 0, maximum = 0, standardDeviation = 0.0)))) as SingleResult<String, JsonSizeOverview>
+                        else -> singleEmptyLeafOverview(name = first().name)
                     }
                 }
     }
@@ -33,10 +32,10 @@ class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline(
             when (node) {
                 is JsonSizeEmpty -> {
                     when (T::class) {
-                        JsonSizeArray::class -> JsonSizeArray(name = node.name, size = 0, children = emptyList(), averageChildSize = 0) as T
-                        JsonSizeObject::class -> JsonSizeObject(name = node.name, size = 0, children = emptyList(), averageChildSize = 0) as T
-                        JsonSizeLeafNode::class -> JsonSizeLeafNode(name = node.name, size = 0) as T
-                        else -> TODO()
+                        JsonSizeArray::class -> emptySizeArray(name = node.name) as T
+                        JsonSizeObject::class -> emptySizeObject(name = node.name) as T
+                        JsonSizeLeafNode::class -> emptySizeLeafNode(name = node.name) as T
+                        else -> throw RuntimeException("Should not be normalizing to empty")
                     }
                 }
                 else -> node as T
@@ -172,6 +171,8 @@ class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline(
         )
     }
 
+    private val EMPTY_DISTRIBUTION = Distribution(average = 0, minimum = 0, maximum = 0, standardDeviation = 0.0)
+
     private fun <T> doOnComputationThread(fn: () -> T): Single<T> {
         return doOnThread(scheduler = scheduler, fn = fn)
     }
@@ -179,4 +180,15 @@ class JsonSizeAverager(private val scheduler: Scheduler = Schedulers.trampoline(
     private fun <T> doOnComputationThreadAndFlatten(fn: () -> Single<T>): Single<T> {
         return doOnThreadAndFlatten(scheduler = scheduler, fn = fn)
     }
+
+    private fun singleEmptyLeafOverview(name: String): SingleResult<String, JsonSizeOverview> =
+            Single.just(Success<String, JsonSizeOverview>(content = emptyLeafOverview(name = name)))
+
+    private fun emptyLeafOverview(name: String): JsonSizeOverview = JsonSizeLeafOverview(name = name, size = EMPTY_DISTRIBUTION)
+
+    private fun emptySizeArray(name: String) = JsonSizeArray(name = name, size = 0, children = emptyList(), averageChildSize = 0)
+
+    private fun emptySizeObject(name: String) = JsonSizeObject(name = name, size = 0, children = emptyList(), averageChildSize = 0)
+
+    private fun emptySizeLeafNode(name: String) = JsonSizeLeafNode(name = name, size = 0)
 }

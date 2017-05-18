@@ -1,12 +1,13 @@
 package com.hcsc.de.claims
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.hcsc.de.claims.fileReaders.JacksonJsonFileReader
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 
 class jsonSchemaFileReaderTest {
 
-    val fileReader = JacksonFileReader()
+    val fileReader = JacksonJsonFileReader()
 
     @Test
     fun `file reader reads from a file into a JSON node`() {

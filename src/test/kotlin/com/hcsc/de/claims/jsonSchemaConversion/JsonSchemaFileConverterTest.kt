@@ -1,30 +1,29 @@
-package com.hcsc.de.claims
+package com.hcsc.de.claims.jsonSchemaConversion
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.javafaker.Faker
-<<<<<<< Updated upstream
+import com.hcsc.de.claims.fileReaders.JacksonJsonFileReader
 import com.hcsc.de.claims.jsonDeIdentifier.FileDeidentifier
-=======
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Success
->>>>>>> Stashed changes
-import com.hcsc.de.claims.jsonSizing.JsonSizeAverager
+import com.hcsc.de.claims.jsonReduction.JsonSchemaFileReducer
+import com.hcsc.de.claims.jsonSizing.JsonSizeAnalyzer
 import com.hcsc.de.claims.jsonSizing.JsonSizeNode
 import com.hcsc.de.claims.jsonSizing.JsonSizer
-import com.hcsc.de.claims.schemaConversion.NodeConverter
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 import java.io.File
 
-class SchemaFileConverterImplTest {
+class JsonSchemaFileConverterTest {
 
     val objectMapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
-    val fileReader = JacksonFileReader()
+    val fileReader = JacksonJsonFileReader()
     val nodeConverter = NodeConverter()
-    val listConverter = ListConverterImpl(nodeConverter = nodeConverter)
-    val schemaFileConverter = SchemaFileConverterImpl(
+    val listConverter = ListConverter(nodeConverter = nodeConverter)
+    val schemaFileConverter = JsonSchemaFileConverter(
             reader = fileReader,
             listConverter = listConverter
     )
@@ -120,7 +119,7 @@ class SchemaFileConverterImplTest {
 
         val schema = nodeConverter.convert(testNode)
 
-        assertThat(schema).isEqualTo(Array(
+        assertThat(schema).isEqualTo(ArrayDetail(
                 itemType = Text(maxLength = 15),
                 maxItems = null
         ))
@@ -139,7 +138,7 @@ class SchemaFileConverterImplTest {
 
         val schema = nodeConverter.convert(testNode)
 
-        assertThat(schema).isEqualTo(Array(
+        assertThat(schema).isEqualTo(ArrayDetail(
                 itemType = Text(maxLength = 15),
                 maxItems = 100
         ))
@@ -161,7 +160,7 @@ class SchemaFileConverterImplTest {
 
         val schema = nodeConverter.convert(testNode)
 
-        assertThat(schema).isEqualTo(Array(
+        assertThat(schema).isEqualTo(ArrayDetail(
                 itemType = ComplexObject(
                         properties = listOf(
                                 SchemaObject(name = "fieldA", detail = Text(maxLength = 30)),
@@ -252,7 +251,7 @@ class SchemaFileConverterImplTest {
 
         val fields = FieldObject(name = "B")
 
-        val newSchema = SchemaReducerImpl().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = JsonSchemaFileReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(schema)
     }
@@ -271,7 +270,7 @@ class SchemaFileConverterImplTest {
                 FieldObject(name = "D")
         ))
 
-        val newSchema = SchemaReducerImpl().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "C", detail = Number),
@@ -296,7 +295,7 @@ class SchemaFileConverterImplTest {
                 ))
         ))
 
-        val newSchema = SchemaReducerImpl().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "D", detail = ComplexObject(properties = listOf(
@@ -310,7 +309,7 @@ class SchemaFileConverterImplTest {
 
         val schema = SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "C", detail = Number),
-                SchemaObject(name = "D", detail = Array(
+                SchemaObject(name = "D", detail = ArrayDetail(
                         itemType = ComplexObject(properties = listOf(
                                 SchemaObject(name = "E", detail = Number),
                                 SchemaObject(name = "F", detail = Number)
@@ -325,10 +324,10 @@ class SchemaFileConverterImplTest {
                 ))
         ))
 
-        val newSchema = SchemaReducerImpl().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
-                SchemaObject(name = "D", detail = Array(
+                SchemaObject(name = "D", detail = ArrayDetail(
                         itemType = ComplexObject(properties = listOf(
                                 SchemaObject(name = "E", detail = Number)
                         )),
@@ -342,7 +341,7 @@ class SchemaFileConverterImplTest {
 
         val schema = SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "C", detail = Number),
-                SchemaObject(name = "D", detail = Array(
+                SchemaObject(name = "D", detail = ArrayDetail(
                         itemType = Number,
                         maxItems = null
                 ))
@@ -352,10 +351,10 @@ class SchemaFileConverterImplTest {
                 FieldObject(name = "D")
         ))
 
-        val newSchema = SchemaReducerImpl().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
-                SchemaObject(name = "D", detail = Array(
+                SchemaObject(name = "D", detail = ArrayDetail(
                         itemType = Number,
                         maxItems = null
                 ))
@@ -381,7 +380,7 @@ class SchemaFileConverterImplTest {
                 ))
         ))
 
-        val newSchema = SchemaReducerImpl().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "ClaimDetail", detail = OneOf(list = listOf(
@@ -403,12 +402,12 @@ class SchemaFileConverterImplTest {
 
 //        val reducedSchemaFields = flatten(fieldSetRows)
 
-//        val reducedSchema = SchemaReducerImpl().reduce(schema, reducedSchemaFields)
+//        val reducedSchema = SchemaReducer().reduce(schema, reducedSchemaFields)
 
         val faker = Faker()
 
         val jsonSizer = JsonSizer()
-        val jsonSizeAverager = JsonSizeAverager()
+        val jsonSizeAverager = JsonSizeAnalyzer()
 
         val start = System.currentTimeMillis()
 
@@ -438,7 +437,7 @@ class SchemaFileConverterImplTest {
     fun `look at some real claims`() {
 
         val jsonSizer = JsonSizer()
-        val jsonSizeAverager = JsonSizeAverager()
+        val jsonSizeAverager = JsonSizeAnalyzer()
 
         val fiveTen = "/Users/xpdesktop/workspace/json-schema-parser/src/main/resources/yan0510.json"
         val fiveEleven = "/Users/xpdesktop/workspace/json-schema-parser/src/main/resources/yan0511.json"
@@ -527,14 +526,14 @@ class SchemaFileConverterImplTest {
 
     @Test
     fun `it writes a simple Array to List`() {
-        val list = Array(itemType = Text(maxLength = 1), maxItems = 3).toJsonable()
+        val list = ArrayDetail(itemType = Text(maxLength = 1), maxItems = 3).toJsonable()
 
         assertThat(list).containsExactlyInAnyOrder("X", "X", "X")
     }
 
     @Test
     fun `it writes a complex Array to List`() {
-        val list = Array(itemType = Array(itemType = Text(maxLength = 1), maxItems = 3), maxItems = 1).toJsonable()
+        val list = ArrayDetail(itemType = ArrayDetail(itemType = Text(maxLength = 1), maxItems = 3), maxItems = 1).toJsonable()
 
         assertThat(list).containsExactlyInAnyOrder(listOf("X", "X", "X"))
     }
@@ -544,7 +543,7 @@ class SchemaFileConverterImplTest {
 
         val itemType = ComplexObject(properties = listOf(SchemaObject(name = "A", detail = Text(maxLength = 1))))
 
-        val list = Array(itemType = itemType, maxItems = 2).toJsonable()
+        val list = ArrayDetail(itemType = itemType, maxItems = 2).toJsonable()
 
         assertThat(list).containsExactlyInAnyOrder(mapOf("A" to "X"), mapOf("A" to "X"))
     }
