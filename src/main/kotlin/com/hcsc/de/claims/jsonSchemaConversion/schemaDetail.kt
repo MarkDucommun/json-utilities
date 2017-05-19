@@ -2,87 +2,46 @@ package com.hcsc.de.claims.jsonSchemaConversion
 
 import java.util.*
 
-sealed class SchemaDetail {
-    abstract fun toJsonable(): Any
-}
+sealed class SchemaDetail
 
 data class Text(
         val maxLength: Int
-) : SchemaDetail() {
+) : SchemaDetail()
 
-    override fun toJsonable(): String {
+object Date : SchemaDetail()
 
-        return 1.rangeTo(random(maxLength)).fold("") { acc, _ -> acc.plus("X") }
-    }
-}
+object DateTime : SchemaDetail()
 
-object Date : SchemaDetail() {
+object Number : SchemaDetail()
 
-    override fun toJsonable(): String {
-        return "1111/11/11"
-    }
-}
+object Integer : SchemaDetail()
 
-object DateTime : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        return "1111/11/11 11:11:11 UTC"
-    }
-}
-
-object Number : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        return "100000000000.00000"
-    }
-}
-
-object Integer : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        return "10000000000"
-    }
-}
-
-data class Reference(val type: String) : SchemaDetail() {
-
-    override fun toJsonable(): String {
-        throw Exception("I should have been replaced")
-    }
-}
+data class Reference(val type: String) : SchemaDetail()
 
 data class ArrayDetail(
         val itemType: SchemaDetail,
         val maxItems: Int?
 ) : SchemaDetail() {
 
-    override fun toJsonable(): List<Any> {
-
-        return List(maxItems?.let { random(it) } ?: random(5)) {
-            itemType.toJsonable()
-        }
-    }
+//    override fun toJsonable(): List<Any> {
+//
+//        return List(maxItems?.let { random(it) } ?: random(5)) {
+//            itemType.toJsonable()
+//        }
+//    }
 }
 
 data class ComplexObject(
         val properties: List<SchemaObject<*>>
-) : SchemaDetail() {
-
-    override fun toJsonable(): Map<String, Any> {
-        return properties.map {
-            val toJson = it.detail.toJsonable()
-            it.name to toJson
-        }.toMap()
-    }
-}
+) : SchemaDetail()
 
 data class OneOf(
         val list: List<SchemaDetail>
 ) : SchemaDetail() {
 
-    override fun toJsonable(): Any {
-        return list.first().toJsonable()
-    }
+//    override fun toJsonable(): Any {
+//        return list.first().toJsonable()
+//    }
 }
 
 val random = Random()

@@ -8,6 +8,7 @@ data class SchemaObject<out detailType : SchemaDetail>(
 ) {
     fun toJson(): String {
 
-        return ObjectMapper().writeValueAsString(mapOf(name to detail.toJsonable()))
+        return ""
+//        return ObjectMapper().writeValueAsString(mapOf(name to detail.toJsonable()))
     }
 }

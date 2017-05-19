@@ -9,6 +9,7 @@ import com.hcsc.de.claims.fileReaders.JacksonJsonFileReader
 import com.hcsc.de.claims.jsonDeIdentifier.FileDeidentifier
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.jsonReduction.FieldObject
 import com.hcsc.de.claims.jsonReduction.JsonSchemaFileReducer
 import com.hcsc.de.claims.jsonSizing.JsonSizeAnalyzer
 import com.hcsc.de.claims.jsonSizing.JsonSizeNode
@@ -29,219 +30,48 @@ class JsonSchemaFileConverterTest {
     )
 
     @Test
-    fun `converts the simplest objects - string`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "string",
-                "maxLength" to 30
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(Text(maxLength = 30))
-    }
-
-    @Test
-    fun `converts the simplest objects - date`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "string",
-                "format" to "date"
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(Date)
-    }
-
-    @Test
-    fun `converts the simplest objects - date-time`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "string",
-                "format" to "date-time"
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(DateTime)
-    }
-
-    @Test
-    fun `converts the simplest objects - number`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "number"
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(Number)
-    }
-
-    @Test
-    fun `converts the simplest objects - integer`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "integer"
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(Integer)
-    }
-
-    @Test
-    fun `converts a simple object`() {
-
-        val testNode: JsonNode = mapOf(
-                "type" to "object",
-                "properties" to mapOf(
-                        "fieldA" to mapOf("type" to "string", "maxLength" to 30),
-                        "fieldB" to mapOf("type" to "string", "maxLength" to 15)
-                )
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(ComplexObject(
-                properties = listOf(
-                        SchemaObject(name = "fieldA", detail = Text(maxLength = 30)),
-                        SchemaObject(name = "fieldB", detail = Text(maxLength = 15))
-                )
-        ))
-    }
-
-    @Test
-    fun `it converts a simple array`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "array",
-                "items" to mapOf(
-                        "type" to "string",
-                        "maxLength" to 15
-                )
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(ArrayDetail(
-                itemType = Text(maxLength = 15),
-                maxItems = null
-        ))
-    }
-
-    @Test
-    fun `it converts a simple array with maxItems`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "array",
-                "items" to mapOf(
-                        "type" to "string",
-                        "maxLength" to 15
-                ),
-                "maxItems" to 100
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(ArrayDetail(
-                itemType = Text(maxLength = 15),
-                maxItems = 100
-        ))
-    }
-
-    @Test
-    fun `it converts a more complex array`() {
-        val testNode: JsonNode = mapOf(
-                "type" to "array",
-                "items" to mapOf(
-                        "type" to "object",
-                        "properties" to mapOf(
-                                "fieldA" to mapOf("type" to "string", "maxLength" to 30),
-                                "fieldB" to mapOf("type" to "string", "maxLength" to 15)
-                        )
-                ),
-                "maxItems" to 100
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(ArrayDetail(
-                itemType = ComplexObject(
-                        properties = listOf(
-                                SchemaObject(name = "fieldA", detail = Text(maxLength = 30)),
-                                SchemaObject(name = "fieldB", detail = Text(maxLength = 15))
-                        )
-                ),
-                maxItems = 100
-        ))
-    }
-
-    @Test
-    fun `it converts a Reference`() {
-        val testNode: JsonNode = mapOf("\$ref" to "definition").convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(Reference(type = "definition"))
-    }
-
-    @Test
-    fun `it converts a OneOf`() {
-        val testNode: JsonNode = mapOf(
-                "oneOf" to listOf(
-                        mapOf("\$ref" to "definition"),
-                        mapOf("type" to "string", "maxLength" to 15)
-                )
-        ).convert()
-
-        val schema = nodeConverter.convert(testNode)
-
-        assertThat(schema).isEqualTo(OneOf(
-                list = listOf(
-                        Reference(type = "definition"),
-                        Text(maxLength = 15)
-                )
-        ))
-    }
-
-    @Test
     fun `a test`() {
 
-        val result = FieldObject(name = "A").simpleFlatten(listOf("B", "C"))
-
-        assertThat(result).isEqualTo(FieldObject(
-                name = "A",
-                properties = listOf(FieldObject(
-                        name = "B",
-                        properties = listOf(FieldObject(
-                                name = "C",
-                                properties = emptyList()))))))
+//        val result = FieldObject(name = "A").simpleFlatten(listOf("B", "C"))
+//
+//        assertThat(result).isEqualTo(FieldObject(
+//                name = "A",
+//                properties = listOf(FieldObject(
+//                        name = "B",
+//                        properties = listOf(FieldObject(
+//                                name = "C",
+//                                properties = emptyList()))))))
     }
 
     @Test
     fun `merge`() {
 
-        val result = listOf(
-                FieldObject(name = "A", properties = listOf(FieldObject(name = "B", properties = listOf(FieldObject(name = "C", properties = emptyList()))))),
-                FieldObject(name = "A", properties = listOf(FieldObject(name = "B", properties = listOf(FieldObject(name = "D", properties = emptyList()))))),
-                FieldObject(name = "A", properties = listOf(FieldObject(name = "E", properties = emptyList())))
-        ).sum()
-
-        assertThat(result).isEqualTo(FieldObject(name = "A", properties = listOf(
-                FieldObject(name = "B", properties = listOf(
-                        FieldObject(name = "C"),
-                        FieldObject(name = "D")
-                )),
-                FieldObject(name = "E")
-        )))
+//        val result = listOf(
+//                FieldObject(name = "A", properties = listOf(FieldObject(name = "B", properties = listOf(FieldObject(name = "C", properties = emptyList()))))),
+//                FieldObject(name = "A", properties = listOf(FieldObject(name = "B", properties = listOf(FieldObject(name = "D", properties = emptyList()))))),
+//                FieldObject(name = "A", properties = listOf(FieldObject(name = "E", properties = emptyList())))
+//        ).sum()
+//
+//        assertThat(result).isEqualTo(FieldObject(name = "A", properties = listOf(
+//                FieldObject(name = "B", properties = listOf(
+//                        FieldObject(name = "C"),
+//                        FieldObject(name = "D")
+//                )),
+//                FieldObject(name = "E")
+//        )))
     }
 
     @Test
     fun `test`() {
 
-        val list = listOf(listOf("A", "B"), listOf("A", "C"))
-
-        val fieldObject = flatten(list)
-
-        assertThat(fieldObject).isEqualTo(FieldObject(
-                name = "A",
-                properties = listOf(FieldObject(name = "B"), FieldObject(name = "C"))
-        ))
+//        val list = listOf(listOf("A", "B"), listOf("A", "C"))
+//
+//        val fieldObject = flatten(list)
+//
+//        assertThat(fieldObject).isEqualTo(FieldObject(
+//                name = "A",
+//                properties = listOf(FieldObject(name = "B"), FieldObject(name = "C"))
+//        ))
     }
 
     @Test
@@ -270,7 +100,7 @@ class JsonSchemaFileConverterTest {
                 FieldObject(name = "D")
         ))
 
-        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = JsonSchemaFileReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "C", detail = Number),
@@ -295,7 +125,7 @@ class JsonSchemaFileConverterTest {
                 ))
         ))
 
-        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = JsonSchemaFileReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "D", detail = ComplexObject(properties = listOf(
@@ -324,7 +154,7 @@ class JsonSchemaFileConverterTest {
                 ))
         ))
 
-        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = JsonSchemaFileReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "D", detail = ArrayDetail(
@@ -351,7 +181,7 @@ class JsonSchemaFileConverterTest {
                 FieldObject(name = "D")
         ))
 
-        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = JsonSchemaFileReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "D", detail = ArrayDetail(
@@ -380,7 +210,7 @@ class JsonSchemaFileConverterTest {
                 ))
         ))
 
-        val newSchema = SchemaReducer().reduce(schemaObject = schema, fieldObject = fields)
+        val newSchema = JsonSchemaFileReducer().reduce(schemaObject = schema, fieldObject = fields)
 
         assertThat(newSchema).isEqualTo(SchemaObject(name = "A", detail = ComplexObject(properties = listOf(
                 SchemaObject(name = "ClaimDetail", detail = OneOf(list = listOf(
@@ -402,7 +232,7 @@ class JsonSchemaFileConverterTest {
 
 //        val reducedSchemaFields = flatten(fieldSetRows)
 
-//        val reducedSchema = SchemaReducer().reduce(schema, reducedSchemaFields)
+//        val reducedSchema = com.hcsc.de.claims.jsonReduction.JsonSchemaFileReducer().reduce(schema, reducedSchemaFields)
 
         val faker = Faker()
 
@@ -478,91 +308,4 @@ class JsonSchemaFileConverterTest {
     fun `deidentify some claims`() {
         FileDeidentifier().deidentify()
     }
-
-    @Test
-    fun `it writes a Text as a string`() {
-
-        val json = Text(maxLength = 10).toJsonable()
-
-        assertThat(json.length).isEqualTo(10)
-    }
-
-    @Test
-    fun `it writes Text as X`() {
-        assertThat(Text(maxLength = 1).toJsonable()).isEqualTo("X")
-    }
-
-    @Test
-    fun `it writes all the object type SchemaDetails`() {
-        assertThat(Date.toJsonable()).isEqualTo("1111/11/11")
-        assertThat(DateTime.toJsonable()).isEqualTo("1111/11/11 11:11:11 UTC")
-        assertThat(Number.toJsonable()).isEqualTo("100000000000.00000")
-        assertThat(Integer.toJsonable()).isEqualTo("10000000000")
-    }
-
-    @Test
-    fun `it writes a simple Complex Object to json`() {
-        val map = ComplexObject(properties = listOf(
-                SchemaObject("A", detail = Text(maxLength = 1)),
-                SchemaObject("B", detail = Text(maxLength = 1)),
-                SchemaObject("C", detail = Text(maxLength = 1))
-        )).toJsonable()
-
-        assertThat(map).isEqualTo(mapOf("A" to "X", "B" to "X", "C" to "X"))
-    }
-
-    @Test
-    fun `it writes a complex Complex Object to json`() {
-        val map = ComplexObject(properties = listOf(
-                SchemaObject(name = "A", detail = ComplexObject(
-                        properties = listOf(
-                                SchemaObject(name = "1", detail = Text(maxLength = 1))
-                        )
-                ))
-        )).toJsonable()
-
-        assertThat(map).isEqualTo(mapOf("A" to mapOf("1" to "X")))
-    }
-
-    @Test
-    fun `it writes a simple Array to List`() {
-        val list = ArrayDetail(itemType = Text(maxLength = 1), maxItems = 3).toJsonable()
-
-        assertThat(list).containsExactlyInAnyOrder("X", "X", "X")
-    }
-
-    @Test
-    fun `it writes a complex Array to List`() {
-        val list = ArrayDetail(itemType = ArrayDetail(itemType = Text(maxLength = 1), maxItems = 3), maxItems = 1).toJsonable()
-
-        assertThat(list).containsExactlyInAnyOrder(listOf("X", "X", "X"))
-    }
-
-    @Test
-    fun `it writes a complex Object Array to List`() {
-
-        val itemType = ComplexObject(properties = listOf(SchemaObject(name = "A", detail = Text(maxLength = 1))))
-
-        val list = ArrayDetail(itemType = itemType, maxItems = 2).toJsonable()
-
-        assertThat(list).containsExactlyInAnyOrder(mapOf("A" to "X"), mapOf("A" to "X"))
-    }
-
-    @Test
-    fun `it writes OneOf to something?`() {
-        val thing = OneOf(list = listOf(
-                Text(maxLength = 1)
-        )).toJsonable()
-
-        assertThat(thing).isEqualTo("X")
-    }
-
-    @Test
-    fun `it converts a SchemaObject`() {
-        val json = SchemaObject(name = "thing", detail = Text(maxLength = 5)).toJson()
-
-        assertThat(json).isEqualTo("{\"thing\":\"XXXXX\"}")
-    }
-
-    private inline fun <T, reified U : Any> T.convert() = objectMapper.convertValue(this, U::class.java)
 }
