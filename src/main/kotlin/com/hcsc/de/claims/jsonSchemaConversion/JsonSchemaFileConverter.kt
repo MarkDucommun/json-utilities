@@ -1,6 +1,7 @@
 package com.hcsc.de.claims.jsonSchemaConversion
 
 import com.hcsc.de.claims.fileReaders.JsonFileReader
+import com.hcsc.de.claims.helpers.Success
 
 
 class JsonSchemaFileConverter(
@@ -12,18 +13,18 @@ class JsonSchemaFileConverter(
 
         val baseNode = reader.read(filePath = filePath)
 
-        val convertedDefinitions = listConverter.convert(node = baseNode.definitions)
+        val convertedDefinitions = listConverter.convert(node = (baseNode as Success).content.definitions)
 
         val replacedConvertedDefinitions = convertedDefinitions.map {
             it.recursivelyReplaceReferences(definitions = convertedDefinitions)
         }
 
-        val initialSchema = listConverter.convert(node = baseNode.properties).first()
+        val initialSchema = listConverter.convert(node = baseNode.content.properties).first()
 
         return initialSchema.recursivelyReplaceReferences(definitions = replacedConvertedDefinitions)
-
     }
 
+    // TODO extract this!
     private fun SchemaObject<*>.recursivelyReplaceReferences(
             definitions: List<SchemaObject<*>>
     ): SchemaObject<*> {

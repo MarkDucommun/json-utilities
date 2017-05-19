@@ -1,7 +1,5 @@
 package com.hcsc.de.claims.jsonSchemaConversion
 
-import java.util.*
-
 sealed class SchemaDetail
 
 data class Text(
@@ -21,15 +19,7 @@ data class Reference(val type: String) : SchemaDetail()
 data class ArrayDetail(
         val itemType: SchemaDetail,
         val maxItems: Int?
-) : SchemaDetail() {
-
-//    override fun toJsonable(): List<Any> {
-//
-//        return List(maxItems?.let { random(it) } ?: random(5)) {
-//            itemType.toJsonable()
-//        }
-//    }
-}
+) : SchemaDetail()
 
 data class ComplexObject(
         val properties: List<SchemaObject<*>>
@@ -37,13 +27,4 @@ data class ComplexObject(
 
 data class OneOf(
         val list: List<SchemaDetail>
-) : SchemaDetail() {
-
-//    override fun toJsonable(): Any {
-//        return list.first().toJsonable()
-//    }
-}
-
-val random = Random()
-
-fun random(i: Int): Int = random.nextInt(i)
+) : SchemaDetail()

@@ -11,12 +11,9 @@ internal fun SchemaDetail.toJsonable(): Jsonable<*> {
         is DateTime -> TextJson(value = "1111/11/11 11:11:11 UTC")
         is Number -> TextJson(value = "100000000000.00000")
         is Integer -> TextJson(value = "10000000000")
-        is ComplexObject -> {
-            ObjectJson(properties.map {
-                val toJson = it.detail.toJsonable()
-                it.name to toJson
-            }.toMap())
-        }
-        else -> TODO()
+        is ComplexObject -> ObjectJson(properties.map { it.name to it.detail.toJsonable() }.toMap())
+        is ArrayDetail -> ListJson(List(maxItems?.let { it } ?: 5) { itemType.toJsonable() })
+        is OneOf -> list.first().toJsonable()
+        is Reference -> TODO()
     }
 }

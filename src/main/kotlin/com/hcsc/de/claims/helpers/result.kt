@@ -46,3 +46,23 @@ fun <failureType, successType> SingleResult<failureType, successType>.mapSuccess
 fun <failureType, successType> List<SingleResult<failureType, successType>>.concat(): Flowable<Result<failureType, successType>> = Single.concat(this)
 
 val EMPTY_SUCCESS = Success<String, Unit>(Unit)
+
+fun <failureType, successType, newSuccessType> Result<failureType, successType>.flatMap(
+        transform: (successType) -> Result<failureType, newSuccessType>
+): Result<failureType, newSuccessType> {
+
+    return when (this) {
+        is Success -> transform(this.content)
+        is Failure -> Failure<failureType, newSuccessType>(content = this.content)
+    }
+}
+
+fun <failureType, successType, newSuccessType> Result<failureType, successType>.map(
+        transform: (successType) -> newSuccessType
+): Result<failureType, newSuccessType> {
+
+    return when (this) {
+        is Success -> Success(transform(this.content))
+        is Failure -> Failure<failureType, newSuccessType>(content = this.content)
+    }
+}
