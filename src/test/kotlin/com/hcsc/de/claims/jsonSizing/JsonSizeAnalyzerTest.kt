@@ -15,7 +15,7 @@ class JsonSizeAnalyzerTest {
     fun `it cannot sum JsonSizeNodes that are different types (except for leaf nodes to empty objects)`() {
 
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
-        val node2 = JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10)), averageChildSize = 0)
+        val node2 = JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10)))
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message: String ->
 
@@ -46,7 +46,7 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum JsonSizeObject with JsonSizeEmpty`() {
 
-        val node1 = JsonSizeObject(name = "A", size = 10, children = emptyList(), averageChildSize = 0)
+        val node1 = JsonSizeObject(name = "A", size = 10, children = emptyList())
         val node2 = JsonSizeEmpty(name = "A")
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
@@ -72,8 +72,7 @@ class JsonSizeAnalyzerTest {
         val node2 = JsonSizeArray(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "A", size = 10)),
-                averageChildSize = 0
+                children = listOf(JsonSizeLeafNode(name = "A", size = 10))
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
@@ -124,14 +123,12 @@ class JsonSizeAnalyzerTest {
         val node1 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "A", size = 10)),
-                averageChildSize = 10
+                children = listOf(JsonSizeLeafNode(name = "A", size = 10))
         )
         val node2 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 15)),
-                averageChildSize = 10
+                children = listOf(JsonSizeLeafNode(name = "B", size = 15))
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
@@ -146,14 +143,12 @@ class JsonSizeAnalyzerTest {
         val node1 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "A", size = 10)),
-                averageChildSize = 10
+                children = listOf(JsonSizeLeafNode(name = "A", size = 10))
         )
         val node2 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10)), averageChildSize = 10)),
-                averageChildSize = 10
+                children = listOf(JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10))))
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
@@ -172,14 +167,12 @@ class JsonSizeAnalyzerTest {
                 children = listOf(
                         JsonSizeLeafNode(name = "A", size = 10),
                         JsonSizeLeafNode(name = "B", size = 10)
-                ),
-                averageChildSize = 10
+                )
         )
         val node2 = JsonSizeArray(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 15)),
-                averageChildSize = 10
+                children = listOf(JsonSizeLeafNode(name = "B", size = 15))
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
@@ -195,14 +188,12 @@ class JsonSizeAnalyzerTest {
         val node1 = JsonSizeArray(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "0", size = 10)),
-                averageChildSize = 10
+                children = listOf(JsonSizeLeafNode(name = "0", size = 10))
         )
         val node2 = JsonSizeArray(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "1", size = 15)),
-                averageChildSize = 10
+                children = listOf(JsonSizeLeafNode(name = "1", size = 15))
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
@@ -234,14 +225,12 @@ class JsonSizeAnalyzerTest {
         val node1 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 10)),
-                averageChildSize = 10
+                children = listOf(JsonSizeLeafNode(name = "B", size = 10))
         )
         val node2 = JsonSizeObject(
                 name = "A",
                 size = 24,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 19)),
-                averageChildSize = 19
+                children = listOf(JsonSizeLeafNode(name = "B", size = 19))
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
@@ -276,18 +265,15 @@ class JsonSizeAnalyzerTest {
                                         JsonSizeLeafNode(name = "A", size = 4),
                                         JsonSizeLeafNode(name = "B", size = 5)
 
-                                ),
-                                averageChildSize = 5
+                                )
                         ),
                         JsonSizeObject(name = "1", size = 25,
                                 children = listOf(
                                         JsonSizeLeafNode(name = "A", size = 6),
                                         JsonSizeLeafNode(name = "B", size = 8)
-                                ),
-                                averageChildSize = 7
+                                )
                         )
-                ),
-                averageChildSize = 9
+                )
         )
 
         val node2 = JsonSizeArray(
@@ -298,25 +284,21 @@ class JsonSizeAnalyzerTest {
                                 children = listOf(
                                         JsonSizeLeafNode(name = "A", size = 6),
                                         JsonSizeLeafNode(name = "B", size = 8)
-                                ),
-                                averageChildSize = 7
+                                )
                         ),
                         JsonSizeObject(name = "1", size = 35,
                                 children = listOf(
                                         JsonSizeLeafNode(name = "A", size = 10),
                                         JsonSizeLeafNode(name = "B", size = 14)
-                                ),
-                                averageChildSize = 12
+                                )
                         ),
                         JsonSizeObject(name = "1", size = 35,
                                 children = listOf(
                                         JsonSizeLeafNode(name = "A", size = 20),
                                         JsonSizeLeafNode(name = "B", size = 14)
-                                ),
-                                averageChildSize = 12
+                                )
                         )
-                ),
-                averageChildSize = 9
+                )
         )
 
         val result = jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2)
@@ -373,8 +355,7 @@ class JsonSizeAnalyzerTest {
         val node1 = JsonSizeArray(
                 name = "top",
                 size = 48,
-                children = emptyList(),
-                averageChildSize = 0
+                children = emptyList()
         )
 
         val node2 = JsonSizeArray(
@@ -385,25 +366,21 @@ class JsonSizeAnalyzerTest {
                                 children = listOf(
                                         JsonSizeLeafNode(name = "A", size = 6),
                                         JsonSizeLeafNode(name = "B", size = 8)
-                                ),
-                                averageChildSize = 7
+                                )
                         ),
                         JsonSizeObject(name = "1", size = 35,
                                 children = listOf(
                                         JsonSizeLeafNode(name = "A", size = 10),
                                         JsonSizeLeafNode(name = "B", size = 14)
-                                ),
-                                averageChildSize = 12
+                                )
                         ),
                         JsonSizeObject(name = "1", size = 35,
                                 children = listOf(
                                         JsonSizeLeafNode(name = "A", size = 20),
                                         JsonSizeLeafNode(name = "B", size = 14)
-                                ),
-                                averageChildSize = 12
+                                )
                         )
-                ),
-                averageChildSize = 9
+                )
         )
 
         val result = jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2)

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hcsc.de.claims.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
-import org.junit.Assert.fail
 import org.junit.Test
 
 class JsonSizerTest {
@@ -26,8 +25,7 @@ class JsonSizerTest {
                     children = listOf(
                             JsonSizeLeafNode(name = "A", size = 6),
                             JsonSizeLeafNode(name = "B", size = 6)
-                    ),
-                    averageChildSize = 6
+                    )
             ))
         }
     }
@@ -47,8 +45,7 @@ class JsonSizerTest {
                     children = listOf(
                             JsonSizeLeafNode(name = "A", size = 6),
                             JsonSizeLeafNode(name = "B", size = 9)
-                    ),
-                    averageChildSize = 7
+                    )
             ))
         }
     }
@@ -68,8 +65,7 @@ class JsonSizerTest {
                     children = listOf(
                             JsonSizeLeafNode(name = "A", size = 7),
                             JsonSizeLeafNode(name = "B", size = 10)
-                    ),
-                    averageChildSize = 9
+                    )
             ))
         }
     }
@@ -89,8 +85,7 @@ class JsonSizerTest {
                     children = listOf(
                             JsonSizeLeafNode(name = "0", size = 6),
                             JsonSizeLeafNode(name = "1", size = 9)
-                    ),
-                    averageChildSize = 7
+                    )
             ))
         }
     }
@@ -116,18 +111,17 @@ class JsonSizerTest {
                                     children = listOf(
                                             JsonSizeLeafNode(name = "A", size = 6),
                                             JsonSizeLeafNode(name = "B", size = 7)
-                                    ),
-                                    averageChildSize = 7),
+                                    )
+                            ),
                             JsonSizeObject(
                                     name = "1",
                                     size = 29,
                                     children = listOf(
                                             JsonSizeLeafNode(name = "C", size = 8),
                                             JsonSizeLeafNode(name = "D", size = 10)
-                                    ),
-                                    averageChildSize = 9)
-                    ),
-                    averageChildSize = 27
+                                    )
+                            )
+                    )
             ))
         }
     }
@@ -139,6 +133,15 @@ class JsonSizerTest {
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
             assertThat(rootNode.findChild("top")).isEqualTo(JsonSizeEmpty(name = "top"))
+        }
+    }
+
+    @Test
+    fun `it parses empty string as a leafNode of Zero size`() {
+        val jsonString: String = ""
+
+        jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
+            assertThat(rootNode).isEqualTo(JsonSizeEmpty(name = ""))
         }
     }
 

@@ -186,9 +186,9 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
 
     private fun emptyLeafOverview(name: String): JsonSizeOverview = JsonSizeLeafOverview(name = name, size = EMPTY_DISTRIBUTION)
 
-    private fun emptySizeArray(name: String) = JsonSizeArray(name = name, size = 0, children = emptyList(), averageChildSize = 0)
+    private fun emptySizeArray(name: String) = JsonSizeArray(name = name, size = 0, children = emptyList())
 
-    private fun emptySizeObject(name: String) = JsonSizeObject(name = name, size = 0, children = emptyList(), averageChildSize = 0)
+    private fun emptySizeObject(name: String) = JsonSizeObject(name = name, size = 0, children = emptyList())
 
     private fun emptySizeLeafNode(name: String) = JsonSizeLeafNode(name = name, size = 0)
 }

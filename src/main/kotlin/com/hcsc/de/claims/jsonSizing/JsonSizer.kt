@@ -18,16 +18,20 @@ class JsonSizer {
 
     fun String.understandJsonSize(): JsonSizeNode {
 
-        val jsonNode = objectMapper.readValue<JsonNode>(this)
+        return if (this.isNotEmpty()) {
+            val jsonNode = objectMapper.readValue<JsonNode>(this)
 
-        val children = jsonNode.fieldNames.map { fieldName -> jsonNode[fieldName].understandSize(name = fieldName) }
+            val children = jsonNode.fieldNames.map { fieldName -> jsonNode[fieldName].understandSize(name = fieldName) }
 
-        return JsonSizeObject(
-                name = "root",
-                size = children.map { it.size }.sum(),
-                children = children,
-                averageChildSize = children.map { it.size }.averageInt()
-        )
+            JsonSizeObject(
+                    name = "root",
+                    size = children.map { it.size }.sum(),
+                    children = children
+
+            )
+        } else {
+            JsonSizeEmpty(name = "")
+        }
     }
 
     fun JsonNode.understandSize(name: String): JsonSizeNode {
@@ -67,8 +71,7 @@ class JsonSizer {
     ) = JsonSizeObject(
             name = name,
             size = size,
-            children = children,
-            averageChildSize = children.averageSize()
+            children = children
     )
 
     fun generateJsonSizeArray(
@@ -78,8 +81,7 @@ class JsonSizer {
     ) = JsonSizeArray(
             name = name,
             size = size,
-            children = children,
-            averageChildSize = children.averageSize()
+            children = children
     )
 
     fun generateJsonEmpty(
