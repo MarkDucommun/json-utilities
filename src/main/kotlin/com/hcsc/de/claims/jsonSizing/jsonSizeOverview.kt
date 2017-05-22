@@ -12,6 +12,13 @@ data class Distribution(
         val standardDeviation: Double
 )
 
+data class DoubleDistribution(
+        val average: Double,
+        val minimum: Double,
+        val maximum: Double,
+        val standardDeviation: Double
+)
+
 data class JsonSizeLeafOverview(
         override val name: String,
         override val size: Distribution

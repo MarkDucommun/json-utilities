@@ -1,7 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.helpers.*
 
 class JsonPercentageSizer {
 
@@ -24,22 +23,53 @@ class JsonPercentageSizer {
             is JsonSizeLeafOverview -> {
                 Success(JsonPercentageSizeLeaf(
                         name = input.name,
-                        localPercent = localParentSize / input.size,
-                        globalPercent = globalParentSize / input.size
+                        localPercent = input.size / localParentSize,
+                        globalPercent = input.size / globalParentSize
                 ))
             }
-            is JsonSizeObjectOverview -> TODO()
-            is JsonSizeArrayOverview -> TODO()
+            is JsonSizeObjectOverview -> {
+                return input.children.map { child ->
+
+                    generatePercentage(child, globalParentSize, input.size)
+                }.traverse().flatMap { childPercentages: List<JsonPercentageSize> ->
+
+                    Success<String, JsonPercentageSize>(JsonPercentageSizeObject(
+                            name = input.name,
+                            localPercent = input.size / localParentSize,
+                            globalPercent = input.size / globalParentSize,
+                            children = childPercentages
+                    ))
+                }
+            }
+            is JsonSizeArrayOverview -> {
+                return generatePercentage(input.averageChild, globalParentSize, input.size)
+                        .flatMap { averageChild ->
+                            Success<String, JsonPercentageSize>(JsonPercentageSizeArray(
+                                    name = input.name,
+                                    localPercent = input.size / localParentSize,
+                                    globalPercent = input.size / globalParentSize,
+                                    averageChild = averageChild,
+                                    numberOfChildren = input.numberOfChildren
+                            ))
+                        }
+            }
         }
     }
 
-    private infix operator fun Distribution.div(other: Distribution): Distribution {
+    private infix operator fun Distribution.div(other: Distribution): PercentageDistribution {
 
-        return Distribution(
-                average = if (average == 0) ((average.toDouble() / other.average.toDouble()) * 100).toInt() else 0,
-                minimum = if (average == 0) ((minimum.toDouble() / other.minimum.toDouble()) * 100).toInt() else 0,
-                maximum = if (average == 0)((maximum.toDouble() / other.maximum.toDouble()) * 100).toInt() else 0,
-                standardDeviation = standardDeviation / other.standardDeviation * 100
+        return PercentageDistribution(
+                average = average safePercentage other.average,
+                minimum = minimum safePercentage other.minimum,
+                maximum = maximum safePercentage other.maximum
         )
+    }
+
+    private infix fun Int.safePercentage(other: Int): Double {
+        return if (other == 0) 0.0 else (this.toDouble() / other.toDouble()) * 100
+    }
+
+    private infix fun Double.safePercentage(other: Double): Double {
+        return if (other == 0.0) 0.0 else this / other * 100
     }
 }
