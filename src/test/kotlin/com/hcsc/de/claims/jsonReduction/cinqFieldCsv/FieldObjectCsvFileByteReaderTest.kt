@@ -8,7 +8,7 @@ import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
 import com.hcsc.de.claims.jsonReduction.FieldObject
 import com.hcsc.de.claims.mockTranslator
-import com.hcsc.de.claims.succeedsAndReturns
+import com.hcsc.de.claims.succeedsAndShouldReturn
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
@@ -55,7 +55,7 @@ class FieldObjectCsvFileByteReaderTest {
                 csvStringConverter = mockCsvStringTranslator(result = Success(expectedFieldObject))
         )
 
-        subject.read("file-path") succeedsAndReturns expectedFieldObject
+        subject.read("file-path") succeedsAndShouldReturn expectedFieldObject
     }
 
     @Test

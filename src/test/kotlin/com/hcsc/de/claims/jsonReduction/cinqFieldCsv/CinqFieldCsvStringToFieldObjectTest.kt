@@ -48,7 +48,7 @@ class CinqFieldCsvStringToFieldObjectTest {
                 fieldListToFieldObject = mockFieldListTranslator(result = Success(expectedFieldObject))
         )
 
-        subject.translate("csv-string") succeedsAndReturns expectedFieldObject
+        subject.translate("csv-string") succeedsAndShouldReturn expectedFieldObject
     }
 
     @Test

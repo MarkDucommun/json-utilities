@@ -47,7 +47,14 @@ class JsonSizeAnalyzerIntegrationTest {
 
         when (result) {
             is Success -> FileWriter("claim-overview.json").apply {
-                write(ObjectMapper().writeValueAsString(result.content))
+
+                val claimOverview = result.content
+
+                val jsonSorter = JsonSizeSorter()
+
+                val sortedClaim = jsonSorter.sort(claimOverview)
+
+                write(ObjectMapper().writeValueAsString(sortedClaim))
                 close()
             }
             is Failure -> throw RuntimeException(result.content)

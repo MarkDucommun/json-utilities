@@ -14,7 +14,7 @@ infix fun <failureType, successType> Result<failureType, successType>.succeedsAn
     }
 }
 
-infix fun <failureType, successType> Result<failureType, successType>.succeedsAndReturns(expectedObject: successType) {
+infix fun <failureType, successType> Result<failureType, successType>.succeedsAndShouldReturn(expectedObject: successType) {
     when (this) {
         is Success -> assertThat(content).isEqualTo(expectedObject)
         is Failure -> fail("Result should have been a Success")
