@@ -22,7 +22,7 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
                         "JsonSizeLeafNode" -> this.normalizeNodes<JsonSizeLeafNode>().generateAveragedLeafNode()
                         "JsonSizeArray" -> this.normalizeNodes<JsonSizeArray>().generateAveragedArrayNode()
                         "JsonSizeObject" -> this.normalizeNodes<JsonSizeObject>().generateAveragedObjectNode()
-                        else -> singleEmptyLeafOverview(name = first().name)
+                        else -> singleEmptyLeafOverview(name = firstOrNull()?.name ?: "")
                     }
                 }
     }
@@ -56,13 +56,13 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
 
     private fun List<JsonSizeObject>.generateAveragedObjectNode(): SingleResult<String, JsonSizeOverview> {
 
-        return ensureNodesHaveSameFields().flatMapSuccess {
+        return collectAllChildFields().flatMapSuccess { children ->
 
-            first().children.map { child ->
+           children.map { child ->
 
                 doOnComputationThreadAndFlatten {
 
-                    val nodes = this.map { it.children.find { it.name == child.name } ?: throw RuntimeException("This should not happen") }
+                    val nodes = this.map { it.children.find { it.name == child } ?: JsonSizeEmpty(name = child) }
 
                     nodes.generateOverview()
                 }
@@ -121,21 +121,16 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
                     }
                 }
                 1 -> Success<String, String>(content = types.first())
-                0 -> Failure<String, String>(content = "No associated types")
+                0 -> Success<String, String>(content = "")
                 else -> Failure<String, String>(content = "Nodes are not the same type")
             }
         }
     }
 
-    private fun List<JsonSizeObject>.ensureNodesHaveSameFields(): SingleResult<String, Unit> {
+    private fun List<JsonSizeObject>.collectAllChildFields(): SingleResult<String, Set<String>> {
 
         return doOnComputationThread {
-
-            if (map { it.fields }.toSet().size > 1) {
-                Failure<String, Unit>(content = "Nodes do not match")
-            } else {
-                EMPTY_SUCCESS
-            }
+            Success<String, Set<String>>(flatMap { it.children.map { it.name } }.toSet())
         }
     }
 

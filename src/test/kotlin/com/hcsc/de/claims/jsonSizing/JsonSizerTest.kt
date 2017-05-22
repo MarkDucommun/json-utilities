@@ -11,8 +11,7 @@ class JsonSizerTest {
     val jsonSizer = JsonSizer()
 
     @Test
-    fun `it can size JSON objects`() {
-
+    fun `it returns the number of bytes in the JSON object and all of its child nodes number of bytes`() {
         val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXX")).writeAsString()
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->

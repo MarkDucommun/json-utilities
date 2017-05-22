@@ -254,6 +254,59 @@ class JsonSizeAnalyzerTest {
     }
 
     @Test
+    fun `it can sum a list of JsonSizeObjects with different keys`() {
+
+        val node1 = JsonSizeObject(
+                name = "A",
+                size = 15,
+                children = listOf(
+                        JsonSizeLeafNode(name = "B", size = 10),
+                        JsonSizeLeafNode(name = "C", size = 15)
+                )
+        )
+        val node2 = JsonSizeObject(
+                name = "A",
+                size = 24,
+                children = listOf(
+                        JsonSizeLeafNode(name = "B", size = 19),
+                        JsonSizeLeafNode(name = "D", size = 25)
+                )
+        )
+
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
+
+            assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
+                    name = "A",
+                    size = Distribution(
+                            average = 19,
+                            minimum = 15,
+                            maximum = 24,
+                            standardDeviation = 4.527692569068709
+                    ),
+                    children = listOf(
+                            JsonSizeLeafOverview(name = "B", size = Distribution(
+                                    average = 15,
+                                    minimum = 10,
+                                    maximum = 19,
+                                    standardDeviation = 4.527692569068709
+                            )),
+                            JsonSizeLeafOverview(name = "C", size = Distribution(
+                                    average = 7,
+                                    minimum = 0,
+                                    maximum = 15,
+                                    standardDeviation = 7.516648189186454
+                            )),
+                            JsonSizeLeafOverview(name = "D", size = Distribution(
+                                    average = 13,
+                                    minimum = 0,
+                                    maximum = 25,
+                                    standardDeviation = 12.509996003196804
+                            )))
+            ))
+        }
+    }
+
+    @Test
     fun `it can sum a list of JsonSizeNodes with JsonSizeArrays to create an averaged node`() {
 
         val node1 = JsonSizeArray(

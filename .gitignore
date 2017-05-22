@@ -5,7 +5,9 @@
 /src/main/resources/yan0511.json
 .DS_Store
 src/.DS_Store
-/deidentifiedClaims3.json
-/deidentifiedClaims2.json
-/deidentifiedClaims4.json
-/deidentifiedClaims1.json
+/data/deidentifiedClaims3.json
+/data/deidentifiedClaims2.json
+/data/deidentifiedClaims4.json
+/data/deidentifiedClaims1.json
+/src/test/resources/data/
+claim-overview.json
