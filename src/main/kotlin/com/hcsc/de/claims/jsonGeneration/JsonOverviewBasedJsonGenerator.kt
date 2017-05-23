@@ -1,8 +1,10 @@
 package com.hcsc.de.claims.jsonGeneration
 
-class JsonOverviewBasedJsonGeneratora<in inputType> : JsonGenerator<inputType> {
+import com.hcsc.de.claims.jsonSizing.JsonSizeOverview
 
-    override fun generate(input: inputType): String {
+class JsonOverviewBasedJsonGenerator : JsonGenerator<JsonSizeOverview> {
+
+    override fun generate(input: JsonSizeOverview): String {
         TODO()
     }
 }
