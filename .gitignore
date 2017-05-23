@@ -11,3 +11,4 @@ src/.DS_Store
 /data/deidentifiedClaims1.json
 /src/test/resources/data/
 claim-percentage-overview.json
+json-schema-parser.iml
