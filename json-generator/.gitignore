@@ -1,14 +1,1 @@
-/.idea
-/build/
-/.gradle/
-/src/main/resources/yan0510.json
-/src/main/resources/yan0511.json
-.DS_Store
-src/.DS_Store
-/data/deidentifiedClaims3.json
-/data/deidentifiedClaims2.json
-/data/deidentifiedClaims4.json
-/data/deidentifiedClaims1.json
 /src/test/resources/data/
-claim-percentage-overview.json
-json-schema-parser.iml
