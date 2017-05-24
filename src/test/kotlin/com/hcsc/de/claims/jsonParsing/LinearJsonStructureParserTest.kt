@@ -17,10 +17,10 @@ class LinearJsonStructureParserTest {
     fun `it can create a simple structure`() {
 
         "asdf".jsonStructure succeedsAndShouldReturn listOf(
-                Literal,
-                Literal,
-                Literal,
-                Literal
+                Literal('a'),
+                Literal('s'),
+                Literal('d'),
+                Literal('f')
         )
     }
 
@@ -29,10 +29,10 @@ class LinearJsonStructureParserTest {
 
         "\"asdf\"".jsonStructure succeedsAndShouldReturn listOf(
                 ElementStart(StringElement(id = 0)),
-                Literal,
-                Literal,
-                Literal,
-                Literal,
+                Literal('a'),
+                Literal('s'),
+                Literal('d'),
+                Literal('f'),
                 ElementEnd(StringElement(id = 0)
         ))
     }
@@ -42,10 +42,10 @@ class LinearJsonStructureParserTest {
 
         "[asdf]".jsonStructure succeedsAndShouldReturn listOf(
                 ElementStart(ArrayElement(id = 0)),
-                Literal,
-                Literal,
-                Literal,
-                Literal,
+                Literal('a'),
+                Literal('s'),
+                Literal('d'),
+                Literal('f'),
                 ElementEnd(ArrayElement(id = 0)
         ))
     }
@@ -55,15 +55,15 @@ class LinearJsonStructureParserTest {
 
         "[asdf,asdf]".jsonStructure succeedsAndShouldReturn listOf(
                 ElementStart(ArrayElement(id = 0)),
-                Literal,
-                Literal,
-                Literal,
-                Literal,
+                Literal('a'),
+                Literal('s'),
+                Literal('d'),
+                Literal('f'),
                 CommaElement,
-                Literal,
-                Literal,
-                Literal,
-                Literal,
+                Literal('a'),
+                Literal('s'),
+                Literal('d'),
+                Literal('f'),
                 ElementEnd(ArrayElement(id = 0))
         )
     }
@@ -92,10 +92,10 @@ class LinearJsonStructureParserTest {
         "{\"a\":1}".jsonStructure succeedsAndShouldReturn listOf(
                 ElementStart(ObjectElement(id = 0)),
                 ElementStart(ObjectKeyElement(id = 1)),
-                Literal,
+                Literal('a'),
                 ElementEnd(ObjectKeyElement(id = 1)),
                 ColonElement,
-                Literal,
+                Literal('1'),
                 ElementEnd(ObjectElement(id = 0))
         )
     }
@@ -106,13 +106,43 @@ class LinearJsonStructureParserTest {
         "{\"a\":\"1\"}".jsonStructure succeedsAndShouldReturn listOf(
                 ElementStart(ObjectElement(id = 0)),
                 ElementStart(ObjectKeyElement(id = 1)),
-                Literal,
+                Literal('a'),
                 ElementEnd(ObjectKeyElement(id = 1)),
                 ColonElement,
                 ElementStart(ObjectValueElement(StringElement(id = 2))),
-                Literal,
+                Literal('1'),
                 ElementEnd(ObjectValueElement(StringElement(id = 2))),
                 ElementEnd(ObjectElement(id = 0))
         )
+    }
+
+    @Test
+    fun `it can parse an object with multiple children`() {
+
+        "{\"a\":\"1\",\"b\":\"2\"}".jsonStructure succeedsAndShouldReturn listOf(
+                ElementStart(ObjectElement(id = 0)),
+                ElementStart(ObjectKeyElement(id = 1)),
+                Literal('a'),
+                ElementEnd(ObjectKeyElement(id = 1)),
+                ColonElement,
+                ElementStart(ObjectValueElement(StringElement(id = 2))),
+                Literal('1'),
+                ElementEnd(ObjectValueElement(StringElement(id = 2))),
+                CommaElement,
+                ElementStart(ObjectKeyElement(id = 3)),
+                Literal('b'),
+                ElementEnd(ObjectKeyElement(id = 3)),
+                ColonElement,
+                ElementStart(ObjectValueElement(StringElement(id = 4))),
+                Literal('2'),
+                ElementEnd(ObjectValueElement(StringElement(id = 4))),
+                ElementEnd(ObjectElement(id = 0))
+        )
+    }
+
+    @Test
+    fun `it cannot parse an object with key that is not string`() {
+
+        "{a:\"1\"}".jsonStructure failsWithMessage "Invalid JSON, object keys must be strings"
     }
 }
