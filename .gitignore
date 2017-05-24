@@ -4,10 +4,10 @@
 .gradle/
 build/
 
-json-generator/src/test/resources/data/
 /json-generator/src/test/resources/data/
 /json-generator/claim-size-list.csv
 /src/main/resources/yan0510.json
 /src/main/resources/yan0511.json
 /src/test/resources/data/
 /data/
+/src/
