@@ -1,5 +1,7 @@
-.idea/
 *.iml
+.DS_Store
+.idea/
 .gradle/
 build/
-.DS_Store
+
+json-generator/src/test/resources/data/
