@@ -35,7 +35,7 @@ class JsonSizer {
     }
 
     fun JsonNode.understandSize(name: String): JsonSizeNode {
-
+        println()
         return when {
             this.isObject -> generateJsonSizeObject(
                     name = name,

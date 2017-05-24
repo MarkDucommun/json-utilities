@@ -12,7 +12,8 @@ class JsonSizerTest {
 
     @Test
     fun `it returns the number of bytes in the JSON object and all of its child nodes number of bytes`() {
-        val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXX")).writeAsString()
+
+        val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXX")).asJson
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
 
@@ -32,7 +33,7 @@ class JsonSizerTest {
     @Test
     fun `it can uses floor for converting doubles that are odd`() {
 
-        val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXXXXX")).writeAsString()
+        val jsonString: String = mapOf("top" to mapOf("A" to "XXXX", "B" to "XXXXXXX")).asJson
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
 
@@ -52,7 +53,7 @@ class JsonSizerTest {
     @Test
     fun `it can uses ceiling for converting doubles that are even`() {
 
-        val jsonString: String = mapOf("top" to mapOf("A" to "XXXXX", "B" to "XXXXXXXX")).writeAsString()
+        val jsonString: String = mapOf("top" to mapOf("A" to "XXXXX", "B" to "XXXXXXXX")).asJson
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
 
@@ -72,7 +73,7 @@ class JsonSizerTest {
     @Test
     fun `it can size JSON objects with arrays`() {
 
-        val jsonString: String = mapOf("top" to listOf("XXXX", "XXXXXXX")).writeAsString()
+        val jsonString: String = mapOf("top" to listOf("XXXX", "XXXXXXX")).asJson
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
 
@@ -94,7 +95,7 @@ class JsonSizerTest {
 
         val jsonString: String = mapOf("top" to listOf(
                 mapOf("A" to "XXXX", "B" to "XXXXX"),
-                mapOf("C" to "XXXXXX", "D" to "XXXXXXXX"))).writeAsString()
+                mapOf("C" to "XXXXXX", "D" to "XXXXXXXX"))).asJson
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
 
@@ -126,17 +127,17 @@ class JsonSizerTest {
     }
 
     @Test
-    fun `it handles null value appropriately`() {
+    fun `it parses a null value as a JsonSizeEmpty`() {
 
-        val jsonString: String = mapOf("top" to null).writeAsString()
+        val jsonString: String = mapOf("key" to null).asJson
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
-            assertThat(rootNode.findChild("top")).isEqualTo(JsonSizeEmpty(name = "top"))
+            assertThat(rootNode.findChild("key")).isEqualTo(JsonSizeEmpty(name = "key"))
         }
     }
 
     @Test
-    fun `it parses empty string as a leafNode of Zero size`() {
+    fun `it parses empty string as a JsonSizeEmpty`() {
         val jsonString: String = ""
 
         jsonSizer.calculateSize(jsonString) succeedsAnd { rootNode ->
@@ -153,5 +154,5 @@ class JsonSizerTest {
 
     val objectMapper = ObjectMapper().registerKotlinModule()
 
-    private fun Any.writeAsString() = objectMapper.writeValueAsString(this)
+    private val Any?.asJson get()  = objectMapper.writeValueAsString(this)
 }

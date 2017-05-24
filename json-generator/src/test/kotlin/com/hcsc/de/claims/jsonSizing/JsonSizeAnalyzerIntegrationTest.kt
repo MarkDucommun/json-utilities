@@ -4,23 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.hcsc.de.claims.fileReaders.JacksonJsonFileReader
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.*
 import net.sourceforge.jdistlib.Normal
-import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import net.sourceforge.jdistlib.generic.GenericDistribution
-import org.apache.commons.math3.distribution.NormalDistribution
-import org.apache.commons.math3.distribution.PoissonDistribution
-import org.apache.commons.math3.distribution.WeibullDistribution
 import org.apache.commons.math3.stat.inference.ChiSquareTest
-import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest
 import org.assertj.core.api.KotlinAssertions.assertThat
+import org.junit.Ignore
 import org.junit.Test
 import java.io.FileWriter
-import java.util.*
 
+@Ignore
 class JsonSizeAnalyzerIntegrationTest {
 
     @Test
@@ -257,11 +252,11 @@ class JsonSizeAnalyzerIntegrationTest {
             val count: Long
     )
 
-    private val List<Double>.distribution: DoubleDistribution get() {
+    private val List<Double>.distribution: NormalDoubleDistribution get() {
 
         val average = this.average()
 
-        return DoubleDistribution(
+        return NormalDoubleDistribution(
                 average = average,
                 minimum = min() ?: 0.0,
                 maximum = max() ?: 0.0,

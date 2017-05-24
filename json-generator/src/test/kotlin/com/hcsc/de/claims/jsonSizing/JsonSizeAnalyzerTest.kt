@@ -12,7 +12,7 @@ class JsonSizeAnalyzerTest {
     val jsonSizeAnalyzer = JsonSizeAnalyzer()
 
     @Test
-    fun `it cannot sum JsonSizeNodes that are different types (except for leaf nodes to empty objects)`() {
+    fun `it cannot sum JsonSizeNodes that are different non-empty types`() {
 
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10)))
@@ -33,7 +33,7 @@ class JsonSizeAnalyzerTest {
 
             assertThat(averageNode).isEqualTo(JsonSizeLeafOverview(
                     name = "A",
-                    size = Distribution(
+                    size = NormalIntDistribution(
                             average = 5,
                             minimum = 0,
                             maximum = 10,
@@ -53,7 +53,7 @@ class JsonSizeAnalyzerTest {
 
             assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
                     name = "A",
-                    size = Distribution(
+                    size = NormalIntDistribution(
                             average = 5,
                             minimum = 0,
                             maximum = 10,
@@ -79,13 +79,13 @@ class JsonSizeAnalyzerTest {
 
             assertThat(averageNode).isEqualToComparingFieldByFieldRecursively(JsonSizeArrayOverview(
                     name = "A",
-                    size = Distribution(
+                    size = NormalIntDistribution(
                             average = 7,
                             minimum = 0,
                             maximum = 15,
                             standardDeviation = 7.516648189186454
                     ),
-                    numberOfChildren = Distribution(
+                    numberOfChildren = NormalIntDistribution(
                             average = 1,
                             minimum = 0,
                             maximum = 1,
@@ -93,7 +93,7 @@ class JsonSizeAnalyzerTest {
                     ),
                     averageChild = JsonSizeLeafOverview(
                             name = "averageChild",
-                            size = Distribution(
+                            size = NormalIntDistribution(
                                     average = 10,
                                     minimum = 10,
                                     maximum = 10,
@@ -118,26 +118,6 @@ class JsonSizeAnalyzerTest {
     }
 
     @Test
-    fun `it cannot sum JsonSizeObjects that are shaped differently`() {
-
-        val node1 = JsonSizeObject(
-                name = "A",
-                size = 15,
-                children = listOf(JsonSizeLeafNode(name = "A", size = 10))
-        )
-        val node2 = JsonSizeObject(
-                name = "A",
-                size = 15,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 15))
-        )
-
-        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
-
-            assertThat(message).isEqualTo("Nodes do not match")
-        }
-    }
-
-    @Test
     fun `it cannot sum JsonSizeObjects that have children with different key types`() {
 
         val node1 = JsonSizeObject(
@@ -148,7 +128,10 @@ class JsonSizeAnalyzerTest {
         val node2 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeObject(name = "A", size = 15, children = listOf(JsonSizeLeafNode(name = "A", size = 10))))
+                children = listOf(JsonSizeObject(
+                        name = "A",
+                        size = 15,
+                        children = listOf(JsonSizeLeafNode(name = "A", size = 10))))
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
@@ -210,7 +193,7 @@ class JsonSizeAnalyzerTest {
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd { averageNode ->
 
-            assertThat(averageNode).isEqualTo(JsonSizeLeafOverview(name = "A", size = Distribution(
+            assertThat(averageNode).isEqualTo(JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
                     average = 13,
                     minimum = 10,
                     maximum = 15,
@@ -237,18 +220,21 @@ class JsonSizeAnalyzerTest {
 
             assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
                     name = "A",
-                    size = Distribution(
+                    size = NormalIntDistribution(
                             average = 19,
                             minimum = 15,
                             maximum = 24,
                             standardDeviation = 4.527692569068709
                     ),
-                    children = listOf(JsonSizeLeafOverview(name = "B", size = Distribution(
-                            average = 15,
-                            minimum = 10,
-                            maximum = 19,
-                            standardDeviation = 4.527692569068709
-                    )))
+                    children = listOf(JsonSizeObjectChild(
+                            overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                    average = 15,
+                                    minimum = 10,
+                                    maximum = 19,
+                                    standardDeviation = 4.527692569068709
+                            )),
+                            presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                    ))
             ))
         }
     }
@@ -277,31 +263,40 @@ class JsonSizeAnalyzerTest {
 
             assertThat(averageNode).isEqualTo(JsonSizeObjectOverview(
                     name = "A",
-                    size = Distribution(
+                    size = NormalIntDistribution(
                             average = 19,
                             minimum = 15,
                             maximum = 24,
                             standardDeviation = 4.527692569068709
                     ),
                     children = listOf(
-                            JsonSizeLeafOverview(name = "B", size = Distribution(
-                                    average = 15,
-                                    minimum = 10,
-                                    maximum = 19,
-                                    standardDeviation = 4.527692569068709
-                            )),
-                            JsonSizeLeafOverview(name = "C", size = Distribution(
-                                    average = 7,
-                                    minimum = 0,
-                                    maximum = 15,
-                                    standardDeviation = 7.516648189186454
-                            )),
-                            JsonSizeLeafOverview(name = "D", size = Distribution(
-                                    average = 13,
-                                    minimum = 0,
-                                    maximum = 25,
-                                    standardDeviation = 12.509996003196804
-                            )))
+                            JsonSizeObjectChild(
+                                    overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                            average = 15,
+                                            minimum = 10,
+                                            maximum = 19,
+                                            standardDeviation = 4.527692569068709
+                                    )),
+                                    presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                            ),
+                            JsonSizeObjectChild(
+                                    overview = JsonSizeLeafOverview(name = "C", size = NormalIntDistribution(
+                                            average = 15,
+                                            minimum = 15,
+                                            maximum = 15,
+                                            standardDeviation = 0.0
+                                    )),
+                                    presence = NormalDoubleDistribution(average = 0.5, minimum = 0.0, maximum = 1.0, standardDeviation = 0.5)
+                            ),
+                            JsonSizeObjectChild(
+                                    overview = JsonSizeLeafOverview(name = "D", size = NormalIntDistribution(
+                                            average = 25,
+                                            minimum = 25,
+                                            maximum = 25,
+                                            standardDeviation = 0.0
+                                    )),
+                                    presence = NormalDoubleDistribution(average = 0.5, minimum = 0.0, maximum = 1.0, standardDeviation = 0.5)
+                            ))
             ))
         }
     }
@@ -361,7 +356,7 @@ class JsonSizeAnalyzerTest {
             assertThat(averagedNode).isEqualToComparingFieldByFieldRecursively(
                     JsonSizeArrayOverview(
                             name = "top",
-                            size = Distribution(
+                            size = NormalIntDistribution(
                                     average = 55,
                                     minimum = 48,
                                     maximum = 63,
@@ -369,28 +364,33 @@ class JsonSizeAnalyzerTest {
                             ),
                             averageChild = JsonSizeObjectOverview(
                                     name = "averageChild",
-                                    size = Distribution(
+                                    size = NormalIntDistribution(
                                             average = 28,
                                             minimum = 20,
                                             maximum = 35,
                                             standardDeviation = 6.0
                                     ),
                                     children = listOf(
-                                            JsonSizeLeafOverview(name = "A", size = Distribution(
-                                                    average = 9,
-                                                    minimum = 4,
-                                                    maximum = 20,
-                                                    standardDeviation = 5.744562646538029
-                                            )),
-                                            JsonSizeLeafOverview(name = "B", size = Distribution(
-                                                    average = 9,
-                                                    minimum = 5,
-                                                    maximum = 14,
-                                                    standardDeviation = 3.687817782917155
-                                            ))
+                                            JsonSizeObjectChild(
+                                                    overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                                            average = 9,
+                                                            minimum = 4,
+                                                            maximum = 20,
+                                                            standardDeviation = 5.744562646538029
+                                                    )),
+                                                    presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                            ),
+                                            JsonSizeObjectChild(
+                                                    overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                                            average = 9,
+                                                            minimum = 5,
+                                                            maximum = 14,
+                                                            standardDeviation = 3.687817782917155
+                                                    )),
+                                                    presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0))
                                     )
                             ),
-                            numberOfChildren = Distribution(
+                            numberOfChildren = NormalIntDistribution(
                                     average = 3,
                                     minimum = 2,
                                     maximum = 3,
@@ -443,7 +443,7 @@ class JsonSizeAnalyzerTest {
             assertThat(averagedNode).isEqualToComparingFieldByFieldRecursively(
                     JsonSizeArrayOverview(
                             name = "top",
-                            size = Distribution(
+                            size = NormalIntDistribution(
                                     average = 55,
                                     minimum = 48,
                                     maximum = 63,
@@ -451,28 +451,33 @@ class JsonSizeAnalyzerTest {
                             ),
                             averageChild = JsonSizeObjectOverview(
                                     name = "averageChild",
-                                    size = Distribution(
+                                    size = NormalIntDistribution(
                                             average = 31,
                                             minimum = 25,
                                             maximum = 35,
                                             standardDeviation = 4.760952285695233
                                     ),
                                     children = listOf(
-                                            JsonSizeLeafOverview(name = "A", size = Distribution(
-                                                    average = 12,
-                                                    minimum = 6,
-                                                    maximum = 20,
-                                                    standardDeviation = 5.887840577551898
-                                            )),
-                                            JsonSizeLeafOverview(name = "B", size = Distribution(
-                                                    average = 12,
-                                                    minimum = 8,
-                                                    maximum = 14,
-                                                    standardDeviation = 2.8284271247461903
-                                            ))
+                                            JsonSizeObjectChild(
+                                                    overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                                            average = 12,
+                                                            minimum = 6,
+                                                            maximum = 20,
+                                                            standardDeviation = 5.887840577551898
+                                                    )),
+                                                    presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                            ),
+                                            JsonSizeObjectChild(
+                                                    overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                                            average = 12,
+                                                            minimum = 8,
+                                                            maximum = 14,
+                                                            standardDeviation = 2.8284271247461903
+                                                    )),
+                                                    presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0))
                                     )
                             ),
-                            numberOfChildren = Distribution(
+                            numberOfChildren = NormalIntDistribution(
                                     average = 1,
                                     minimum = 0,
                                     maximum = 3,

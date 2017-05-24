@@ -28,9 +28,9 @@ class JsonPercentageSizer {
                 ))
             }
             is JsonSizeObjectOverview -> {
-                return input.children.map { child ->
+                return input.children.map { (overview) ->
 
-                    generatePercentage(child, globalParentSize, input.size)
+                    generatePercentage(overview, globalParentSize, input.size)
                 }.traverse().flatMap { childPercentages: List<JsonPercentageSize> ->
 
                     Success<String, JsonPercentageSize>(JsonPercentageSizeObject(
@@ -56,9 +56,13 @@ class JsonPercentageSizer {
         }
     }
 
-    private infix operator fun Distribution.div(other: Distribution): PercentageDistribution {
+    private infix operator fun Distribution.div(other: Distribution): NormalPercentageDistribution {
 
-        return PercentageDistribution(
+        // TODO fix me so that I have average, min and max on distribution
+        this as NormalIntDistribution
+        other as NormalIntDistribution
+
+        return NormalPercentageDistribution(
                 average = average safePercentage other.average,
                 minimum = minimum safePercentage other.minimum,
                 maximum = maximum safePercentage other.maximum

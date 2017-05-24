@@ -8,14 +8,14 @@ class JsonSizeSorterTest {
     val sorter = JsonSizeSorter()
 
     @Test
-    fun `it sorts a LeafNode`() {
+    fun `it sorts a LeafNode by average size`() {
 
-        sorter.sort(JsonSizeLeafOverview(name = "trial", size = Distribution(
+        sorter.sort(JsonSizeLeafOverview(name = "trial", size = NormalIntDistribution(
                 average = 1,
                 minimum = 1,
                 maximum = 1,
                 standardDeviation = 0.0
-        ))) succeedsAndShouldReturn JsonSizeLeafOverview(name = "trial", size = Distribution(
+        ))) succeedsAndShouldReturn JsonSizeLeafOverview(name = "trial", size = NormalIntDistribution(
                 average = 1,
                 minimum = 1,
                 maximum = 1,
@@ -24,61 +24,73 @@ class JsonSizeSorterTest {
     }
 
     @Test
-    fun `it sorts an Object`() {
+    fun `it sorts an Object by average size`() {
 
         val input = JsonSizeObjectOverview(
                 name = "top",
-                size = Distribution(
+                size = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
                         standardDeviation = 0.0
                 ),
                 children = listOf(
-                        JsonSizeLeafOverview(name = "A", size = Distribution(
-                                average = 1,
-                                minimum = 1,
-                                maximum = 1,
-                                standardDeviation = 0.0
-                        )),
-                        JsonSizeLeafOverview(name = "B", size = Distribution(
-                                average = 2,
-                                minimum = 2,
-                                maximum = 2,
-                                standardDeviation = 0.0
-                        )))
+                        JsonSizeObjectChild(
+                                overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                        average = 1,
+                                        minimum = 1,
+                                        maximum = 1,
+                                        standardDeviation = 0.0
+                                )),
+                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                        ),
+                        JsonSizeObjectChild(
+                                overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                        average = 2,
+                                        minimum = 2,
+                                        maximum = 2,
+                                        standardDeviation = 0.0
+                                )),
+                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                        ))
         )
 
         sorter.sort(input) succeedsAndShouldReturn JsonSizeObjectOverview(
                 name = "top",
-                size = Distribution(
+                size = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
                         standardDeviation = 0.0
                 ),
                 children = listOf(
-                        JsonSizeLeafOverview(name = "B", size = Distribution(
-                                average = 2,
-                                minimum = 2,
-                                maximum = 2,
-                                standardDeviation = 0.0
-                        )),
-                        JsonSizeLeafOverview(name = "A", size = Distribution(
-                                average = 1,
-                                minimum = 1,
-                                maximum = 1,
-                                standardDeviation = 0.0
-                        )))
+                        JsonSizeObjectChild(
+                                overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                        average = 2,
+                                        minimum = 2,
+                                        maximum = 2,
+                                        standardDeviation = 0.0
+                                )),
+                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                        ),
+                        JsonSizeObjectChild(
+                                overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                        average = 1,
+                                        minimum = 1,
+                                        maximum = 1,
+                                        standardDeviation = 0.0
+                                )),
+                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                        ))
         )
     }
 
     @Test
-    fun `it sorts an Array`() {
+    fun `it sorts an Array by average size`() {
 
         val array = JsonSizeArrayOverview(
                 name = "top",
-                size = Distribution(
+                size = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
@@ -86,27 +98,33 @@ class JsonSizeSorterTest {
                 ),
                 averageChild = JsonSizeObjectOverview(
                         name = "child",
-                        size = Distribution(
+                        size = NormalIntDistribution(
                                 average = 1,
                                 minimum = 1,
                                 maximum = 1,
                                 standardDeviation = 0.0
                         ),
                         children = listOf(
-                                JsonSizeLeafOverview(name = "A", size = Distribution(
-                                        average = 1,
-                                        minimum = 1,
-                                        maximum = 1,
-                                        standardDeviation = 0.0
-                                )),
-                                JsonSizeLeafOverview(name = "B", size = Distribution(
-                                        average = 2,
-                                        minimum = 2,
-                                        maximum = 2,
-                                        standardDeviation = 0.0
-                                )))
+                                JsonSizeObjectChild(
+                                        overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                                average = 1,
+                                                minimum = 1,
+                                                maximum = 1,
+                                                standardDeviation = 0.0
+                                        )),
+                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                ),
+                                JsonSizeObjectChild(
+                                        overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                                average = 2,
+                                                minimum = 2,
+                                                maximum = 2,
+                                                standardDeviation = 0.0
+                                        )),
+                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                ))
                 ),
-                numberOfChildren = Distribution(
+                numberOfChildren = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
@@ -116,7 +134,7 @@ class JsonSizeSorterTest {
 
         sorter.sort(array) succeedsAndShouldReturn JsonSizeArrayOverview(
                 name = "top",
-                size = Distribution(
+                size = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
@@ -124,28 +142,34 @@ class JsonSizeSorterTest {
                 ),
                 averageChild = JsonSizeObjectOverview(
                         name = "child",
-                        size = Distribution(
+                        size = NormalIntDistribution(
                                 average = 1,
                                 minimum = 1,
                                 maximum = 1,
                                 standardDeviation = 0.0
                         ),
                         children = listOf(
-                                JsonSizeLeafOverview(name = "B", size = Distribution(
-                                        average = 2,
-                                        minimum = 2,
-                                        maximum = 2,
-                                        standardDeviation = 0.0
-                                )),
-                                JsonSizeLeafOverview(name = "A", size = Distribution(
-                                        average = 1,
-                                        minimum = 1,
-                                        maximum = 1,
-                                        standardDeviation = 0.0
+                                JsonSizeObjectChild(
+                                        overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                                average = 2,
+                                                minimum = 2,
+                                                maximum = 2,
+                                                standardDeviation = 0.0
+                                        )),
+                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                ),
+                                JsonSizeObjectChild(
+                                        overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                                average = 1,
+                                                minimum = 1,
+                                                maximum = 1,
+                                                standardDeviation = 0.0
+                                        ))
+                                        ,
+                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
                                 ))
-                        )
                 ),
-                numberOfChildren = Distribution(
+                numberOfChildren = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
@@ -155,69 +179,88 @@ class JsonSizeSorterTest {
     }
 
     @Test
-    fun `it sorts an object of objects`() {
+    fun `it sorts an object of objects by average size`() {
 
         val complexObject = JsonSizeObjectOverview(
                 name = "top",
-                size = Distribution(
+                size = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
                         standardDeviation = 0.0
                 ),
-                children = listOf(JsonSizeObjectOverview(
-                        name = "child",
-                        size = Distribution(
-                                average = 1,
-                                minimum = 1,
-                                maximum = 1,
-                                standardDeviation = 0.0
-                        ),
-                        children = listOf(
-                                JsonSizeLeafOverview(name = "A", size = Distribution(
+                children = listOf(JsonSizeObjectChild(
+                        overview = JsonSizeObjectOverview(
+                                name = "child",
+                                size = NormalIntDistribution(
                                         average = 1,
                                         minimum = 1,
                                         maximum = 1,
                                         standardDeviation = 0.0
-                                )),
-                                JsonSizeLeafOverview(name = "B", size = Distribution(
-                                        average = 2,
-                                        minimum = 2,
-                                        maximum = 2,
-                                        standardDeviation = 0.0
-                                )))
+                                ),
+                                children = listOf(
+                                        JsonSizeObjectChild(
+                                                overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                                        average = 1,
+                                                        minimum = 1,
+                                                        maximum = 1,
+                                                        standardDeviation = 0.0
+                                                )),
+                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        ),
+                                        JsonSizeObjectChild(
+                                                overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                                        average = 2,
+                                                        minimum = 2,
+                                                        maximum = 2,
+                                                        standardDeviation = 0.0
+                                                )),
+                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        ))
+                        ),
+                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
                 ))
         )
 
         sorter.sort(complexObject) succeedsAndShouldReturn JsonSizeObjectOverview(
                 name = "top",
-                size = Distribution(
+                size = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
                         standardDeviation = 0.0
                 ),
-                children = listOf(JsonSizeObjectOverview(
-                        name = "child",
-                        size = Distribution(
-                                average = 1,
-                                minimum = 1,
-                                maximum = 1,
-                                standardDeviation = 0.0
-                        ),
-                        children = listOf(
-                                JsonSizeLeafOverview(name = "B", size = Distribution(
-                                        average = 2,
-                                        minimum = 2,
-                                        maximum = 2,
-                                        standardDeviation = 0.0
-                                )),
-                                JsonSizeLeafOverview(name = "A", size = Distribution(
+                children = listOf(JsonSizeObjectChild(
+                        overview = JsonSizeObjectOverview(
+                                name = "child",
+                                size = NormalIntDistribution(
                                         average = 1,
                                         minimum = 1,
                                         maximum = 1,
                                         standardDeviation = 0.0
-                                )))
+                                ),
+                                children = listOf(
+                                        JsonSizeObjectChild(
+                                                overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
+                                                        average = 2,
+                                                        minimum = 2,
+                                                        maximum = 2,
+                                                        standardDeviation = 0.0
+                                                )),
+                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        ),
+                                        JsonSizeObjectChild(
+                                                overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
+                                                        average = 1,
+                                                        minimum = 1,
+                                                        maximum = 1,
+                                                        standardDeviation = 0.0
+                                                )),
+                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        )
+                                )
+                        ),
+                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
                 ))
         )
     }

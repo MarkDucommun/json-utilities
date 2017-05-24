@@ -56,27 +56,46 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
 
     private fun List<JsonSizeObject>.generateAveragedObjectNode(): SingleResult<String, JsonSizeOverview> {
 
-        return collectAllChildFields().flatMapSuccess { children ->
+        return this.collectAllChildrenNames().flatMapSuccess { childrenNames ->
 
-           children.map { child ->
+            val a: List<SingleResult<String, JsonSizeOverview>> = this.generateOverviewsForEachChildByNames(childrenNames)
 
-                doOnComputationThreadAndFlatten {
+            childrenNames
+                    .map { name ->
 
-                    val nodes = this.map { it.children.find { it.name == child } ?: JsonSizeEmpty(name = child) }
+                        doOnComputationThreadAndFlatten {
 
-                    nodes.generateOverview()
-                }
-            }.concat().toList().map { results ->
+                            val findAllChildrenByName = this.findAllChildrenByName(name)
 
-                results.find { it is Failure }
-                        ?.let { Failure<String, JsonSizeOverview>(content = (it as Failure).content) }
-                        ?: Success<String, JsonSizeOverview>(JsonSizeObjectOverview(
-                        name = first().name,
-                        size = sizeDistribution,
-                        children = (results as List<Success<String, JsonSizeOverview>>).map { it.content }
-                ))
-            }
+                            val difference = size - findAllChildrenByName.size
+
+                            val presence = List(difference) { 0.0 }.plus(List(findAllChildrenByName.size) { 1.0 }).distribution
+
+                            findAllChildrenByName.generateOverview().flatMapSuccess { it: JsonSizeOverview ->
+                                val child: JsonSizeObjectChild = JsonSizeObjectChild(overview = it, presence = presence)
+                                Single.just(Success<String, JsonSizeObjectChild>(child)) as SingleResult<String, JsonSizeObjectChild> // TODO send this to Intellij
+                            }
+                        }
+                    }
+                    .concat()
+                    .toList()
+                    .map { results ->
+                        results.traverse().map {
+                            JsonSizeObjectOverview(
+                                    name = first().name,
+                                    size = this.sizeDistribution,
+                                    children = it
+                            ) as JsonSizeOverview
+                        }
+                    }
         }
+    }
+
+    private fun List<JsonSizeObject>.generateOverviewsForEachChildByNames(names: Set<String>) =
+            names.map { name -> doOnComputationThreadAndFlatten { this.findAllChildrenByName(name).generateOverview() } }
+
+    private fun List<JsonSizeObject>.findAllChildrenByName(name: String): List<JsonSizeNode> {
+        return map { it.children.find { it.name == name } }.filterNotNull()
     }
 
     private fun List<JsonSizeArray>.generateAveragedArrayNode(): SingleResult<String, JsonSizeOverview> {
@@ -85,7 +104,7 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
 
             Success<String, JsonSizeOverview>(content = JsonSizeArrayOverview(
                     name = first().name,
-                    size = sizeDistribution,
+                    size = this.sizeDistribution,
                     averageChild = averageChild,
                     numberOfChildren = numberOfChildrenDistribution
             ))
@@ -115,7 +134,7 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
             when (numberOfTypes) {
                 2 -> {
                     if (types.contains("JsonSizeEmpty")) {
-                        Success<String, String>(content = types.filterNot { it == "JsonSizeEmpty"}.first())
+                        Success<String, String>(content = types.filterNot { it == "JsonSizeEmpty" }.first())
                     } else {
                         Failure<String, String>(content = "Nodes are not the same type")
                     }
@@ -127,7 +146,7 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
         }
     }
 
-    private fun List<JsonSizeObject>.collectAllChildFields(): SingleResult<String, Set<String>> {
+    private fun List<JsonSizeObject>.collectAllChildrenNames(): SingleResult<String, Set<String>> {
 
         return doOnComputationThread {
             Success<String, Set<String>>(flatMap { it.children.map { it.name } }.toSet())
@@ -147,18 +166,18 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
         }
     }
 
-    private val List<JsonSizeNode>.sizeDistribution: Distribution get() = map(JsonSizeNode::size).distribution
+    private val List<JsonSizeNode>.sizeDistribution: NormalIntDistribution get() = map(JsonSizeNode::size).distribution
 
     private val JsonSizeArray.numberOfChildren: Int get() = children.size
 
-    private val List<JsonSizeArray>.numberOfChildrenDistribution: Distribution
+    private val List<JsonSizeArray>.numberOfChildrenDistribution: NormalIntDistribution
         get() = map { it.numberOfChildren }.distribution
 
-    private val List<Int>.distribution: Distribution get() {
+    private val List<Int>.distribution: NormalIntDistribution get() {
 
         val average = averageInt()
 
-        return Distribution(
+        return NormalIntDistribution(
                 average = average,
                 minimum = min() ?: 0,
                 maximum = max() ?: 0,
@@ -166,7 +185,20 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
         )
     }
 
-    private val EMPTY_DISTRIBUTION = Distribution(average = 0, minimum = 0, maximum = 0, standardDeviation = 0.0)
+    // TODO COMMONIZE THIS FUNCTION
+    private val List<Double>.distribution: NormalDoubleDistribution get() {
+
+        val average = average()
+
+        return NormalDoubleDistribution(
+                average = average,
+                minimum = min() ?: 0.0,
+                maximum = max() ?: 0.0,
+                standardDeviation = map { member -> (member - average).square() }.average().sqrt()
+        )
+    }
+
+    private val EMPTY_DISTRIBUTION = NormalIntDistribution(average = 0, minimum = 0, maximum = 0, standardDeviation = 0.0)
 
     private fun <T> doOnComputationThread(fn: () -> T): Single<T> {
         return doOnThread(scheduler = scheduler, fn = fn)
