@@ -3,9 +3,6 @@ package com.hcsc.de.claims.jsonParsing
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
-import java.lang.reflect.Constructor
-import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 
 class LinearJsonStructureParser : JsonStructureParser {
 
@@ -26,20 +23,30 @@ class LinearJsonStructureParser : JsonStructureParser {
                         when (char) {
                             '"' -> {
                                 when (lastClosable) {
-                                    is ObjectValueElement -> {
-                                        TODO()
-                                    }
-                                    else -> {
-                                        val newObjectValue = ObjectValueElement(StringElement(id = acc.idCounter))
-                                        acc.copy(
-                                                structure = acc.structure.plus(ElementStart(newObjectValue)),
-                                                closableStack = acc.closableStack.plus(newObjectValue),
-                                                idCounter = acc.idCounter + 1
-                                        )
-                                    }
+                                    is ObjectValueElement -> TODO()
+                                    else -> acc.startObjectValue(::StringElement)
                                 }
                             }
-                            else -> acc.addLiteral()
+                            else -> acc.addLiteral(char)
+                        }
+                    }
+                    is ElementStart -> {
+                        when (acc.previousElement.element) {
+                            is ObjectElement -> when (char) {
+                                '"' -> when (lastClosable) {
+                                    is StringElement, is ObjectKeyElement -> acc.endClosable(lastClosable)
+                                    is ObjectElement -> acc.startClosable(::ObjectKeyElement)
+                                    is ObjectValueElement -> {
+                                        when (lastClosable.element) {
+                                            is StringElement -> acc.endClosable(lastClosable)
+                                            else -> TODO()
+                                        }
+                                    }
+                                    else -> acc.startClosable(::StringElement)
+                                }
+                                else -> acc.fail("object keys must be strings")
+                            }
+                            else -> acc.addLiteral(char)
                         }
                     }
                     else -> {
@@ -49,6 +56,12 @@ class LinearJsonStructureParser : JsonStructureParser {
                                 when (lastClosable) {
                                     is StringElement, is ObjectKeyElement -> acc.endClosable(lastClosable)
                                     is ObjectElement -> acc.startClosable(::ObjectKeyElement)
+                                    is ObjectValueElement -> {
+                                        when (lastClosable.element) {
+                                            is StringElement -> acc.endClosable(lastClosable)
+                                            else -> TODO()
+                                        }
+                                    }
                                     else -> acc.startClosable(::StringElement)
                                 }
                             }
@@ -65,7 +78,7 @@ class LinearJsonStructureParser : JsonStructureParser {
                                     null -> acc.fail("array was never opened")
                                 }
                             }
-                        // TODO previous element is not a start, comma or colonor beginning of string  should be a failure
+                        // TODO previous element is not a start, comma or colon or beginning of string  should be a failure
                             '{' -> acc.startClosable(::ObjectElement)
                             '}' -> {
                                 when (lastClosable) {
@@ -81,6 +94,7 @@ class LinearJsonStructureParser : JsonStructureParser {
                             ',' -> {
                                 when (lastClosable) {
                                     is ArrayElement -> acc.addComma()
+                                    is ObjectElement -> acc.addComma()
                                     null -> acc.fail("cannot use comma outside of an object, string or array")
                                     else -> TODO()
                                 }
@@ -92,12 +106,12 @@ class LinearJsonStructureParser : JsonStructureParser {
                                     else -> TODO()
                                 }
                             }
-                            else -> acc.addLiteral()
+                            else -> acc.addLiteral(char)
                         }
                     }
                 }.let { accumulator ->
 
-                    val newlyAddedElement = accumulator.structure.lastOrNull() ?: Literal
+                    val newlyAddedElement = accumulator.structure.lastOrNull() ?: Literal(' ')
 
                     when (newlyAddedElement) {
                         is NotWhitespaceElement -> accumulator.copy(previousElement = newlyAddedElement)
@@ -107,44 +121,22 @@ class LinearJsonStructureParser : JsonStructureParser {
             }
         }
 
-        return accumulator.failure ?: Success(accumulator.structure)
-    }
+        return accumulator.failure ?: {
 
-    data class JsonStructureAccumulator(
-            val idCounter: Long = 0,
-            val closableStack: List<ClosableElement> = emptyList(),
-            val previousElement: NotWhitespaceElement = Literal, // TODO might this actually be nullable?
-            val structure: List<JsonStructureElement> = emptyList(),
-            val failure: Failure<String, List<JsonStructureElement>>? = null
-    ) {
+            if (accumulator.closableStack.isEmpty()) {
 
-        fun fail(message: String) = copy(failure = Failure("Invalid JSON, $message"))
-
-        fun addSimpleElement(element: SimpleElement) = copy(structure = structure.plus(element))
-
-        fun addLiteral() = addSimpleElement(Literal)
-
-        fun addColon() = addSimpleElement(ColonElement)
-
-        fun addComma() = addSimpleElement(CommaElement)
-
-        fun startClosable(newClosableConstructor: (id: Long) -> ClosableElement): JsonStructureAccumulator {
-
-            val newClosableElement = newClosableConstructor.invoke(idCounter)
-
-            return copy(
-                    structure = structure.plus(ElementStart(newClosableElement)),
-                    closableStack = closableStack.plus(newClosableElement),
-                    idCounter = idCounter + 1
-            )
-        }
-
-        fun endClosable(closable: ClosableElement): JsonStructureAccumulator {
-
-            return copy(
-                    structure = structure.plus(ElementEnd(closable)),
-                    closableStack = closableStack.dropLast(1)
-            )
-        }
+                Success<String, List<JsonStructureElement>>(accumulator.structure)
+            } else {
+                when (accumulator.closableStack.lastOrNull()) {
+                    is StringElement -> accumulator.fail("did not close string").failure!!
+                    is ObjectElement -> TODO()
+                    is ArrayElement -> TODO()
+                    is ObjectKeyElement -> TODO()
+                    is ObjectValueElement -> TODO()
+                    is ArrayChildElement -> TODO()
+                    null -> TODO("I don't think that this is at all possible")
+                }
+            }
+        }()
     }
 }
