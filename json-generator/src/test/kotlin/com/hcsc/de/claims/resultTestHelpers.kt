@@ -21,6 +21,14 @@ infix fun <failureType, successType> Result<failureType, successType>.succeedsAn
     }
 }
 
+fun <failureType, successType: List<childSuccessType>, childSuccessType> Result<failureType, successType>.succeedsAndShouldReturn(vararg expectedObjects: childSuccessType) {
+    when (this) {
+        is Success -> assertThat(content).isEqualTo(expectedObjects.toList())
+        is Failure -> fail("Result should have been a Success")
+    }
+}
+
+
 infix fun <failureType, successType> Result<failureType, successType>.failsAnd(onFailure: (failureType) -> Unit) {
     when (this) {
         is Success -> fail("Result should have been a Failure")
