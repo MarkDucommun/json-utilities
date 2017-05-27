@@ -4,7 +4,7 @@ import com.hcsc.de.claims.helpers.*
 
 class JsonPercentageSizer {
 
-    fun generatePercentage(input: JsonSizeOverview): Result<String, JsonPercentageSize> {
+    fun <numberType: Number> generatePercentage(input: JsonSizeOverview<numberType>): Result<String, JsonPercentageSize> {
 
         return generatePercentage(
                 input = input,
@@ -13,10 +13,10 @@ class JsonPercentageSizer {
         )
     }
 
-    private fun generatePercentage(
-            input: JsonSizeOverview,
-            globalParentSize: Distribution,
-            localParentSize: Distribution
+    private fun <numberType: Number> generatePercentage(
+            input: JsonSizeOverview<numberType>,
+            globalParentSize: Distribution<numberType>,
+            localParentSize: Distribution<numberType>
     ): Result<String, JsonPercentageSize> {
 
         return when (input) {
@@ -56,24 +56,16 @@ class JsonPercentageSizer {
         }
     }
 
-    private infix operator fun Distribution.div(other: Distribution): NormalPercentageDistribution {
+    private infix operator fun <numberType: Number> Distribution<numberType>.div(other: Distribution<numberType>): PercentageDistribution {
 
-        // TODO fix me so that I have average, min and max on distribution
-        this as NormalIntDistribution
-        other as NormalIntDistribution
-
-        return NormalPercentageDistribution(
+        return PercentageDistribution(
                 average = average safePercentage other.average,
                 minimum = minimum safePercentage other.minimum,
                 maximum = maximum safePercentage other.maximum
         )
     }
 
-    private infix fun Int.safePercentage(other: Int): Double {
+    private infix fun <numberType : Number> numberType.safePercentage(other: numberType) : Double {
         return if (other == 0) 0.0 else (this.toDouble() / other.toDouble()) * 100
-    }
-
-    private infix fun Double.safePercentage(other: Double): Double {
-        return if (other == 0.0) 0.0 else this / other * 100
     }
 }

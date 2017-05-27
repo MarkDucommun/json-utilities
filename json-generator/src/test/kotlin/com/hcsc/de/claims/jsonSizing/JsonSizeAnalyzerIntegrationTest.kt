@@ -260,6 +260,8 @@ class JsonSizeAnalyzerIntegrationTest {
                 average = average,
                 minimum = min() ?: 0.0,
                 maximum = max() ?: 0.0,
+                mode = 0.0,
+                median = 0.0,
                 standardDeviation = map { member -> (member - average).square() }.average().sqrt()
         )
     }

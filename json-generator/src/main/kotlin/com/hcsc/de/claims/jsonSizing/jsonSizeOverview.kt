@@ -1,49 +1,29 @@
 package com.hcsc.de.claims.jsonSizing
 
-sealed class JsonSizeOverview {
+sealed class JsonSizeOverview<out numberType: Number> {
     abstract val name: String
-    abstract val size: Distribution
+    abstract val size: Distribution<numberType>
 }
 
-sealed class Distribution
-
-sealed class DoubleDistribution : Distribution()
-
-sealed class IntDistribution : Distribution()
-
-data class NormalIntDistribution(
-        val average: Int,
-        val minimum: Int,
-        val maximum: Int,
-        val standardDeviation: Double
-) : IntDistribution()
-
-data class NormalDoubleDistribution(
-        val average: Double,
-        val minimum: Double,
-        val maximum: Double,
-        val standardDeviation: Double
-) : DoubleDistribution()
-
-data class JsonSizeLeafOverview(
+data class JsonSizeLeafOverview<out numberType: Number>(
         override val name: String,
-        override val size: Distribution
-) : JsonSizeOverview()
+        override val size: Distribution<numberType>
+) : JsonSizeOverview<numberType>()
 
-data class JsonSizeObjectOverview(
+data class JsonSizeObjectOverview<out numberType: Number>(
         override val name: String,
-        override val size: Distribution,
-        val children: List<JsonSizeObjectChild>
-) : JsonSizeOverview()
+        override val size: Distribution<numberType>,
+        val children: List<JsonSizeObjectChild<numberType>>
+) : JsonSizeOverview<numberType>()
 
-data class JsonSizeObjectChild(
-        val overview: JsonSizeOverview,
-        val presence: DoubleDistribution
+data class JsonSizeObjectChild<out numberType: Number>(
+        val overview: JsonSizeOverview<numberType>,
+        val presence: Distribution<Double>
 )
 
-data class JsonSizeArrayOverview(
+data class JsonSizeArrayOverview<out numberType: Number>(
         override val name: String,
-        override val size: NormalIntDistribution,
-        val averageChild: JsonSizeOverview,
-        val numberOfChildren: NormalIntDistribution
-) : JsonSizeOverview()
+        override val size: Distribution<numberType>,
+        val averageChild: JsonSizeOverview<numberType>,
+        val numberOfChildren: Distribution<numberType>
+) : JsonSizeOverview<numberType>()

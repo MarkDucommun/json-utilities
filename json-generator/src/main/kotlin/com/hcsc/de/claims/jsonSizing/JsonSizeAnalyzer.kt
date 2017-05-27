@@ -4,16 +4,18 @@ import com.hcsc.de.claims.helpers.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.apache.commons.lang3.ObjectUtils.median
+import org.apache.commons.math3.stat.StatUtils.mode
 import kotlin.reflect.KClass
 
 class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline()) {
 
-    fun generateJsonSizeOverview(nodes: List<JsonSizeNode>): SingleResult<String, JsonSizeOverview> {
+    fun generateJsonSizeOverview(nodes: List<JsonSizeNode>): SingleResult<String, JsonSizeOverview<Int>> {
 
         return nodes.generateOverview()
     }
 
-    fun List<JsonSizeNode>.generateOverview(): SingleResult<String, JsonSizeOverview> {
+    fun List<JsonSizeNode>.generateOverview(): SingleResult<String, JsonSizeOverview<Int>> {
 
         return ensureNodesHaveSameName()
                 .flatMapSuccess { ensureNodesAreSameType() }
@@ -43,22 +45,22 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
         }
     }
 
-    private fun List<JsonSizeLeafNode>.generateAveragedLeafNode(): SingleResult<String, JsonSizeOverview> {
+    private fun List<JsonSizeLeafNode>.generateAveragedLeafNode(): SingleResult<String, JsonSizeOverview<Int>> {
 
         return doOnComputationThread {
 
-            Success<String, JsonSizeOverview>(JsonSizeLeafOverview(
+            Success<String, JsonSizeOverview<Int>>(JsonSizeLeafOverview<Int>(
                     name = first().name,
                     size = sizeDistribution
             ))
         }
     }
 
-    private fun List<JsonSizeObject>.generateAveragedObjectNode(): SingleResult<String, JsonSizeOverview> {
+    private inline fun List<JsonSizeObject>.generateAveragedObjectNode(): SingleResult<String, JsonSizeOverview<Int>> {
 
         return this.collectAllChildrenNames().flatMapSuccess { childrenNames ->
 
-            val a: List<SingleResult<String, JsonSizeOverview>> = this.generateOverviewsForEachChildByNames(childrenNames)
+            val a: List<SingleResult<String, JsonSizeOverview<Int>>> = this.generateOverviewsForEachChildByNames(childrenNames)
 
             childrenNames
                     .map { name ->
@@ -71,9 +73,9 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
 
                             val presence = List(difference) { 0.0 }.plus(List(findAllChildrenByName.size) { 1.0 }).distribution
 
-                            findAllChildrenByName.generateOverview().flatMapSuccess { it: JsonSizeOverview ->
-                                val child: JsonSizeObjectChild = JsonSizeObjectChild(overview = it, presence = presence)
-                                Single.just(Success<String, JsonSizeObjectChild>(child)) as SingleResult<String, JsonSizeObjectChild> // TODO send this to Intellij
+                            findAllChildrenByName.generateOverview().flatMapSuccess { it ->
+                                val child: JsonSizeObjectChild<Int> = JsonSizeObjectChild(overview = it, presence = presence)
+                                Single.just(Success<String, JsonSizeObjectChild<Int>>(child)) as SingleResult<String, JsonSizeObjectChild<Int>> // TODO send this to Intellij
                             }
                         }
                     }
@@ -85,7 +87,7 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
                                     name = first().name,
                                     size = this.sizeDistribution,
                                     children = it
-                            ) as JsonSizeOverview
+                            ) as JsonSizeOverview<Int>
                         }
                     }
         }
@@ -98,11 +100,11 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
         return map { it.children.find { it.name == name } }.filterNotNull()
     }
 
-    private fun List<JsonSizeArray>.generateAveragedArrayNode(): SingleResult<String, JsonSizeOverview> {
+    private fun List<JsonSizeArray>.generateAveragedArrayNode(): SingleResult<String, JsonSizeOverview<Int>> {
 
         return flatMap { array -> array.childrenWithNormalizedNames }.generateOverview().mapSuccess { averageChild ->
 
-            Success<String, JsonSizeOverview>(content = JsonSizeArrayOverview(
+            Success<String, JsonSizeOverview<Int>>(content = JsonSizeArrayOverview(
                     name = first().name,
                     size = this.sizeDistribution,
                     averageChild = averageChild,
@@ -181,11 +183,13 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
                 average = average,
                 minimum = min() ?: 0,
                 maximum = max() ?: 0,
+                mode = modeInt(),
+                median = medianInt(),
                 standardDeviation = map { member -> (member - average).square() }.average().sqrt()
         )
     }
 
-    // TODO COMMONIZE THIS FUNCTION
+    // TODO EXTRACT AND GENERICIZE THIS FUNCTION
     private val List<Double>.distribution: NormalDoubleDistribution get() {
 
         val average = average()
@@ -194,11 +198,20 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
                 average = average,
                 minimum = min() ?: 0.0,
                 maximum = max() ?: 0.0,
+                mode = median(),
+                median = mode(),
                 standardDeviation = map { member -> (member - average).square() }.average().sqrt()
         )
     }
 
-    private val EMPTY_DISTRIBUTION = NormalIntDistribution(average = 0, minimum = 0, maximum = 0, standardDeviation = 0.0)
+    private val EMPTY_DISTRIBUTION = NormalIntDistribution(
+            average = 0,
+            minimum = 0,
+            maximum = 0,
+            mode = 0,
+            median = 0,
+            standardDeviation = 0.0
+    )
 
     private fun <T> doOnComputationThread(fn: () -> T): Single<T> {
         return doOnThread(scheduler = scheduler, fn = fn)
@@ -208,10 +221,10 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
         return doOnThreadAndFlatten(scheduler = scheduler, fn = fn)
     }
 
-    private fun singleEmptyLeafOverview(name: String): SingleResult<String, JsonSizeOverview> =
-            Single.just(Success<String, JsonSizeOverview>(content = emptyLeafOverview(name = name)))
+    private fun singleEmptyLeafOverview(name: String): SingleResult<String, JsonSizeOverview<Int>> =
+            Single.just(Success<String, JsonSizeOverview<Int>>(content = emptyLeafOverview(name = name)))
 
-    private fun emptyLeafOverview(name: String): JsonSizeOverview = JsonSizeLeafOverview(name = name, size = EMPTY_DISTRIBUTION)
+    private fun emptyLeafOverview(name: String): JsonSizeOverview<Int> = JsonSizeLeafOverview(name = name, size = EMPTY_DISTRIBUTION)
 
     private fun emptySizeArray(name: String) = JsonSizeArray(name = name, size = 0, children = emptyList())
 

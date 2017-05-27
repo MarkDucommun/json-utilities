@@ -50,6 +50,7 @@ dependencies {
 	compile("com.github.fge:json-schema-validator:2.2.6")
 	compile('org.apache.commons:commons-math3:3.6.1')
 	compile group: 'net.sourceforge.jdistlib', name: 'jdistlib', version: '0.4.5'
+//	compile "org.renjin:renjin-script-engine:$renjinVersion"
 	runtime('com.h2database:h2')
 	runtime('org.postgresql:postgresql')
 	testCompile('org.springframework.boot:spring-boot-starter-test')

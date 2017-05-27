@@ -14,11 +14,15 @@ class JsonSizeSorterTest {
                 average = 1,
                 minimum = 1,
                 maximum = 1,
+                mode = 1,
+                median = 1,
                 standardDeviation = 0.0
         ))) succeedsAndShouldReturn JsonSizeLeafOverview(name = "trial", size = NormalIntDistribution(
                 average = 1,
                 minimum = 1,
                 maximum = 1,
+                mode = 1,
+                median = 1,
                 standardDeviation = 0.0
         ))
     }
@@ -32,6 +36,8 @@ class JsonSizeSorterTest {
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 ),
                 children = listOf(
@@ -40,18 +46,36 @@ class JsonSizeSorterTest {
                                         average = 1,
                                         minimum = 1,
                                         maximum = 1,
+                                        mode = 1,
+                                        median = 1,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0
+                                )
                         ),
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
                                         average = 2,
                                         minimum = 2,
                                         maximum = 2,
+                                        mode = 2,
+                                        median = 2,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0
+                                )
                         ))
         )
 
@@ -61,6 +85,8 @@ class JsonSizeSorterTest {
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 ),
                 children = listOf(
@@ -69,18 +95,36 @@ class JsonSizeSorterTest {
                                         average = 2,
                                         minimum = 2,
                                         maximum = 2,
+                                        mode = 2,
+                                        median = 2,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0
+                                )
                         ),
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
                                         average = 1,
                                         minimum = 1,
                                         maximum = 1,
+                                        mode = 1,
+                                        median = 1,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0
+                                )
                         ))
         )
     }
@@ -94,6 +138,8 @@ class JsonSizeSorterTest {
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 ),
                 averageChild = JsonSizeObjectOverview(
@@ -102,6 +148,8 @@ class JsonSizeSorterTest {
                                 average = 1,
                                 minimum = 1,
                                 maximum = 1,
+                                mode = 1,
+                                median = 1,
                                 standardDeviation = 0.0
                         ),
                         children = listOf(
@@ -110,24 +158,44 @@ class JsonSizeSorterTest {
                                                 average = 1,
                                                 minimum = 1,
                                                 maximum = 1,
+                                                mode = 1,
+                                                median = 1,
                                                 standardDeviation = 0.0
                                         )),
-                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        presence = NormalDoubleDistribution(
+                                                average = 1.0,
+                                                minimum = 1.0,
+                                                maximum = 1.0,
+                                                mode = 1.0,
+                                                median = 1.0,
+                                                standardDeviation = 0.0
+                                        )
                                 ),
                                 JsonSizeObjectChild(
                                         overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
                                                 average = 2,
                                                 minimum = 2,
                                                 maximum = 2,
+                                                mode = 2,
+                                                median = 2,
                                                 standardDeviation = 0.0
                                         )),
-                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        presence = NormalDoubleDistribution(
+                                                average = 1.0,
+                                                minimum = 1.0,
+                                                maximum = 1.0,
+                                                mode = 1.0,
+                                                median = 1.0,
+                                                standardDeviation = 0.0
+                                        )
                                 ))
                 ),
                 numberOfChildren = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 )
         )
@@ -138,6 +206,8 @@ class JsonSizeSorterTest {
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 ),
                 averageChild = JsonSizeObjectOverview(
@@ -146,6 +216,8 @@ class JsonSizeSorterTest {
                                 average = 1,
                                 minimum = 1,
                                 maximum = 1,
+                                mode = 1,
+                                median = 1,
                                 standardDeviation = 0.0
                         ),
                         children = listOf(
@@ -154,25 +226,45 @@ class JsonSizeSorterTest {
                                                 average = 2,
                                                 minimum = 2,
                                                 maximum = 2,
+                                                mode = 2,
+                                                median = 2,
                                                 standardDeviation = 0.0
                                         )),
-                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        presence = NormalDoubleDistribution(
+                                                average = 1.0,
+                                                minimum = 1.0,
+                                                maximum = 1.0,
+                                                mode = 1.0,
+                                                median = 1.0,
+                                                standardDeviation = 0.0
+                                        )
                                 ),
                                 JsonSizeObjectChild(
                                         overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
                                                 average = 1,
                                                 minimum = 1,
                                                 maximum = 1,
+                                                mode = 1,
+                                                median = 1,
                                                 standardDeviation = 0.0
                                         ))
                                         ,
-                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                        presence = NormalDoubleDistribution(
+                                                average = 1.0,
+                                                minimum = 1.0,
+                                                maximum = 1.0,
+                                                mode = 1.0,
+                                                median = 1.0,
+                                                standardDeviation = 0.0
+                                        )
                                 ))
                 ),
                 numberOfChildren = NormalIntDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 )
         )
@@ -187,6 +279,8 @@ class JsonSizeSorterTest {
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 ),
                 children = listOf(JsonSizeObjectChild(
@@ -196,6 +290,8 @@ class JsonSizeSorterTest {
                                         average = 1,
                                         minimum = 1,
                                         maximum = 1,
+                                        mode = 1,
+                                        median = 1,
                                         standardDeviation = 0.0
                                 ),
                                 children = listOf(
@@ -204,21 +300,46 @@ class JsonSizeSorterTest {
                                                         average = 1,
                                                         minimum = 1,
                                                         maximum = 1,
+                                                        mode = 1,
+                                                        median = 1,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                                presence = NormalDoubleDistribution(
+                                                        average = 1.0,
+                                                        minimum = 1.0,
+                                                        maximum = 1.0,
+                                                        mode = 1.0,
+                                                        median = 1.0,
+                                                        standardDeviation = 0.0
+                                                )
                                         ),
                                         JsonSizeObjectChild(
                                                 overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
                                                         average = 2,
                                                         minimum = 2,
                                                         maximum = 2,
+                                                        mode = 2,
+                                                        median = 2,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                                presence = NormalDoubleDistribution(
+                                                        average = 1.0,
+                                                        minimum = 1.0,
+                                                        maximum = 1.0,
+                                                        mode = 1.0,
+                                                        median = 1.0,
+                                                        standardDeviation = 0.0
+                                                )
                                         ))
                         ),
-                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                        presence = NormalDoubleDistribution(
+                                average = 1.0,
+                                minimum = 1.0,
+                                maximum = 1.0,
+                                mode = 1.0,
+                                median = 1.0,
+                                standardDeviation = 0.0
+                        )
                 ))
         )
 
@@ -228,6 +349,8 @@ class JsonSizeSorterTest {
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 ),
                 children = listOf(JsonSizeObjectChild(
@@ -237,6 +360,8 @@ class JsonSizeSorterTest {
                                         average = 1,
                                         minimum = 1,
                                         maximum = 1,
+                                        mode = 1,
+                                        median = 1,
                                         standardDeviation = 0.0
                                 ),
                                 children = listOf(
@@ -245,22 +370,47 @@ class JsonSizeSorterTest {
                                                         average = 2,
                                                         minimum = 2,
                                                         maximum = 2,
+                                                        mode = 2,
+                                                        median = 2,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                                presence = NormalDoubleDistribution(
+                                                        average = 1.0,
+                                                        minimum = 1.0,
+                                                        maximum = 1.0,
+                                                        mode = 1.0,
+                                                        median = 1.0,
+                                                        standardDeviation = 0.0
+                                                )
                                         ),
                                         JsonSizeObjectChild(
                                                 overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
                                                         average = 1,
                                                         minimum = 1,
                                                         maximum = 1,
+                                                        mode = 1,
+                                                        median = 1,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                                presence = NormalDoubleDistribution(
+                                                        average = 1.0,
+                                                        minimum = 1.0,
+                                                        maximum = 1.0,
+                                                        mode = 1.0,
+                                                        median = 1.0,
+                                                        standardDeviation = 0.0
+                                                )
                                         )
                                 )
                         ),
-                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                        presence = NormalDoubleDistribution(
+                                average = 1.0,
+                                minimum = 1.0,
+                                maximum = 1.0,
+                                mode = 1.0,
+                                median = 1.0,
+                                standardDeviation = 0.0
+                        )
                 ))
         )
     }

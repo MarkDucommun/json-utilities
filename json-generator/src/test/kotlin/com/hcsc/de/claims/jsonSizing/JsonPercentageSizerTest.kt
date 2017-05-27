@@ -16,16 +16,18 @@ class JsonPercentageSizerTest {
                         average = 1,
                         minimum = 1,
                         maximum = 1,
+                        mode = 1,
+                        median = 1,
                         standardDeviation = 0.0
                 )
         )) succeedsAndShouldReturn JsonPercentageSizeLeaf(
                 name = "test",
-                localPercent = NormalPercentageDistribution(
+                localPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
                 ),
-                globalPercent = NormalPercentageDistribution(
+                globalPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
@@ -42,6 +44,8 @@ class JsonPercentageSizerTest {
                         average = 100,
                         minimum = 100,
                         maximum = 100,
+                        mode = 100,
+                        median = 100,
                         standardDeviation = 0.0
                 ),
                 children = listOf(
@@ -52,10 +56,18 @@ class JsonPercentageSizerTest {
                                                 average = 70,
                                                 minimum = 70,
                                                 maximum = 70,
+                                                mode = 70,
+                                                median = 70,
                                                 standardDeviation = 0.0
                                         )
                                 ),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0))
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0))
                         ,
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(
@@ -64,21 +76,29 @@ class JsonPercentageSizerTest {
                                                 average = 30,
                                                 minimum = 30,
                                                 maximum = 30,
+                                                mode = 30,
+                                                median = 30,
                                                 standardDeviation = 0.0
                                         )
                                 ),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0))
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0))
                 )
         )
 
         percentageSizer.generatePercentage(input) succeedsAndShouldReturn JsonPercentageSizeObject(
                 name = "test",
-                localPercent = NormalPercentageDistribution(
+                localPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
                 ),
-                globalPercent = NormalPercentageDistribution(
+                globalPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
@@ -86,12 +106,12 @@ class JsonPercentageSizerTest {
                 children = listOf(
                         JsonPercentageSizeLeaf(
                                 name = "A",
-                                localPercent = NormalPercentageDistribution(
+                                localPercent = PercentageDistribution(
                                         average = 70.0,
                                         minimum = 70.0,
                                         maximum = 70.0
                                 ),
-                                globalPercent = NormalPercentageDistribution(
+                                globalPercent = PercentageDistribution(
                                         average = 70.0,
                                         minimum = 70.0,
                                         maximum = 70.0
@@ -99,12 +119,12 @@ class JsonPercentageSizerTest {
                         ),
                         JsonPercentageSizeLeaf(
                                 name = "B",
-                                localPercent = NormalPercentageDistribution(
+                                localPercent = PercentageDistribution(
                                         average = 30.0,
                                         minimum = 30.0,
                                         maximum = 30.0
                                 ),
-                                globalPercent = NormalPercentageDistribution(
+                                globalPercent = PercentageDistribution(
                                         average = 30.0,
                                         minimum = 30.0,
                                         maximum = 30.0
@@ -123,6 +143,8 @@ class JsonPercentageSizerTest {
                         average = 100,
                         minimum = 100,
                         maximum = 100,
+                        mode = 100,
+                        median = 100,
                         standardDeviation = 0.0
                 ),
                 children = listOf(
@@ -133,6 +155,8 @@ class JsonPercentageSizerTest {
                                                 average = 80,
                                                 minimum = 80,
                                                 maximum = 80,
+                                                mode = 80,
+                                                median = 80,
                                                 standardDeviation = 0.0
                                         ),
                                         children = listOf(
@@ -143,10 +167,18 @@ class JsonPercentageSizerTest {
                                                                         average = 20,
                                                                         minimum = 20,
                                                                         maximum = 20,
+                                                                        mode = 20,
+                                                                        median = 20,
                                                                         standardDeviation = 0.0
                                                                 )
                                                         ),
-                                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                                        presence = NormalDoubleDistribution(
+                                                                average = 1.0,
+                                                                minimum = 1.0,
+                                                                maximum = 1.0,
+                                                                mode = 1.0,
+                                                                median = 1.0,
+                                                                standardDeviation = 0.0)
                                                 ),
                                                 JsonSizeObjectChild(
                                                         overview = JsonSizeLeafOverview(
@@ -155,13 +187,27 @@ class JsonPercentageSizerTest {
                                                                         average = 60,
                                                                         minimum = 60,
                                                                         maximum = 60,
+                                                                        mode = 60,
+                                                                        median = 60,
                                                                         standardDeviation = 0.0
                                                                 )
                                                         ),
-                                                        presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0))
+                                                        presence = NormalDoubleDistribution(
+                                                                average = 1.0,
+                                                                minimum = 1.0,
+                                                                maximum = 1.0,
+                                                                mode = 1.0,
+                                                                median = 1.0,
+                                                                standardDeviation = 0.0))
                                         )
                                 ),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0)
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0)
                         ),
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(
@@ -170,21 +216,29 @@ class JsonPercentageSizerTest {
                                                 average = 20,
                                                 minimum = 20,
                                                 maximum = 20,
+                                                mode = 20,
+                                                median = 20,
                                                 standardDeviation = 0.0
                                         )
                                 ),
-                                presence = NormalDoubleDistribution(average = 1.0, minimum = 1.0, maximum = 1.0, standardDeviation = 0.0))
+                                presence = NormalDoubleDistribution(
+                                        average = 1.0,
+                                        minimum = 1.0,
+                                        maximum = 1.0,
+                                        mode = 1.0,
+                                        median = 1.0,
+                                        standardDeviation = 0.0))
                 )
         )
 
         percentageSizer.generatePercentage(input) succeedsAndShouldReturn JsonPercentageSizeObject(
                 name = "test",
-                localPercent = NormalPercentageDistribution(
+                localPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
                 ),
-                globalPercent = NormalPercentageDistribution(
+                globalPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
@@ -192,12 +246,12 @@ class JsonPercentageSizerTest {
                 children = listOf(
                         JsonPercentageSizeObject(
                                 name = "A",
-                                localPercent = NormalPercentageDistribution(
+                                localPercent = PercentageDistribution(
                                         average = 80.0,
                                         minimum = 80.0,
                                         maximum = 80.0
                                 ),
-                                globalPercent = NormalPercentageDistribution(
+                                globalPercent = PercentageDistribution(
                                         average = 80.0,
                                         minimum = 80.0,
                                         maximum = 80.0
@@ -205,12 +259,12 @@ class JsonPercentageSizerTest {
                                 children = listOf(
                                         JsonPercentageSizeLeaf(
                                                 name = "C",
-                                                localPercent = NormalPercentageDistribution(
+                                                localPercent = PercentageDistribution(
                                                         average = 25.0,
                                                         minimum = 25.0,
                                                         maximum = 25.0
                                                 ),
-                                                globalPercent = NormalPercentageDistribution(
+                                                globalPercent = PercentageDistribution(
                                                         average = 20.0,
                                                         minimum = 20.0,
                                                         maximum = 20.0
@@ -218,12 +272,12 @@ class JsonPercentageSizerTest {
                                         ),
                                         JsonPercentageSizeLeaf(
                                                 name = "D",
-                                                localPercent = NormalPercentageDistribution(
+                                                localPercent = PercentageDistribution(
                                                         average = 75.0,
                                                         minimum = 75.0,
                                                         maximum = 75.0
                                                 ),
-                                                globalPercent = NormalPercentageDistribution(
+                                                globalPercent = PercentageDistribution(
                                                         average = 60.0,
                                                         minimum = 60.0,
                                                         maximum = 60.0
@@ -233,12 +287,12 @@ class JsonPercentageSizerTest {
                         ),
                         JsonPercentageSizeLeaf(
                                 name = "B",
-                                localPercent = NormalPercentageDistribution(
+                                localPercent = PercentageDistribution(
                                         average = 20.0,
                                         minimum = 20.0,
                                         maximum = 20.0
                                 ),
-                                globalPercent = NormalPercentageDistribution(
+                                globalPercent = PercentageDistribution(
                                         average = 20.0,
                                         minimum = 20.0,
                                         maximum = 20.0
@@ -257,6 +311,8 @@ class JsonPercentageSizerTest {
                         average = 100,
                         minimum = 100,
                         maximum = 100,
+                        mode = 100,
+                        median = 100,
                         standardDeviation = 0.0
                 ),
                 averageChild = JsonSizeLeafOverview(
@@ -265,6 +321,8 @@ class JsonPercentageSizerTest {
                                 average = 20,
                                 minimum = 20,
                                 maximum = 20,
+                                mode = 20,
+                                median = 20,
                                 standardDeviation = 0.0
                         )
                 ),
@@ -272,30 +330,32 @@ class JsonPercentageSizerTest {
                         average = 5,
                         minimum = 5,
                         maximum = 5,
+                        mode = 5,
+                        median = 5,
                         standardDeviation = 0.0)
 
         )
 
         percentageSizer.generatePercentage(input) succeedsAndShouldReturn JsonPercentageSizeArray(
                 name = "test",
-                localPercent = NormalPercentageDistribution(
+                localPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
                 ),
-                globalPercent = NormalPercentageDistribution(
+                globalPercent = PercentageDistribution(
                         average = 100.0,
                         minimum = 100.0,
                         maximum = 100.0
                 ),
                 averageChild = JsonPercentageSizeLeaf(
                         name = "A",
-                        localPercent = NormalPercentageDistribution(
+                        localPercent = PercentageDistribution(
                                 average = 20.0,
                                 minimum = 20.0,
                                 maximum = 20.0
                         ),
-                        globalPercent = NormalPercentageDistribution(
+                        globalPercent = PercentageDistribution(
                                 average = 20.0,
                                 minimum = 20.0,
                                 maximum = 20.0
@@ -305,6 +365,8 @@ class JsonPercentageSizerTest {
                         average = 5,
                         minimum = 5,
                         maximum = 5,
+                        mode = 5,
+                        median = 5,
                         standardDeviation = 0.0
                 )
         )
