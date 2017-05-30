@@ -1,19 +1,14 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.doOnThread
 import com.hcsc.de.claims.succeedsAnd
-import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
-import net.sourceforge.jdistlib.*
+import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.disttest.DistributionTest
-import net.sourceforge.jdistlib.evd.Extreme
 import net.sourceforge.jdistlib.generic.GenericDistribution
-import org.apache.commons.math3.distribution.NormalDistribution
 import org.apache.commons.math3.distribution.WeibullDistribution
 import org.junit.Test
-import org.rosuda.JRI.Rengine
+import org.renjin.script.RenjinScriptEngineFactory
 
-class chiSquaredTestTest {
+class IsNormalTest {
 
     @Test
     fun `it returns a high level of confidence for a simple data set`() {
@@ -44,8 +39,6 @@ class chiSquaredTestTest {
         val initialList = List(10000) { (initialDistribution.random()).toInt() }
 
         val unknownDistribution = initialList.unknownVariableBinWidthDistribution(1000)
-
-//        val rengine = Rengine(arrayOf("--vanilla"), false, null)
 
         val generatedList = List(500000) { unknownDistribution.random() }
 
@@ -87,9 +80,19 @@ class chiSquaredTestTest {
 
         val two: GenericDistribution = Weibull(3.0, 2.0)
 
+        val factory = RenjinScriptEngineFactory()
+
+        val engine = factory.scriptEngine
+
         val size = 20
 
         val listA = List(size) { one.random() }.map { it * 10 }.map { it.toInt() }.map { it.toDouble() }
+
+        engine.eval("library(MASS)")
+        engine.eval("set.seed(101)")
+        engine.eval("my_data <- rnorm(250, mean=1, sd=0.45)")
+        engine.eval("fit <- fitdistr(my_data, densfun=\"normal\")")
+        engine.eval("print(fit)")
 
         val listOne = listA.toDoubleArray()
 
@@ -97,7 +100,45 @@ class chiSquaredTestTest {
         val listTwo = listB.toDoubleArray()
 
         val output = DistributionTest.kolmogorov_smirnov_test(listOne, listTwo)
+    }
 
-        println()
+    @Test
+    fun `test renjin`() {
+
+        val factory = RenjinScriptEngineFactory()
+
+        val engine = factory.scriptEngine
+
+        engine.put("df", 123)
+
+        engine.eval("print(df)")
+    }
+
+    @Test
+    fun `generate normal data in kotlin, move it into R, find the mean and std deviation in R, move those back to java and test the fit`() {
+
+        val initialDistribution = Weibull(2.0, 100.0)
+
+        val initialList = List(10) { (initialDistribution.random()).toInt() }
+
+        val unknownDistribution = initialList.unknownVariableBinWidthDistribution(binCount = 5)
+
+        val generatedList: List<Int> = List(500) { unknownDistribution.random() }
+
+        val factory = RenjinScriptEngineFactory()
+
+        val engine = factory.scriptEngine
+
+        engine.eval("library(fitdistrplus)")
+
+        engine.put("my_data", initialList.map { it.toDouble() }.toDoubleArray())
+
+        engine.eval("fit.weibull <- fitdist(my_data, distr = \"weibull\", method = \"mle\", lower = c(0, 0))")
+        engine.eval("fit.gamma <- fitdist(my_data, distr = \"gamma\", method = \"mle\", lower = c(0, 0), start = list(scale = 1, shape = 1))")
+
+        engine.eval("print(fit.weibull)")
+        engine.eval("print(fit.gamma)")
+
+        engine.eval("print(gofstat(list(fit.weibull, fit.gamma)))")
     }
 }

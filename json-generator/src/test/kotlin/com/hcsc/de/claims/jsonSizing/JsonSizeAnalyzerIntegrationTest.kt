@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.hcsc.de.claims.distributions.NormalDoubleDistribution
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.*
 import net.sourceforge.jdistlib.Normal

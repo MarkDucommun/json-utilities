@@ -1,5 +1,7 @@
 package com.hcsc.de.claims.jsonSizing
 
+import com.hcsc.de.claims.distributions.NormalDoubleDistribution
+import com.hcsc.de.claims.distributions.NormalIntDistribution
 import com.hcsc.de.claims.failsAnd
 import com.hcsc.de.claims.helpers.SingleResult
 import com.hcsc.de.claims.succeedsAnd

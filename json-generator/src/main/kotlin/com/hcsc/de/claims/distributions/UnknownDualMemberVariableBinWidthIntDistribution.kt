@@ -1,31 +1,9 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.averageInt
 import com.hcsc.de.claims.helpers.medianInt
 import com.hcsc.de.claims.helpers.modeInt
 
-interface UnknownDualMemberVariableBinWidthDistribution<out numberType : Number> : Distribution<numberType> {
-    val numberOfBins: Int
-    val bins: List<VariableDualMemberWidthBin<numberType>>
-}
-
-data class VariableDualMemberWidthBin<out numberType : Number>(
-        val startValue: numberType,
-        val endValue: numberType,
-        val members: List<BinMember<numberType>>
-) {
-    val memberOneCount: Int = members.filter { it is BinMember.BinMemberOne }.size
-    val memberTwoCount: Int = members.filter { it is BinMember.BinMemberTwo }.size
-}
-
-sealed class BinMember<out numberType : Number>(
-        val value: numberType
-) {
-
-    class BinMemberOne<out numberType : Number>(value: numberType) : BinMember<numberType>(value = value)
-
-    class BinMemberTwo<out numberType : Number>(value: numberType) : BinMember<numberType>(value = value)
-}
 
 data class UnknownDualMemberVariableBinWidthIntDistribution(
         override val average: Int,
@@ -120,7 +98,6 @@ val UnknownDualMemberVariableBinWidthDistribution<Int>
             )
     )
 }
-
 
 private fun VariableDualMemberWidthBin<Int>.maximizeBins(binCount: Int): List<VariableDualMemberWidthBin<Int>> {
 

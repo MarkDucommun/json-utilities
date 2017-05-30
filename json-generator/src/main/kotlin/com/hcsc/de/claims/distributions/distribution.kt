@@ -1,4 +1,4 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
 interface Distribution<out numberType: Number> {
     val average: numberType

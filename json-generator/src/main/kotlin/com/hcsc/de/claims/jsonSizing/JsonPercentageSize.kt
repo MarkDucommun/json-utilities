@@ -1,5 +1,7 @@
 package com.hcsc.de.claims.jsonSizing
 
+import com.hcsc.de.claims.distributions.Distribution
+
 sealed class JsonPercentageSize {
     abstract val name: String
     abstract val localPercent: PercentageDistribution

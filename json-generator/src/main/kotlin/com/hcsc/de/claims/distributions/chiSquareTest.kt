@@ -1,9 +1,14 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
+import org.apache.commons.math.util.FastMath
 import org.apache.commons.math3.distribution.ChiSquaredDistribution
-import org.apache.commons.math3.util.FastMath
+
+data class ChiSquareValue(
+        val statistic: Double,
+        val pValue: Double
+)
 
 fun List<Int>.chiSquaredTestFromList(expected: List<Int>, binCount: Int = 5): Result<String, ChiSquareValue> {
 
@@ -32,9 +37,6 @@ fun List<Int>.chiSquaredTestFromList(expected: List<Int>, binCount: Int = 5): Re
     return observedUnknownDistribution.chiSquaredTest(expectedUnknownDistribution)
 
 }
-
-fun UnknownFixedBinWidthDistribution<Int>.chiSquaredTestWithValidations(expected: UnknownFixedBinWidthDistribution<Int>)
-        : Result<String, ChiSquareValue> = TODO()
 
 fun DistributionPair<Int>.chiSquaredTest(binCount: Int = 10): Result<String, ChiSquareValue> {
 
@@ -76,8 +78,3 @@ private fun BinDistribution<Int>.chiSquaredTest(expected: BinDistribution<Int>):
             pValue = pValue
     ))
 }
-
-data class ChiSquareValue(
-        val statistic: Double,
-        val pValue: Double
-)

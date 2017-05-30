@@ -1,4 +1,4 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.*
 import java.util.*

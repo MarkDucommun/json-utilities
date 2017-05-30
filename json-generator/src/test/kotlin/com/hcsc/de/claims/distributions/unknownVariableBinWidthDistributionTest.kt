@@ -1,4 +1,4 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test

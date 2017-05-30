@@ -1,29 +1,10 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.averageInt
 import com.hcsc.de.claims.helpers.ceiling
 import com.hcsc.de.claims.helpers.medianInt
 import com.hcsc.de.claims.helpers.modeInt
 import org.apache.commons.math3.util.IntegerSequence
-
-interface BinDistribution<out numberType: Number> : Distribution<numberType> {
-    val bins: List<Bin>
-}
-
-interface Bin {
-    val count: Int
-}
-
-interface UnknownFixedBinWidthDistribution<out numberType : Number> : BinDistribution<numberType> {
-    val numberOfBins: Int
-    val sizeOfBin: Int
-    override val bins: List<FixedWidthBin<numberType>>
-}
-
-data class FixedWidthBin<out numberType : Number>(
-        val startValue: numberType,
-        override val count: Int
-) : Bin
 
 data class UnknownIntFixedBinWidthDistribution(
         override val average: Int,

@@ -1,9 +1,9 @@
-package com.hcsc.de.claims.jsonSizing
+package com.hcsc.de.claims.distributions
 
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 
-class unknownDistributionTest {
+class UnknownIntFixedBinWidthDistributionTest {
 
     @Test
     fun `it creates a simple UnknownDistribution from a list of binary integers`() {

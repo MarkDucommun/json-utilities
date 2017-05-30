@@ -1,5 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
+import com.hcsc.de.claims.distributions.Distribution
 import com.hcsc.de.claims.helpers.*
 
 class JsonPercentageSizer {

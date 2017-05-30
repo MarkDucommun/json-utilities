@@ -1,11 +1,11 @@
 package com.hcsc.de.claims.jsonSizing
 
+import com.hcsc.de.claims.distributions.NormalDoubleDistribution
+import com.hcsc.de.claims.distributions.NormalIntDistribution
 import com.hcsc.de.claims.helpers.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.apache.commons.lang3.ObjectUtils.median
-import org.apache.commons.math3.stat.StatUtils.mode
 import kotlin.reflect.KClass
 
 class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline()) {
