@@ -57,6 +57,16 @@ fun <failureType, successType, newSuccessType> Result<failureType, successType>.
     }
 }
 
+fun <failureType, newFailureType, successType> Result<failureType, successType>.flatMapError(
+        transform: (failureType) -> Result<newFailureType, successType>
+): Result<newFailureType, successType> {
+
+    return when (this) {
+        is Success -> Success<newFailureType, successType>(content = this.content)
+        is Failure -> transform(this.content)
+    }
+}
+
 fun <failureType, successType, newSuccessType> Result<failureType, successType>.map(
         transform: (successType) -> newSuccessType
 ): Result<failureType, newSuccessType> {
@@ -64,6 +74,16 @@ fun <failureType, successType, newSuccessType> Result<failureType, successType>.
     return when (this) {
         is Success -> Success(transform(this.content))
         is Failure -> Failure<failureType, newSuccessType>(content = this.content)
+    }
+}
+
+fun <failureType, newFailureType, successType> Result<failureType, successType>.mapError(
+        transform: (failureType) -> newFailureType
+): Result<newFailureType, successType> {
+
+    return when (this) {
+        is Success -> Success<newFailureType, successType>(content = this.content)
+        is Failure -> Failure(transform(this.content))
     }
 }
 
