@@ -3,7 +3,6 @@ package com.hcsc.de.claims.renjinWrapper
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
-import org.apache.commons.math.stat.descriptive.moment.StandardDeviation
 import org.renjin.script.RenjinScriptEngineFactory
 import org.renjin.sexp.DoubleArrayVector
 import org.renjin.sexp.ListVector
@@ -22,15 +21,37 @@ data class WeibullParameters(
 
 data class NormalParameters(
         val mean: Double,
-        val standardDeviation: StandardDeviation
+        val standardDeviation: Double
 )
 
 object Renjin : R {
 
     private val engine = RenjinScriptEngineFactory().scriptEngine
 
-    override fun normalParameters(list: List<Double>): Result<String, > {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun normalParameters(list: List<Double>): Result<String, NormalParameters> {
+
+        engine.eval("library(fitdistrplus)")
+
+        engine.put("my_data", list.toDoubleArray())
+
+        val result = engine.eval("fitdist(my_data, distr = \"norm\", method = \"mle\", lower = c(0, 0))") as ListVector
+
+        val estimate = result.get("estimate") as DoubleArrayVector
+
+        return Success(NormalParameters(mean = estimate.get(0), standardDeviation = estimate.get(1)))
+    }
+
+    fun normalParametersTwo(list: List<Double>): Result<String, NormalParameters> {
+
+        engine.eval("library(MASS)")
+
+        engine.put("my_data", list.toDoubleArray())
+
+        val result = engine.eval("fitdistr(my_data, densfun=\"normal\")") as ListVector
+
+        val estimate = result.get("estimate") as DoubleArrayVector
+
+        return Success(NormalParameters(mean = estimate.get(0), standardDeviation = estimate.get(1)))
     }
 
     override fun weibullParameters(list: List<Double>): Result<String, WeibullParameters> {

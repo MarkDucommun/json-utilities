@@ -2,6 +2,7 @@ package com.hcsc.de.claims.renjinWrapper
 
 import com.hcsc.de.claims.failsAnd
 import com.hcsc.de.claims.succeedsAnd
+import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.Weibull
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.assertj.core.data.Percentage
@@ -21,8 +22,8 @@ class RenjinTest {
 
         subject.weibullParameters(list) succeedsAnd { (shape, scale) ->
 
-            assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(2.0))
-            assertThat(scale).isCloseTo(100.0, Percentage.withPercentage(2.0))
+            assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(3.0))
+            assertThat(scale).isCloseTo(100.0, Percentage.withPercentage(3.0))
         }
     }
 
@@ -34,6 +35,20 @@ class RenjinTest {
         subject.weibullParameters(list) failsAnd { message ->
 
                assertThat(message).contains("must be positive")
+        }
+    }
+
+    @Test
+    fun `it can return the mean and standard deviation for a list of doubles`() {
+
+        val distributionCurve = Normal(2.0, 100.0)
+
+        val list = List(10000) { distributionCurve.random() }
+
+        subject.normalParametersTwo(list) succeedsAnd { (shape, scale) ->
+
+            assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(3.0))
+            assertThat(scale).isCloseTo(100.0, Percentage.withPercentage(3.0))
         }
     }
 }
