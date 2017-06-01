@@ -17,6 +17,14 @@ class JsonStructureParserTest {
     }
 
     @Test
+    fun `simple literal element with two chars`() {
+        "ab".jsonStructure succeedsAndShouldReturn listOf(
+                LiteralChildStructureElement(id = 1, value = 'a'),
+                LiteralChildStructureElement(id = 1, value = 'b')
+        )
+    }
+
+    @Test
     fun `simple literal element with whitespace`() {
 
         listOf(' ', '\n', '\r', '\t').forEach { whitespaceChar ->
@@ -135,6 +143,42 @@ class JsonStructureParserTest {
 
             "[$whitespaceChar]".jsonStructure succeedsAndShouldReturn listOf(
                     ArrayOpen(id = 1),
+                    ArrayClose(id = 1)
+            )
+        }
+    }
+
+    @Test
+    fun `it can create an array with a single literal child`() {
+
+        "[a]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                LiteralChildCloseElement(id = 2, value = 'a'),
+                ArrayClose(id = 1)
+        )
+    }
+
+    @Test
+    fun `it can create an array with a single literal child with whitespace`() {
+
+        listOf(' ', '\n', '\r', '\t').forEach { whitespaceChar ->
+
+            "[a$whitespaceChar]".jsonStructure succeedsAndShouldReturn listOf(
+                    ArrayOpen(id = 1),
+                    LiteralChildCloseElement(id = 2, value = 'a'),
+                    ArrayClose(id = 1)
+            )
+        }
+    }
+
+    @Test
+    fun `it can create an array with a single literal child with more than one whitespace`() {
+
+        listOf(' ', '\n', '\r', '\t').forEach { whitespaceChar ->
+
+            "[a$whitespaceChar$whitespaceChar]".jsonStructure succeedsAndShouldReturn listOf(
+                    ArrayOpen(id = 1),
+                    LiteralChildCloseElement(id = 2, value = 'a'),
                     ArrayClose(id = 1)
             )
         }
