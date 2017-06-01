@@ -189,7 +189,7 @@ class JsonStructureParserTest {
 
         "[a,b]".jsonStructure succeedsAndShouldReturn listOf(
                 ArrayOpen(id = 1),
-                LiteralChildStructureElement(id = 2, value = 'a'),
+                LiteralChildCloseElement(id = 2, value = 'a'),
                 ArrayComma(id = 1),
                 LiteralChildCloseElement(id = 3, value = 'b'),
                 ArrayClose(id = 1)
@@ -201,17 +201,79 @@ class JsonStructureParserTest {
 
         "[a, b]".jsonStructure succeedsAndShouldReturn listOf(
                 ArrayOpen(id = 1),
-                LiteralChildStructureElement(id = 2, value = 'a'),
+                LiteralChildCloseElement(id = 2, value = 'a'),
                 ArrayComma(id = 1),
                 LiteralChildCloseElement(id = 3, value = 'b'),
                 ArrayClose(id = 1)
         )
 
-        "[a ,b]".jsonStructure succeedsAndShouldReturn listOf(
+        "[a ,ba]".jsonStructure succeedsAndShouldReturn listOf(
                 ArrayOpen(id = 1),
-                LiteralChildStructureElement(id = 2, value = 'a'),
+                LiteralChildCloseElement(id = 2, value = 'a'),
                 ArrayComma(id = 1),
-                LiteralChildCloseElement(id = 3, value = 'b'),
+                LiteralChildStructureElement(id = 3, value = 'b'),
+                LiteralChildCloseElement(id = 3, value = 'a'),
+                ArrayClose(id = 1)
+        )
+    }
+
+    @Test
+    fun `it can create an array with an empty string child`() {
+
+        "[\"\"]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                StringChildOpenElement(id = 2),
+                StringChildCloseElement(id = 2),
+                ArrayClose(id = 1)
+        )
+    }
+
+    @Test
+    fun `it can create an array with a string child`() {
+
+        "[\"a\"]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                StringChildOpenElement(id = 2),
+                StringChildStructureElement(id = 2, value = 'a'),
+                StringChildCloseElement(id = 2),
+                ArrayClose(id = 1)
+        )
+    }
+
+    @Test
+    fun `it can create an array with two string children `() {
+
+        "[\"\", \"b\"]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                StringChildOpenElement(id = 2),
+                StringChildCloseElement(id = 2),
+                ArrayComma(id = 1),
+                StringChildOpenElement(id = 3),
+                StringChildStructureElement(id = 3, value = 'b'),
+                StringChildCloseElement(id = 3),
+                ArrayClose(id = 1)
+        )
+    }
+
+    @Test
+    fun `it can create an array with a string child and a literal child `() {
+
+        "[a, \"\"]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                LiteralChildCloseElement(id = 2, value = 'a'),
+                ArrayComma(id = 1),
+                StringChildOpenElement(id = 3),
+                StringChildCloseElement(id = 3),
+                ArrayClose(id = 1)
+        )
+
+
+        "[\"\", a]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                StringChildOpenElement(id = 2),
+                StringChildCloseElement(id = 2),
+                ArrayComma(id = 1),
+                LiteralChildCloseElement(id = 3, value = 'a'),
                 ArrayClose(id = 1)
         )
     }
