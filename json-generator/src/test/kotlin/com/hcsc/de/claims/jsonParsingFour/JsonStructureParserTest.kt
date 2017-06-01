@@ -183,4 +183,36 @@ class JsonStructureParserTest {
             )
         }
     }
+
+    @Test
+    fun `it can create an array with a two literal children`() {
+
+        "[a,b]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                LiteralChildStructureElement(id = 2, value = 'a'),
+                ArrayComma(id = 1),
+                LiteralChildCloseElement(id = 3, value = 'b'),
+                ArrayClose(id = 1)
+        )
+    }
+
+    @Test
+    fun `it can create an array with a two literal children and some whitespace`() {
+
+        "[a, b]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                LiteralChildStructureElement(id = 2, value = 'a'),
+                ArrayComma(id = 1),
+                LiteralChildCloseElement(id = 3, value = 'b'),
+                ArrayClose(id = 1)
+        )
+
+        "[a ,b]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                LiteralChildStructureElement(id = 2, value = 'a'),
+                ArrayComma(id = 1),
+                LiteralChildCloseElement(id = 3, value = 'b'),
+                ArrayClose(id = 1)
+        )
+    }
 }

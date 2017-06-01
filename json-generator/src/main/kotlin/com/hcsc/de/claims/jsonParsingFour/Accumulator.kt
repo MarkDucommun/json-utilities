@@ -131,6 +131,24 @@ data class LiteralChildAccumulator(
                     ))
                 }
             }
+            ',' -> when (newPreviousStructure) {
+                is ArrayStructureElement -> {
+
+                    val arrayClose = ArrayComma(newPreviousStructure.id)
+
+                    Success<String, Accumulator<*, *>>(ArrayCommaArrayAccumulator(
+                            idCounter = idCounter,
+                            structure = structure.dropLast(1)
+                                    .plus(LiteralChildCloseElement(id = previousElement.id, value = previousElement.value))
+                                    .plus(arrayClose),
+                            previousElement = arrayClose,
+                            structureStack = 
+                    ))
+
+
+                }
+                else -> TODO()
+            }
             ']' -> when (newPreviousStructure) {
                 is ArrayStructureElement -> {
 
@@ -406,6 +424,35 @@ data class ArrayOpenAccumulator(
                     is ArrayStructureElement -> TODO()
                 }
             }
+            ' ', '\n', '\r', '\t' -> unmodified
+            else -> {
+
+                val literalElement = LiteralStructureElement(id = idCounter)
+
+                val literalChild = LiteralChildStructureElement(value = char, id = idCounter)
+
+                Success(LiteralChildAccumulator(
+                        idCounter = idCounter + 1,
+                        structureStack = structureStack.plus(literalElement),
+                        previousElement = literalChild,
+                        previousClosable = literalElement,
+                        structure = structure.plus(literalChild)
+                ))
+            }
+        }
+    }
+}
+
+data class ArrayCommaArrayAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructureElement>,
+        override val structureStack: List<MainStructureElement>,
+        override val previousClosable: ArrayStructureElement,
+        override val previousElement: ArrayOpen
+) : Accumulator<ArrayComma, ArrayStructureElement>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
             else -> {
 
