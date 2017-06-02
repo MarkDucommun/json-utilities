@@ -3,6 +3,11 @@ package com.hcsc.de.claims.jsonParsingFour
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
+import kotlin.reflect.KClass
+import kotlin.reflect.KClassifier
+import kotlin.reflect.KDeclarationContainer
+import kotlin.reflect.KFunction5
+import kotlin.reflect.full.createType
 
 sealed class Accumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure?> {
 
@@ -18,9 +23,51 @@ sealed class Accumulator<out previousElementType : JsonStructure, out previousCl
 
     abstract fun processChar(char: Char): Result<String, Accumulator<*, *>>
 
-//    fun addNewStructure(constructor: () -> MainStructure): Accumulator<previousElementType, previousClosableType> {
-//
-//    }
+    fun openString(): Result<String, Accumulator<*, *>> {
+
+        return openStructure(::StringOpen, ::StringStructureElement, ::StringOpenAccumulator)
+    }
+
+    fun openArray(): Result<String, Accumulator<*, *>> {
+
+        return openStructure(::ArrayOpen, ::ArrayStructureElement, ::ArrayOpenAccumulator)
+    }
+
+    fun openLiteral(char: Char): Result<String, Accumulator<*, *>> {
+        return openStructure(
+                LiteralValue(id = idCounter, value = char),
+                ::LiteralStructureElement,
+                ::LiteralValueAccumulator
+        )
+    }
+
+    fun <T: JsonStructure, U: MainStructure> openStructure(
+            elementConstructor: (Long) -> T,
+            structureConstructor: (Long) -> U,
+            accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure>, T, U) -> Accumulator<T, U>
+    ): Result<String, Accumulator<*, *>> {
+
+        return openStructure(elementConstructor(idCounter), structureConstructor, accumulatorConstructor)
+    }
+
+    fun <T: JsonStructure, U: MainStructure> openStructure(
+            element: T,
+            structureConstructor: (Long) -> U,
+            accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure>, T, U) -> Accumulator<T, U>
+    ): Result<String, Accumulator<*, *>> {
+
+        return structureConstructor(idCounter).let { newStructure ->
+
+                Success(accumulatorConstructor(
+                        idCounter + 1,
+                        structure.plus(element),
+                        structureStack.plus(newStructure),
+                        element,
+                        newStructure
+                ))
+            }
+
+    }
 
     fun fail(message: String): Failure<String, Accumulator<*, *>> = Failure("Invalid JSON - $message")
 
@@ -49,58 +96,19 @@ object RootAccumulator : Accumulator<EmptyStructureElement, EmptyStructureElemen
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
-            '"' -> {
-
-                val stringStructureElement = StringStructureElement(id = idCounter)
-
-                val openStringElement = StringOpen(id = idCounter)
-
-                Success(StringOpenAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(stringStructureElement),
-                        previousElement = openStringElement,
-                        previousClosable = stringStructureElement,
-                        structure = listOf(openStringElement)
-                ))
-            }
-            '[' -> {
-
-                val structureElement = ArrayStructureElement(id = idCounter)
-
-                val openElement = ArrayOpen(id = idCounter)
-
-                Success(ArrayOpenAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(structureElement),
-                        previousElement = openElement,
-                        previousClosable = structureElement,
-                        structure = listOf(openElement)
-                ))
-            }
-            else -> {
-
-                val literalElement = LiteralStructureElement(id = idCounter)
-
-                val literalChild = LiteralValue(value = char, id = idCounter)
-
-                Success(LiteralValueAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(literalElement),
-                        previousElement = literalChild,
-                        previousClosable = literalElement,
-                        structure = structure.plus(literalChild)
-                ))
-            }
+            '"' -> openString()
+            '[' -> openArray()
+            else -> openLiteral(char)
         }
     }
 }
 
 data class LiteralValueAccumulator(
         override val idCounter: Long,
+        override val structure: List<JsonStructure>,
         override val structureStack: List<MainStructure>,
-        override val previousClosable: LiteralStructureElement,
         override val previousElement: LiteralValue,
-        override val structure: List<JsonStructure>
+        override val previousClosable: LiteralStructureElement
 ) : Accumulator<LiteralValue, LiteralStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
@@ -419,8 +427,8 @@ data class ArrayOpenAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
         override val structureStack: List<MainStructure>,
-        override val previousClosable: ArrayStructureElement,
-        override val previousElement: ArrayOpen
+        override val previousElement: ArrayOpen,
+        override val previousClosable: ArrayStructureElement
 ) : Accumulator<ArrayOpen, ArrayStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
@@ -461,48 +469,9 @@ data class ArrayOpenAccumulator(
                 }
             }
             ' ', '\n', '\r', '\t' -> unmodified
-            '"' -> {
-
-                val stringStructureElement = StringStructureElement(id = idCounter)
-
-                val openStringElement = StringOpen(id = idCounter)
-
-                Success(StringOpenAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(stringStructureElement),
-                        previousElement = openStringElement,
-                        previousClosable = stringStructureElement,
-                        structure = structure.plus(openStringElement)
-                ))
-            }
-            '[' -> {
-
-                val arrayOpen = ArrayOpen(id = idCounter)
-
-                val arrayStructure = ArrayStructureElement(id = idCounter)
-
-                Success(ArrayOpenAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(arrayStructure),
-                        previousElement = arrayOpen,
-                        previousClosable = arrayStructure,
-                        structure = structure.plus(arrayOpen)
-                ))
-            }
-            else -> {
-
-                val literalElement = LiteralStructureElement(id = idCounter)
-
-                val literalChild = LiteralValue(value = char, id = idCounter)
-
-                Success(LiteralValueAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(literalElement),
-                        previousElement = literalChild,
-                        previousClosable = literalElement,
-                        structure = structure.plus(literalChild)
-                ))
-            }
+            '"' -> openString()
+            '[' -> openArray()
+            else -> openLiteral(char)
         }
     }
 }
@@ -518,48 +487,9 @@ data class ArrayCommaAccumulator(
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
-            '"' -> {
-
-                val stringStructureElement = StringStructureElement(id = idCounter)
-
-                val openStringElement = StringOpen(id = idCounter)
-
-                Success(StringOpenAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(stringStructureElement),
-                        previousElement = openStringElement,
-                        previousClosable = stringStructureElement,
-                        structure = structure.plus(openStringElement)
-                ))
-            }
-            '[' -> {
-
-                val arrayOpen = ArrayOpen(id = idCounter)
-
-                val arrayStructure = ArrayStructureElement(id = idCounter)
-
-                Success(ArrayOpenAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(arrayStructure),
-                        previousElement = arrayOpen,
-                        previousClosable = arrayStructure,
-                        structure = structure.plus(arrayOpen)
-                ))
-            }
-            else -> {
-
-                val literalElement = LiteralStructureElement(id = idCounter)
-
-                val literalChild = LiteralValue(value = char, id = idCounter)
-
-                Success(LiteralValueAccumulator(
-                        idCounter = idCounter + 1,
-                        structureStack = structureStack.plus(literalElement),
-                        previousElement = literalChild,
-                        previousClosable = literalElement,
-                        structure = structure.plus(literalChild)
-                ))
-            }
+            '"' -> openString()
+            '[' -> openArray()
+            else -> openLiteral(char)
         }
     }
 }
