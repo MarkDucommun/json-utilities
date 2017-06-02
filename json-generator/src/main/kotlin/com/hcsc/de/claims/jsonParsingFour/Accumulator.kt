@@ -69,6 +69,17 @@ sealed class Accumulator<out previousElementType : JsonStructure, out previousCl
 
     }
 
+//    fun <T: JsonStructure> addValue(element: T, accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure>, T, previousClosableType) -> Accumulator<T, previousClosableType>): Result<String, Accumulator<*, *>> {
+//
+//        return Success(accumulatorConstructor(
+//                idCounter,
+//                structure.plus(element),
+//                structureStack,
+//                element,
+//                previousClosable
+//        ))
+//    }
+
     fun fail(message: String): Failure<String, Accumulator<*, *>> = Failure("Invalid JSON - $message")
 
     val unmodified: Success<String, Accumulator<*, *>> get() = Success(this)
@@ -133,7 +144,7 @@ data class LiteralValueAccumulator(
                     ))
                 }
                 is LiteralStructureElement -> TODO("THIS REALLY SHOULD NEVER HAPPEN")
-                is StringStructureElement -> TODO()
+                is StringStructureElement -> TODO("THIS REALLY SHOULD NEVER HAPPEN")
                 is ArrayStructureElement -> {
 
                     val literalChildCloseElement = LiteralClose(
@@ -211,7 +222,11 @@ data class LiteralValueAccumulator(
             }
             else -> {
 
+
+
                 val literalChild = LiteralValue(value = char, id = previousClosable.id)
+
+//                addValue(literalChild, ::LiteralValueAccumulator)
 
                 Success(LiteralValueAccumulator(
                         idCounter = idCounter,
@@ -639,7 +654,6 @@ data class ArrayCloseArrayAccumulator(
                 val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
 
                 when (newPreviousStructure) {
-
                     is EmptyStructureElement -> {
 
                         val closeElement = ArrayClose(id = previousClosable.id)
