@@ -4,13 +4,13 @@ import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
 
-sealed class Accumulator<out previousElementType : JsonStructureElement, out previousClosableType : MainStructureElement?> {
+sealed class Accumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure?> {
 
     abstract val idCounter: Long
 
-    abstract val structure: List<JsonStructureElement>
+    abstract val structure: List<JsonStructure>
 
-    abstract val structureStack: List<MainStructureElement>
+    abstract val structureStack: List<MainStructure>
 
     abstract val previousClosable: previousClosableType
 
@@ -18,28 +18,31 @@ sealed class Accumulator<out previousElementType : JsonStructureElement, out pre
 
     abstract fun processChar(char: Char): Result<String, Accumulator<*, *>>
 
+//    fun addNewStructure(constructor: () -> MainStructure): Accumulator<previousElementType, previousClosableType> {
+//
+//    }
+
     fun fail(message: String): Failure<String, Accumulator<*, *>> = Failure("Invalid JSON - $message")
 
     val unmodified: Success<String, Accumulator<*, *>> get() = Success(this)
 }
 
-sealed class EmptyAccumulator<out previousElementType : JsonStructureElement> : Accumulator<previousElementType, EmptyStructureElement>() {
+sealed class EmptyAccumulator<out previousElementType : JsonStructure> : Accumulator<previousElementType, EmptyStructureElement>() {
 
     override val previousClosable: EmptyStructureElement = EmptyStructureElement
 
-    override val structureStack: List<MainStructureElement> = listOf(EmptyStructureElement)
+    override val structureStack: List<MainStructure> = listOf(EmptyStructureElement)
 }
-
 
 object RootAccumulator : Accumulator<EmptyStructureElement, EmptyStructureElement>() {
 
     override val idCounter: Long = 1
 
-    override val structure: List<JsonStructureElement> = emptyList()
+    override val structure: List<JsonStructure> = emptyList()
 
     override val previousElement: EmptyStructureElement = EmptyStructureElement
 
-    override val structureStack: List<MainStructureElement> = listOf(EmptyStructureElement)
+    override val structureStack: List<MainStructure> = listOf(EmptyStructureElement)
 
     override val previousClosable: EmptyStructureElement = EmptyStructureElement
 
@@ -50,9 +53,9 @@ object RootAccumulator : Accumulator<EmptyStructureElement, EmptyStructureElemen
 
                 val stringStructureElement = StringStructureElement(id = idCounter)
 
-                val openStringElement = StringChildOpenElement(id = idCounter)
+                val openStringElement = StringOpen(id = idCounter)
 
-                Success(StringChildOpenJsonAccumulator(
+                Success(StringOpenAccumulator(
                         idCounter = idCounter + 1,
                         structureStack = structureStack.plus(stringStructureElement),
                         previousElement = openStringElement,
@@ -78,9 +81,9 @@ object RootAccumulator : Accumulator<EmptyStructureElement, EmptyStructureElemen
 
                 val literalElement = LiteralStructureElement(id = idCounter)
 
-                val literalChild = LiteralChildStructureElement(value = char, id = idCounter)
+                val literalChild = LiteralValue(value = char, id = idCounter)
 
-                Success(LiteralChildAccumulator(
+                Success(LiteralValueAccumulator(
                         idCounter = idCounter + 1,
                         structureStack = structureStack.plus(literalElement),
                         previousElement = literalChild,
@@ -92,13 +95,13 @@ object RootAccumulator : Accumulator<EmptyStructureElement, EmptyStructureElemen
     }
 }
 
-data class LiteralChildAccumulator(
+data class LiteralValueAccumulator(
         override val idCounter: Long,
-        override val structureStack: List<MainStructureElement>,
+        override val structureStack: List<MainStructure>,
         override val previousClosable: LiteralStructureElement,
-        override val previousElement: LiteralChildStructureElement,
-        override val structure: List<JsonStructureElement>
-) : Accumulator<LiteralChildStructureElement, LiteralStructureElement>() {
+        override val previousElement: LiteralValue,
+        override val structure: List<JsonStructure>
+) : Accumulator<LiteralValue, LiteralStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
@@ -110,12 +113,12 @@ data class LiteralChildAccumulator(
             ' ', '\n', '\r', '\t' -> when (newPreviousStructure) {
                 EmptyStructureElement -> {
 
-                    val literalChildCloseElement = LiteralChildCloseElement(
+                    val literalChildCloseElement = LiteralClose(
                             id = previousElement.id,
                             value = previousElement.value
                     )
 
-                    Success<String, Accumulator<*, *>>(LiteralChildCloseEmptyAccumulator(
+                    Success<String, Accumulator<*, *>>(LiteralCloseEmptyAccumulator(
                             idCounter = previousClosable.id,
                             previousElement = literalChildCloseElement,
                             structure = structure.dropLast(1).plus(literalChildCloseElement)
@@ -125,7 +128,7 @@ data class LiteralChildAccumulator(
                 is StringStructureElement -> TODO()
                 is ArrayStructureElement -> {
 
-                    val literalChildCloseElement = LiteralChildCloseElement(
+                    val literalChildCloseElement = LiteralClose(
                             id = previousElement.id,
                             value = previousElement.value
                     )
@@ -138,6 +141,7 @@ data class LiteralChildAccumulator(
                             structureStack = newStructureStack
                     ))
                 }
+                is ObjectStructureElement -> TODO()
             }
             ',' -> when (newPreviousStructure) {
                 is ArrayStructureElement -> {
@@ -147,7 +151,7 @@ data class LiteralChildAccumulator(
                     Success<String, Accumulator<*, *>>(ArrayCommaAccumulator(
                             idCounter = idCounter,
                             structure = structure.dropLast(1)
-                                    .plus(LiteralChildCloseElement(id = previousElement.id, value = previousElement.value))
+                                    .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
                                     .plus(arrayComma),
                             previousElement = arrayComma,
                             structureStack = newStructureStack,
@@ -171,23 +175,37 @@ data class LiteralChildAccumulator(
                             Success<String, Accumulator<*, *>>(ArrayCloseEmptyAccumulator(
                                     idCounter = idCounter,
                                     structure = structure.dropLast(1)
-                                            .plus(LiteralChildCloseElement(id = previousElement.id, value = previousElement.value))
+                                            .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
                                             .plus(arrayClose),
                                     previousElement = arrayClose
                             ))
                         }
                         is LiteralStructureElement -> TODO()
                         is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
-                        is ArrayStructureElement -> TODO()
+                        is ArrayStructureElement -> {
+
+                            val closeElement = ArrayClose(id = newPreviousStructure.id)
+
+                            Success<String, Accumulator<*, *>>(ArrayCloseArrayAccumulator(
+                                    idCounter = idCounter,
+                                    previousElement = closeElement,
+                                    structure = structure.dropLast(1)
+                                            .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
+                                            .plus(closeElement),
+                                    structureStack = evenNewerStructureStack,
+                                    previousClosable = evenNewerPreviousStructure
+                            ))
+                        }
+                        is ObjectStructureElement -> TODO()
                     }
                 }
                 else -> TODO()
             }
             else -> {
 
-                val literalChild = LiteralChildStructureElement(value = char, id = previousClosable.id)
+                val literalChild = LiteralValue(value = char, id = previousClosable.id)
 
-                Success(LiteralChildAccumulator(
+                Success(LiteralValueAccumulator(
                         idCounter = idCounter,
                         structureStack = structureStack,
                         previousElement = literalChild,
@@ -199,13 +217,13 @@ data class LiteralChildAccumulator(
     }
 }
 
-data class LiteralChildCloseEmptyAccumulator(
+data class LiteralCloseEmptyAccumulator(
         override val idCounter: Long,
-        override val previousElement: LiteralChildCloseElement,
-        override val structure: List<JsonStructureElement>
-) : EmptyAccumulator<LiteralChildCloseElement>() {
+        override val previousElement: LiteralClose,
+        override val structure: List<JsonStructure>
+) : EmptyAccumulator<LiteralClose>() {
 
-    override val structureStack: List<MainStructureElement> = listOf(EmptyStructureElement)
+    override val structureStack: List<MainStructure> = listOf(EmptyStructureElement)
 
     override val previousClosable: EmptyStructureElement = EmptyStructureElement
 
@@ -218,13 +236,13 @@ data class LiteralChildCloseEmptyAccumulator(
     }
 }
 
-data class StringChildOpenJsonAccumulator(
+data class StringOpenAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val structureStack: List<MainStructureElement>,
-        override val previousElement: StringChildOpenElement,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: StringOpen,
         override val previousClosable: StringStructureElement
-) : Accumulator<StringChildOpenElement, StringStructureElement>() {
+) : Accumulator<StringOpen, StringStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
@@ -236,12 +254,11 @@ data class StringChildOpenJsonAccumulator(
                 val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
 
                 when (newPreviousStructure) {
-
                     is EmptyStructureElement -> {
 
-                        val closeStringElement = StringChildCloseElement(id = previousClosable.id)
+                        val closeStringElement = StringClose(id = previousClosable.id)
 
-                        Success<String, Accumulator<*, *>>(StringChildCloseEmptyJsonAccumulator(
+                        Success<String, Accumulator<*, *>>(StringCloseEmptyAccumulator(
                                 idCounter = idCounter,
                                 previousElement = closeStringElement,
                                 structure = structure.plus(closeStringElement)
@@ -251,7 +268,7 @@ data class StringChildOpenJsonAccumulator(
                     is StringStructureElement -> fail("How do I get rid of you as a possibility")
                     is ArrayStructureElement -> {
 
-                        val closeStringElement = StringChildCloseElement(id = previousClosable.id)
+                        val closeStringElement = StringClose(id = previousClosable.id)
 
                         Success<String, Accumulator<*, *>>(StringCloseArrayAccumulator(
                                 idCounter = idCounter,
@@ -261,9 +278,10 @@ data class StringChildOpenJsonAccumulator(
                                 structureStack = newStructureStack
                         ))
                     }
+                    is ObjectStructureElement -> TODO()
                 }
             }
-            '\\' -> Success<String, Accumulator<*, *>>(StringEscapeJsonAccumulator(
+            '\\' -> Success<String, Accumulator<*, *>>(StringEscapeAccumulator(
                     idCounter = idCounter,
                     structureStack = structureStack,
                     previousElement = StringEscape,
@@ -272,9 +290,9 @@ data class StringChildOpenJsonAccumulator(
             ))
             else -> {
 
-                val stringElement = StringChildStructureElement(id = previousClosable.id, value = char)
+                val stringElement = StringValue(id = previousClosable.id, value = char)
 
-                Success<String, Accumulator<*, *>>(StringChildStructureJsonAccumulator(
+                Success<String, Accumulator<*, *>>(StringValueAccumulator(
                         idCounter = idCounter,
                         structureStack = structureStack,
                         previousElement = stringElement,
@@ -286,13 +304,13 @@ data class StringChildOpenJsonAccumulator(
     }
 }
 
-data class StringChildStructureJsonAccumulator(
+data class StringValueAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val structureStack: List<MainStructureElement>,
-        override val previousElement: StringChildStructureElement,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: StringValue,
         override val previousClosable: StringStructureElement
-) : Accumulator<StringChildStructureElement, StringStructureElement>() {
+) : Accumulator<StringValue, StringStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
@@ -304,12 +322,11 @@ data class StringChildStructureJsonAccumulator(
                 val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
 
                 when (newPreviousStructure) {
-
                     is EmptyStructureElement -> {
 
-                        val closeStringElement = StringChildCloseElement(id = previousClosable.id)
+                        val closeStringElement = StringClose(id = previousClosable.id)
 
-                        Success<String, Accumulator<*, *>>(StringChildCloseEmptyJsonAccumulator(
+                        Success<String, Accumulator<*, *>>(StringCloseEmptyAccumulator(
                                 idCounter = idCounter,
                                 previousElement = closeStringElement,
                                 structure = structure.plus(closeStringElement)
@@ -317,9 +334,9 @@ data class StringChildStructureJsonAccumulator(
                     }
                     is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
                     is StringStructureElement -> fail("How do I get rid of you as a possibility")
-                    is ArrayStructureElement ->  {
+                    is ArrayStructureElement -> {
 
-                        val closeStringElement = StringChildCloseElement(id = previousClosable.id)
+                        val closeStringElement = StringClose(id = previousClosable.id)
 
                         Success<String, Accumulator<*, *>>(StringCloseArrayAccumulator(
                                 idCounter = idCounter,
@@ -329,9 +346,10 @@ data class StringChildStructureJsonAccumulator(
                                 structureStack = newStructureStack
                         ))
                     }
+                    is ObjectStructureElement -> TODO()
                 }
             }
-            '\\' -> Success<String, Accumulator<*, *>>(StringEscapeJsonAccumulator(
+            '\\' -> Success<String, Accumulator<*, *>>(StringEscapeAccumulator(
                     idCounter = idCounter,
                     structureStack = structureStack,
                     previousElement = StringEscape,
@@ -340,9 +358,9 @@ data class StringChildStructureJsonAccumulator(
             ))
             else -> {
 
-                val stringElement = StringChildStructureElement(id = previousClosable.id, value = char)
+                val stringElement = StringValue(id = previousClosable.id, value = char)
 
-                Success<String, Accumulator<*, *>>(StringChildStructureJsonAccumulator(
+                Success<String, Accumulator<*, *>>(StringValueAccumulator(
                         idCounter = idCounter,
                         structureStack = structureStack,
                         previousElement = stringElement,
@@ -354,10 +372,10 @@ data class StringChildStructureJsonAccumulator(
     }
 }
 
-data class StringEscapeJsonAccumulator(
+data class StringEscapeAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val structureStack: List<MainStructureElement>,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
         override val previousElement: StringEscape,
         override val previousClosable: StringStructureElement
 ) : Accumulator<StringEscape, StringStructureElement>() {
@@ -367,9 +385,9 @@ data class StringEscapeJsonAccumulator(
         return when (char) {
             '"', '\\', '/' -> {
 
-                val stringElement = StringChildStructureElement(id = previousClosable.id, value = char)
+                val stringElement = StringValue(id = previousClosable.id, value = char)
 
-                Success<String, Accumulator<*, *>>(StringChildStructureJsonAccumulator(
+                Success<String, Accumulator<*, *>>(StringValueAccumulator(
                         idCounter = idCounter,
                         structureStack = structureStack,
                         previousElement = stringElement,
@@ -382,27 +400,11 @@ data class StringEscapeJsonAccumulator(
     }
 }
 
-data class StringChildCloseJsonAccumulator(
+data class StringCloseEmptyAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val structureStack: List<MainStructureElement>,
-        override val previousElement: StringChildCloseElement,
-        override val previousClosable: StringStructureElement
-) : Accumulator<StringChildCloseElement, StringStructureElement>() {
-
-    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
-
-        return when (char) {
-            else -> TODO()
-        }
-    }
-}
-
-data class StringChildCloseEmptyJsonAccumulator(
-        override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val previousElement: StringChildCloseElement
-) : EmptyAccumulator<StringChildCloseElement>() {
+        override val structure: List<JsonStructure>,
+        override val previousElement: StringClose
+) : EmptyAccumulator<StringClose>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
@@ -415,8 +417,8 @@ data class StringChildCloseEmptyJsonAccumulator(
 
 data class ArrayOpenAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val structureStack: List<MainStructureElement>,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
         override val previousClosable: ArrayStructureElement,
         override val previousElement: ArrayOpen
 ) : Accumulator<ArrayOpen, ArrayStructureElement>() {
@@ -443,7 +445,19 @@ data class ArrayOpenAccumulator(
                     }
                     is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
                     is StringStructureElement -> fail("How do I get rid of you as a possibility")
-                    is ArrayStructureElement -> TODO()
+                    is ArrayStructureElement -> {
+
+                        val closeElement = ArrayClose(id = previousClosable.id)
+
+                        Success<String, Accumulator<*, *>>(ArrayCloseArrayAccumulator(
+                                idCounter = idCounter,
+                                previousElement = closeElement,
+                                structure = structure.plus(closeElement),
+                                structureStack = newStructureStack,
+                                previousClosable = newPreviousStructure
+                        ))
+                    }
+                    is ObjectStructureElement -> TODO()
                 }
             }
             ' ', '\n', '\r', '\t' -> unmodified
@@ -451,9 +465,9 @@ data class ArrayOpenAccumulator(
 
                 val stringStructureElement = StringStructureElement(id = idCounter)
 
-                val openStringElement = StringChildOpenElement(id = idCounter)
+                val openStringElement = StringOpen(id = idCounter)
 
-                Success(StringChildOpenJsonAccumulator(
+                Success(StringOpenAccumulator(
                         idCounter = idCounter + 1,
                         structureStack = structureStack.plus(stringStructureElement),
                         previousElement = openStringElement,
@@ -461,13 +475,27 @@ data class ArrayOpenAccumulator(
                         structure = structure.plus(openStringElement)
                 ))
             }
+            '[' -> {
+
+                val arrayOpen = ArrayOpen(id = idCounter)
+
+                val arrayStructure = ArrayStructureElement(id = idCounter)
+
+                Success(ArrayOpenAccumulator(
+                        idCounter = idCounter + 1,
+                        structureStack = structureStack.plus(arrayStructure),
+                        previousElement = arrayOpen,
+                        previousClosable = arrayStructure,
+                        structure = structure.plus(arrayOpen)
+                ))
+            }
             else -> {
 
                 val literalElement = LiteralStructureElement(id = idCounter)
 
-                val literalChild = LiteralChildStructureElement(value = char, id = idCounter)
+                val literalChild = LiteralValue(value = char, id = idCounter)
 
-                Success(LiteralChildAccumulator(
+                Success(LiteralValueAccumulator(
                         idCounter = idCounter + 1,
                         structureStack = structureStack.plus(literalElement),
                         previousElement = literalChild,
@@ -481,8 +509,8 @@ data class ArrayOpenAccumulator(
 
 data class ArrayCommaAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val structureStack: List<MainStructureElement>,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
         override val previousClosable: ArrayStructureElement,
         override val previousElement: ArrayComma
 ) : Accumulator<ArrayComma, ArrayStructureElement>() {
@@ -494,9 +522,9 @@ data class ArrayCommaAccumulator(
 
                 val stringStructureElement = StringStructureElement(id = idCounter)
 
-                val openStringElement = StringChildOpenElement(id = idCounter)
+                val openStringElement = StringOpen(id = idCounter)
 
-                Success(StringChildOpenJsonAccumulator(
+                Success(StringOpenAccumulator(
                         idCounter = idCounter + 1,
                         structureStack = structureStack.plus(stringStructureElement),
                         previousElement = openStringElement,
@@ -504,13 +532,27 @@ data class ArrayCommaAccumulator(
                         structure = structure.plus(openStringElement)
                 ))
             }
+            '[' -> {
+
+                val arrayOpen = ArrayOpen(id = idCounter)
+
+                val arrayStructure = ArrayStructureElement(id = idCounter)
+
+                Success(ArrayOpenAccumulator(
+                        idCounter = idCounter + 1,
+                        structureStack = structureStack.plus(arrayStructure),
+                        previousElement = arrayOpen,
+                        previousClosable = arrayStructure,
+                        structure = structure.plus(arrayOpen)
+                ))
+            }
             else -> {
 
                 val literalElement = LiteralStructureElement(id = idCounter)
 
-                val literalChild = LiteralChildStructureElement(value = char, id = idCounter)
+                val literalChild = LiteralValue(value = char, id = idCounter)
 
-                Success(LiteralChildAccumulator(
+                Success(LiteralValueAccumulator(
                         idCounter = idCounter + 1,
                         structureStack = structureStack.plus(literalElement),
                         previousElement = literalChild,
@@ -524,11 +566,11 @@ data class ArrayCommaAccumulator(
 
 data class LiteralCloseArrayAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val previousElement: LiteralChildCloseElement,
-        override val structureStack: List<MainStructureElement>,
+        override val structure: List<JsonStructure>,
+        override val previousElement: LiteralClose,
+        override val structureStack: List<MainStructure>,
         override val previousClosable: ArrayStructureElement
-) : Accumulator<LiteralChildCloseElement, ArrayStructureElement>() {
+) : Accumulator<LiteralClose, ArrayStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {
@@ -540,7 +582,6 @@ data class LiteralCloseArrayAccumulator(
                 val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
 
                 when (newPreviousStructure) {
-
                     is EmptyStructureElement -> {
 
                         val closeElement = ArrayClose(id = previousClosable.id)
@@ -554,6 +595,7 @@ data class LiteralCloseArrayAccumulator(
                     is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
                     is StringStructureElement -> fail("How do I get rid of you as a possibility")
                     is ArrayStructureElement -> TODO()
+                    is ObjectStructureElement -> TODO()
                 }
             }
             ',' -> {
@@ -574,11 +616,11 @@ data class LiteralCloseArrayAccumulator(
 
 data class StringCloseArrayAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
-        override val previousElement: StringChildCloseElement,
-        override val structureStack: List<MainStructureElement>,
+        override val structure: List<JsonStructure>,
+        override val previousElement: StringClose,
+        override val structureStack: List<MainStructure>,
         override val previousClosable: ArrayStructureElement
-) : Accumulator<StringChildCloseElement, ArrayStructureElement>() {
+) : Accumulator<StringClose, ArrayStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {
@@ -590,7 +632,6 @@ data class StringCloseArrayAccumulator(
                 val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
 
                 when (newPreviousStructure) {
-
                     is EmptyStructureElement -> {
 
                         val closeElement = ArrayClose(id = previousClosable.id)
@@ -603,7 +644,19 @@ data class StringCloseArrayAccumulator(
                     }
                     is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
                     is StringStructureElement -> fail("How do I get rid of you as a possibility")
-                    is ArrayStructureElement -> TODO()
+                    is ArrayStructureElement -> {
+
+                        val closeElement = ArrayClose(id = previousClosable.id)
+
+                        Success<String, Accumulator<*, *>>(ArrayCloseArrayAccumulator(
+                                idCounter = idCounter,
+                                previousElement = closeElement,
+                                structure = structure.plus(closeElement),
+                                structureStack = newStructureStack,
+                                previousClosable = newPreviousStructure
+                        ))
+                    }
+                    is ObjectStructureElement -> TODO()
                 }
             }
             ',' -> {
@@ -625,13 +678,77 @@ data class StringCloseArrayAccumulator(
 
 data class ArrayCloseEmptyAccumulator(
         override val idCounter: Long,
-        override val structure: List<JsonStructureElement>,
+        override val structure: List<JsonStructure>,
         override val previousElement: ArrayClose
 ) : EmptyAccumulator<ArrayClose>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
+            ']' -> TODO()
+            else -> TODO()
+        }
+    }
+}
+
+data class ArrayCloseArrayAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val previousElement: ArrayClose,
+        override val structureStack: List<MainStructure>,
+        override val previousClosable: ArrayStructureElement
+) : Accumulator<ArrayClose, ArrayStructureElement>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            ']' -> {
+
+                val newStructureStack = structureStack.dropLast(1)
+
+                val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
+
+                when (newPreviousStructure) {
+
+                    is EmptyStructureElement -> {
+
+                        val closeElement = ArrayClose(id = previousClosable.id)
+
+                        Success<String, Accumulator<*, *>>(ArrayCloseEmptyAccumulator(
+                                idCounter = idCounter,
+                                previousElement = closeElement,
+                                structure = structure.plus(closeElement)
+                        ))
+                    }
+                    is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
+                    is StringStructureElement -> fail("How do I get rid of you as a possibility")
+                    is ArrayStructureElement -> {
+
+                        val closeElement = ArrayClose(id = previousClosable.id)
+
+                        Success<String, Accumulator<*, *>>(ArrayCloseArrayAccumulator(
+                                idCounter = idCounter,
+                                previousElement = closeElement,
+                                structure = structure.plus(closeElement),
+                                structureStack = newStructureStack,
+                                previousClosable = newPreviousStructure
+                        ))
+                    }
+                    is ObjectStructureElement -> TODO()
+                }
+            }
+            ',' -> {
+
+                val arrayComma = ArrayComma(previousClosable.id)
+
+                Success<String, Accumulator<*, *>>(ArrayCommaAccumulator(
+                        idCounter = idCounter,
+                        structure = structure.plus(arrayComma),
+                        previousElement = arrayComma,
+                        structureStack = structureStack,
+                        previousClosable = previousClosable
+                ))
+            }
             else -> TODO()
         }
     }

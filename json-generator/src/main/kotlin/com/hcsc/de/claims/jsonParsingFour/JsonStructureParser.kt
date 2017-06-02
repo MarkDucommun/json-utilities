@@ -4,7 +4,7 @@ import com.hcsc.de.claims.helpers.*
 
 class JsonStructureParser {
 
-    fun parse(string: String): Result<String, List<JsonStructureElement>> {
+    fun parse(string: String): Result<String, List<JsonStructure>> {
 
         return string.toCharArray().fold(rootAccumulatorResult()) { accumulatorResult, char ->
 
@@ -13,13 +13,13 @@ class JsonStructureParser {
         }.flatMap {
 
             when (it) {
-                is EmptyAccumulator -> Success<String, List<JsonStructureElement>>(it.structure)
-                is LiteralChildAccumulator -> Success<String, List<JsonStructureElement>>(it.structure)
-                else -> Failure<String, List<JsonStructureElement>>("Invalid JSON - must close all open elements")
+                is EmptyAccumulator -> Success<String, List<JsonStructure>>(it.structure)
+                is LiteralValueAccumulator -> Success<String, List<JsonStructure>>(it.structure)
+                else -> Failure<String, List<JsonStructure>>("Invalid JSON - must close all open elements")
             }
         }
     }
 
-    fun rootAccumulatorResult(): Result<String, Accumulator<JsonStructureElement, MainStructureElement?>> =
+    fun rootAccumulatorResult(): Result<String, Accumulator<JsonStructure, MainStructure?>> =
             Success(RootAccumulator)
 }

@@ -1,64 +1,72 @@
 package com.hcsc.de.claims.jsonParsingFour
 
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
-
-sealed class JsonStructureElement {
+sealed class JsonStructure {
     abstract val id: Long
 }
 
-sealed class MainStructureElement : JsonStructureElement()
+sealed class MainStructure : JsonStructure()
 
-object EmptyStructureElement : MainStructureElement() {
+object EmptyStructureElement : MainStructure() {
     override val id: Long = 0
 }
 
 data class LiteralStructureElement(
         override val id: Long
-) : MainStructureElement()
+) : MainStructure()
 
-sealed class LiteralChildElement : JsonStructureElement() {
+sealed class LiteralElement : JsonStructure() {
     abstract val value: Char
 }
 
-data class LiteralChildStructureElement(
+data class LiteralValue(
         override val id: Long,
         override val value: Char
-) : LiteralChildElement()
+) : LiteralElement()
 
-data class LiteralChildCloseElement(
+data class LiteralClose(
         override val id: Long,
         override val value: Char
-) : LiteralChildElement()
+) : LiteralElement()
 
-data class StringStructureElement(override val id: Long) : MainStructureElement()
+data class StringStructureElement(override val id: Long) : MainStructure()
 
-sealed class StringChildElement : JsonStructureElement()
+sealed class StringElement : JsonStructure()
 
-data class StringChildOpenElement(
+data class StringOpen(
         override val id: Long
-) : StringChildElement()
+) : StringElement()
 
-data class StringChildStructureElement(
+data class StringValue(
         override val id: Long,
         val value: Char
-) : StringChildElement()
+) : StringElement()
 
-object StringEscape : StringChildElement() {
+object StringEscape : StringElement() {
     override val id: Long = 0
 }
 
-data class StringChildCloseElement(
+data class StringClose(
         override val id: Long
-) : StringChildElement()
+) : StringElement()
 
-data class ArrayStructureElement(override val id: Long) : MainStructureElement()
+data class ArrayStructureElement(override val id: Long) : MainStructure()
 
-sealed class ArrayChildElement : JsonStructureElement()
+sealed class ArrayElement : JsonStructure()
 
-data class ArrayOpen(override val id: Long) : ArrayChildElement()
+data class ArrayOpen(override val id: Long) : ArrayElement()
 
-data class ArrayClose(override val id: Long) : ArrayChildElement()
+data class ArrayClose(override val id: Long) : ArrayElement()
 
-data class ArrayComma(override val id: Long) : ArrayChildElement()
+data class ArrayComma(override val id: Long) : ArrayElement()
+
+data class ObjectStructureElement(override val id: Long): MainStructure()
+
+sealed class ObjectElement : JsonStructure()
+
+data class ObjectOpen(override val id: Long) : ObjectElement()
+
+data class ObjectColon(override val id: Long) : ObjectElement()
+
+data class ObjectComma(override val id: Long) : ObjectElement()
+
+data class ObjectClose(override val id: Long) : ObjectElement()

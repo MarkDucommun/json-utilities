@@ -48,7 +48,7 @@ data class ArrayStructureElement(
 
 sealed class ArrayChildStructureElement : JsonStructureElement()
 
-//data class ArrayChildMainStructureElement<mainStructureElementType : MainStructureElement>(
+//data class ArrayChildMainStructureElement<mainStructureElementType : MainStructure>(
 //    val
 //) : ArrayChildStructureElement()
 
