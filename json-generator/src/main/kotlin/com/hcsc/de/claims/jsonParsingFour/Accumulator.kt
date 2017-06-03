@@ -3,25 +3,24 @@ package com.hcsc.de.claims.jsonParsingFour
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
-import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KDeclarationContainer
-import kotlin.reflect.KFunction5
-import kotlin.reflect.full.createType
 
-sealed class Accumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure?> {
+interface AccumulatorInt<out previousElementType : JsonStructure, out previousClosableType : MainStructure?> {
 
-    abstract val idCounter: Long
+    val idCounter: Long
 
-    abstract val structure: List<JsonStructure>
+    val structure: List<JsonStructure>
 
-    abstract val structureStack: List<MainStructure>
+    val structureStack: List<MainStructure>
 
-    abstract val previousClosable: previousClosableType
+    val previousClosable: previousClosableType
 
-    abstract val previousElement: previousElementType
+    val previousElement: previousElementType
 
-    abstract fun processChar(char: Char): Result<String, Accumulator<*, *>>
+    fun processChar(char: Char): Result<String, Accumulator<*, *>>
+}
+
+sealed class Accumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure?>
+    : AccumulatorInt<previousElementType, previousClosableType> {
 
     fun openString(): Result<String, Accumulator<*, *>> {
 
@@ -33,6 +32,11 @@ sealed class Accumulator<out previousElementType : JsonStructure, out previousCl
         return openStructure(::ArrayOpen, ::ArrayStructureElement, ::ArrayOpenAccumulator)
     }
 
+    fun openObject(): Result<String, Accumulator<*, *>> {
+
+        return openStructure(::ObjectOpen, ::OpenObjectStructure, ::ObjectOpenAccumulator)
+    }
+
     fun openLiteral(char: Char): Result<String, Accumulator<*, *>> {
         return openStructure(
                 LiteralValue(id = idCounter, value = char),
@@ -41,7 +45,7 @@ sealed class Accumulator<out previousElementType : JsonStructure, out previousCl
         )
     }
 
-    fun <T: JsonStructure, U: MainStructure> openStructure(
+    fun <T : JsonStructure, U : MainStructure> openStructure(
             elementConstructor: (Long) -> T,
             structureConstructor: (Long) -> U,
             accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure>, T, U) -> Accumulator<T, U>
@@ -50,7 +54,7 @@ sealed class Accumulator<out previousElementType : JsonStructure, out previousCl
         return openStructure(elementConstructor(idCounter), structureConstructor, accumulatorConstructor)
     }
 
-    fun <T: JsonStructure, U: MainStructure> openStructure(
+    fun <T : JsonStructure, U : MainStructure> openStructure(
             element: T,
             structureConstructor: (Long) -> U,
             accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure>, T, U) -> Accumulator<T, U>
@@ -58,27 +62,16 @@ sealed class Accumulator<out previousElementType : JsonStructure, out previousCl
 
         return structureConstructor(idCounter).let { newStructure ->
 
-                Success(accumulatorConstructor(
-                        idCounter + 1,
-                        structure.plus(element),
-                        structureStack.plus(newStructure),
-                        element,
-                        newStructure
-                ))
-            }
+            Success(accumulatorConstructor(
+                    idCounter + 1,
+                    structure.plus(element),
+                    structureStack.plus(newStructure),
+                    element,
+                    newStructure
+            ))
+        }
 
     }
-
-//    fun <T: JsonStructure> addValue(element: T, accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure>, T, previousClosableType) -> Accumulator<T, previousClosableType>): Result<String, Accumulator<*, *>> {
-//
-//        return Success(accumulatorConstructor(
-//                idCounter,
-//                structure.plus(element),
-//                structureStack,
-//                element,
-//                previousClosable
-//        ))
-//    }
 
     fun fail(message: String): Failure<String, Accumulator<*, *>> = Failure("Invalid JSON - $message")
 
@@ -87,9 +80,19 @@ sealed class Accumulator<out previousElementType : JsonStructure, out previousCl
 
 sealed class EmptyAccumulator<out previousElementType : JsonStructure> : Accumulator<previousElementType, EmptyStructureElement>() {
 
+    abstract val elementName: String
+
     override val previousClosable: EmptyStructureElement = EmptyStructureElement
 
     override val structureStack: List<MainStructure> = listOf(EmptyStructureElement)
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            else -> fail("nothing can follow a closed root $elementName")
+        }
+    }
 }
 
 object RootAccumulator : Accumulator<EmptyStructureElement, EmptyStructureElement>() {
@@ -109,6 +112,7 @@ object RootAccumulator : Accumulator<EmptyStructureElement, EmptyStructureElemen
             ' ', '\n', '\r', '\t' -> unmodified
             '"' -> openString()
             '[' -> openArray()
+            '{' -> openObject()
             else -> openLiteral(char)
         }
     }
@@ -138,7 +142,7 @@ data class LiteralValueAccumulator(
                     )
 
                     Success<String, Accumulator<*, *>>(LiteralCloseEmptyAccumulator(
-                            idCounter = previousClosable.id,
+                            idCounter = idCounter,
                             previousElement = literalChildCloseElement,
                             structure = structure.dropLast(1).plus(literalChildCloseElement)
                     ))
@@ -160,7 +164,24 @@ data class LiteralValueAccumulator(
                             structureStack = newStructureStack
                     ))
                 }
-                is ObjectStructureElement -> TODO()
+                is OpenObjectStructure -> TODO()
+                is ObjectWithKeyStructure -> {
+
+                    val literalChildCloseElement = LiteralClose(
+                            id = previousElement.id,
+                            value = previousElement.value
+                    )
+
+                    val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
+
+                    Success<String, Accumulator<*, *>>(LiteralCloseOpenObjectAccumulator(
+                            idCounter = idCounter,
+                            previousElement = literalChildCloseElement,
+                            previousClosable = modifiedNewPreviousStructure,
+                            structure = structure.dropLast(1).plus(literalChildCloseElement),
+                            structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure)
+                    ))
+                }
             }
             ',' -> when (newPreviousStructure) {
                 is ArrayStructureElement -> {
@@ -175,6 +196,22 @@ data class LiteralValueAccumulator(
                             previousElement = arrayComma,
                             structureStack = newStructureStack,
                             previousClosable = newPreviousStructure
+                    ))
+                }
+                is ObjectWithKeyStructure -> {
+
+                    val objectComma = ObjectComma(id = newPreviousStructure.id)
+
+                    val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
+
+                    Success<String, Accumulator<*, *>>(ObjectCommaAccumulator(
+                            idCounter = idCounter,
+                            structure = structure.dropLast(1)
+                                    .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
+                                    .plus(objectComma),
+                            previousElement = objectComma,
+                            structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure),
+                            previousClosable = modifiedNewPreviousStructure
                     ))
                 }
                 else -> TODO()
@@ -215,18 +252,72 @@ data class LiteralValueAccumulator(
                                     previousClosable = evenNewerPreviousStructure
                             ))
                         }
-                        is ObjectStructureElement -> TODO()
+                        is ObjectStructureElement -> {
+
+                            val closeElement = ArrayClose(id = newPreviousStructure.id)
+
+                            val modifiedEvenNewerPreviousStructure = OpenObjectStructure(id = evenNewerPreviousStructure.id)
+
+                            Success<String, Accumulator<*, *>>(ArrayCloseOpenObjectAccumulator(
+                                    idCounter = idCounter,
+                                    previousElement = closeElement,
+                                    structure = structure.dropLast(1)
+                                            .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
+                                            .plus(closeElement),
+                                    structureStack = evenNewerStructureStack.dropLast(1).plus(modifiedEvenNewerPreviousStructure),
+                                    previousClosable = modifiedEvenNewerPreviousStructure
+                            ))
+                        }
+                    }
+                }
+                else -> TODO()
+            }
+            '}' -> when (newPreviousStructure) {
+                is ObjectWithKeyStructure -> {
+
+                    val evenNewerStructureStack = newStructureStack.dropLast(1)
+
+                    val evenNewerPreviousStructure = evenNewerStructureStack.lastOrNull() ?: EmptyStructureElement
+
+                    when (evenNewerPreviousStructure) {
+                        EmptyStructureElement -> {
+
+                            val objectClose = ObjectClose(newPreviousStructure.id)
+
+                            Success<String, Accumulator<*, *>>(ObjectCloseEmptyAccumulator(
+                                    idCounter = idCounter,
+                                    structure = structure.dropLast(1)
+                                            .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
+                                            .plus(objectClose),
+                                    previousElement = objectClose
+                            ))
+                        }
+                        is ArrayStructureElement -> TODO()
+                        is ObjectStructureElement -> {
+
+                            val objectClose = ObjectClose(newPreviousStructure.id)
+
+                            val modifiedEvenNewerPreviousStructure = OpenObjectStructure(id = evenNewerPreviousStructure.id)
+
+                            Success<String, Accumulator<*, *>>(ObjectCloseOpenObjectAccumulator(
+                                    idCounter = idCounter,
+                                    structure = structure.dropLast(1)
+                                            .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
+                                            .plus(objectClose),
+                                    previousElement = objectClose,
+                                    structureStack = evenNewerStructureStack.dropLast(1).plus(modifiedEvenNewerPreviousStructure),
+                                    previousClosable = modifiedEvenNewerPreviousStructure
+                            ))
+                        }
+                        is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                        is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                     }
                 }
                 else -> TODO()
             }
             else -> {
 
-
-
                 val literalChild = LiteralValue(value = char, id = previousClosable.id)
-
-//                addValue(literalChild, ::LiteralValueAccumulator)
 
                 Success(LiteralValueAccumulator(
                         idCounter = idCounter,
@@ -246,17 +337,7 @@ data class LiteralCloseEmptyAccumulator(
         override val structure: List<JsonStructure>
 ) : EmptyAccumulator<LiteralClose>() {
 
-    override val structureStack: List<MainStructure> = listOf(EmptyStructureElement)
-
-    override val previousClosable: EmptyStructureElement = EmptyStructureElement
-
-    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
-
-        return when (char) {
-            ' ', '\n', '\r', '\t' -> unmodified
-            else -> fail("nothing can follow a closed root literal")
-        }
-    }
+    override val elementName: String = "literal"
 }
 
 data class StringOpenAccumulator(
@@ -369,7 +450,34 @@ data class StringValueAccumulator(
                                 structureStack = newStructureStack
                         ))
                     }
-                    is ObjectStructureElement -> TODO()
+                    is OpenObjectStructure -> {
+
+                        val closeStringElement = StringClose(id = previousClosable.id)
+
+                        val modifiedNewPreviousStructure = ObjectWithKeyStructure(id = newPreviousStructure.id)
+
+                        Success<String, Accumulator<*, *>>(ObjectWithKeyAccumulator(
+                                idCounter = idCounter,
+                                previousElement = closeStringElement,
+                                structure = structure.plus(closeStringElement),
+                                previousClosable = modifiedNewPreviousStructure,
+                                structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure)
+                        ))
+                    }
+                    is ObjectWithKeyStructure -> {
+
+                        val closeStringElement = StringClose(id = previousClosable.id)
+
+                        val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
+
+                        Success<String, Accumulator<*, *>>(StringCloseOpenObjectAccumulator(
+                                idCounter = idCounter,
+                                previousElement = closeStringElement,
+                                structure = structure.plus(closeStringElement),
+                                previousClosable = modifiedNewPreviousStructure,
+                                structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure)
+                        ))
+                    }
                 }
             }
             '\\' -> Success<String, Accumulator<*, *>>(StringEscapeAccumulator(
@@ -429,13 +537,7 @@ data class StringCloseEmptyAccumulator(
         override val previousElement: StringClose
 ) : EmptyAccumulator<StringClose>() {
 
-    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
-
-        return when (char) {
-            ' ', '\n', '\r', '\t' -> unmodified
-            else -> fail("nothing can follow a closed root string")
-        }
-    }
+    override val elementName: String = "string"
 }
 
 data class ArrayOpenAccumulator(
@@ -455,7 +557,6 @@ data class ArrayOpenAccumulator(
                 val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
 
                 when (newPreviousStructure) {
-
                     is EmptyStructureElement -> {
 
                         val closeElement = ArrayClose(id = previousClosable.id)
@@ -466,8 +567,6 @@ data class ArrayOpenAccumulator(
                                 structure = structure.plus(closeElement)
                         ))
                     }
-                    is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
-                    is StringStructureElement -> fail("How do I get rid of you as a possibility")
                     is ArrayStructureElement -> {
 
                         val closeElement = ArrayClose(id = previousClosable.id)
@@ -480,7 +579,23 @@ data class ArrayOpenAccumulator(
                                 previousClosable = newPreviousStructure
                         ))
                     }
-                    is ObjectStructureElement -> TODO()
+                    is ObjectWithKeyStructure -> {
+
+                        val closeElement = ArrayClose(id = previousClosable.id)
+
+                        val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
+
+                        Success<String, Accumulator<*, *>>(ArrayCloseOpenObjectAccumulator(
+                                idCounter = idCounter,
+                                previousElement = closeElement,
+                                structure = structure.plus(closeElement),
+                                structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure),
+                                previousClosable = modifiedNewPreviousStructure
+                        ))
+                    }
+                    is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
+                    is StringStructureElement -> fail("How do I get rid of you as a possibility")
+                    is OpenObjectStructure -> TODO("This should never happen")
                 }
             }
             ' ', '\n', '\r', '\t' -> unmodified
@@ -537,10 +652,34 @@ data class LiteralCloseArrayAccumulator(
                                 structure = structure.plus(closeElement)
                         ))
                     }
+                    is ArrayStructureElement -> {
+
+                        val closeElement = ArrayClose(id = previousClosable.id)
+
+                        Success<String, Accumulator<*, *>>(ArrayCloseArrayAccumulator(
+                                idCounter = idCounter,
+                                structureStack = newStructureStack,
+                                structure = structure.plus(closeElement),
+                                previousClosable = newPreviousStructure,
+                                previousElement = closeElement
+                        ))
+                    }
+                    is ObjectStructureElement -> {
+
+                        val closeElement = ArrayClose(id = previousClosable.id)
+
+                        val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
+
+                        Success<String, Accumulator<*, *>>(ArrayCloseOpenObjectAccumulator(
+                                idCounter = idCounter,
+                                structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure),
+                                structure = structure.plus(closeElement),
+                                previousClosable = modifiedNewPreviousStructure,
+                                previousElement = closeElement
+                        ))
+                    }
                     is LiteralStructureElement -> fail("How do I get rid of you as a possibility")
                     is StringStructureElement -> fail("How do I get rid of you as a possibility")
-                    is ArrayStructureElement -> TODO()
-                    is ObjectStructureElement -> TODO()
                 }
             }
             ',' -> {
@@ -627,13 +766,7 @@ data class ArrayCloseEmptyAccumulator(
         override val previousElement: ArrayClose
 ) : EmptyAccumulator<ArrayClose>() {
 
-    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
-        return when (char) {
-            ' ', '\n', '\r', '\t' -> unmodified
-            ']' -> TODO()
-            else -> TODO()
-        }
-    }
+    override val elementName: String = "array"
 }
 
 data class ArrayCloseArrayAccumulator(
@@ -696,4 +829,311 @@ data class ArrayCloseArrayAccumulator(
             else -> TODO()
         }
     }
+}
+
+data class ObjectOpenAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: ObjectOpen,
+        override val previousClosable: OpenObjectStructure
+) : Accumulator<ObjectOpen, OpenObjectStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            '"' -> {
+
+                val open = StringOpen(id = idCounter)
+
+                val string = StringStructureElement(id = idCounter)
+
+                Success(StringOpenAccumulator(
+                        idCounter = idCounter + 1,
+                        structure = structure.plus(open),
+                        structureStack = structureStack.plus(string),
+                        previousElement = open,
+                        previousClosable = string
+                ))
+            }
+            '}' -> {
+
+                val newStructureStack = structureStack.dropLast(1)
+
+                val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
+
+                when (newPreviousStructure) {
+                    is EmptyStructureElement -> {
+
+                        val close = ObjectClose(id = previousClosable.id)
+
+                        Success<String, Accumulator<*, *>>(ObjectCloseEmptyAccumulator(
+                                idCounter = idCounter,
+                                structure = structure.plus(close),
+                                previousElement = close
+                        ))
+                    }
+                    is LiteralStructureElement -> TODO()
+                    is StringStructureElement -> TODO()
+                    is ArrayStructureElement -> TODO()
+                    is OpenObjectStructure -> TODO()
+                    is ObjectWithKeyStructure -> {
+
+                        val close = ObjectClose(id = previousClosable.id)
+
+                        val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
+
+                        Success<String, Accumulator<*, *>>(ObjectCloseOpenObjectAccumulator(
+                                idCounter = idCounter,
+                                structure = structure.plus(close),
+                                structureStack = newStructureStack,
+                                previousElement = close,
+                                previousClosable = modifiedNewPreviousStructure
+                        ))
+                    }
+                }
+            }
+            else -> fail("object key must be a string")
+        }
+    }
+}
+
+data class ObjectWithKeyAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: StringClose,
+        override val previousClosable: ObjectWithKeyStructure
+) : Accumulator<StringClose, ObjectWithKeyStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            ':' -> {
+
+                val colon = ObjectColon(id = previousClosable.id)
+
+                Success(ObjectReadyForValueAccumulator(
+                        idCounter = idCounter,
+                        structure = structure.plus(colon),
+                        structureStack = structureStack,
+                        previousElement = colon,
+                        previousClosable = previousClosable
+                ))
+            }
+            else -> fail("colon must follow an object key")
+        }
+    }
+}
+
+data class ObjectReadyForValueAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: ObjectColon,
+        override val previousClosable: ObjectWithKeyStructure
+) : Accumulator<ObjectColon, ObjectWithKeyStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            '"' -> openString()
+            '[' -> openArray()
+            '{' -> openObject()
+            '}' -> fail("a value must follow a colon")
+            else -> openLiteral(char)
+        }
+    }
+}
+
+data class LiteralCloseOpenObjectAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: LiteralClose,
+        override val previousClosable: OpenObjectStructure
+) : Accumulator<LiteralClose, OpenObjectStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            ',' -> {
+
+                val objectComma = ObjectComma(id = previousClosable.id)
+
+                Success(ObjectCommaAccumulator(
+                        idCounter = idCounter,
+                        structureStack = structureStack,
+                        structure = structure.plus(objectComma),
+                        previousClosable = previousClosable,
+                        previousElement = objectComma
+                ))
+            }
+            '}' -> {
+
+                val close = ObjectClose(id = previousClosable.id)
+
+                Success(ObjectCloseEmptyAccumulator(
+                        idCounter = idCounter,
+                        structure = structure.plus(close),
+                        previousElement = close
+                ))
+            }
+            else -> TODO()
+        }
+    }
+}
+
+data class StringCloseOpenObjectAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: StringClose,
+        override val previousClosable: OpenObjectStructure
+) : Accumulator<StringClose, OpenObjectStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            ',' -> {
+
+                val objectComma = ObjectComma(id = previousClosable.id)
+
+                Success(ObjectCommaAccumulator(
+                        idCounter = idCounter,
+                        structureStack = structureStack,
+                        structure = structure.plus(objectComma),
+                        previousClosable = previousClosable,
+                        previousElement = objectComma
+                ))
+            }
+            '}' -> {
+
+                val close = ObjectClose(id = previousClosable.id)
+
+                Success(ObjectCloseEmptyAccumulator(
+                        idCounter = idCounter,
+                        structure = structure.plus(close),
+                        previousElement = close
+                ))
+            }
+            else -> TODO()
+        }
+    }
+}
+
+data class ArrayCloseOpenObjectAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: ArrayClose,
+        override val previousClosable: OpenObjectStructure
+) : Accumulator<ArrayClose, OpenObjectStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            ',' -> {
+
+                val objectComma = ObjectComma(id = previousClosable.id)
+
+                Success(ObjectCommaAccumulator(
+                        idCounter = idCounter,
+                        structureStack = structureStack,
+                        structure = structure.plus(objectComma),
+                        previousClosable = previousClosable,
+                        previousElement = objectComma
+                ))
+            }
+            '}' -> {
+
+                val close = ObjectClose(id = previousClosable.id)
+
+                Success(ObjectCloseEmptyAccumulator(
+                        idCounter = idCounter,
+                        structure = structure.plus(close),
+                        previousElement = close
+                ))
+            }
+            else -> TODO()
+        }
+    }
+}
+
+data class ObjectCloseOpenObjectAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousElement: ObjectClose,
+        override val previousClosable: OpenObjectStructure
+) : Accumulator<ObjectClose, OpenObjectStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            ',' -> {
+
+                val objectComma = ObjectComma(id = previousClosable.id)
+
+                Success(ObjectCommaAccumulator(
+                        idCounter = idCounter,
+                        structureStack = structureStack,
+                        structure = structure.plus(objectComma),
+                        previousClosable = previousClosable,
+                        previousElement = objectComma
+                ))
+            }
+            '}' -> {
+
+                val close = ObjectClose(id = previousClosable.id)
+
+                Success<String, Accumulator<*, *>>(ObjectCloseEmptyAccumulator(
+                        idCounter = idCounter,
+                        structure = structure.plus(close),
+                        previousElement = close
+                ))
+            }
+            else -> TODO()
+        }
+    }
+}
+
+data class ObjectCommaAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val structureStack: List<MainStructure>,
+        override val previousClosable: OpenObjectStructure,
+        override val previousElement: ObjectComma
+) : Accumulator<ObjectComma, OpenObjectStructure>() {
+
+    override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+        return when (char) {
+            ' ', '\n', '\r', '\t' -> unmodified
+            '"' -> {
+
+                val open = StringOpen(id = idCounter)
+
+                val string = StringStructureElement(id = idCounter)
+
+                Success(StringOpenAccumulator(
+                        idCounter = idCounter + 1,
+                        structure = structure.plus(open),
+                        structureStack = structureStack.plus(string),
+                        previousElement = open,
+                        previousClosable = string
+                ))
+            }
+            else -> TODO()
+//            else -> fail("object key must be a string")
+        }
+    }
+}
+
+data class ObjectCloseEmptyAccumulator(
+        override val idCounter: Long,
+        override val structure: List<JsonStructure>,
+        override val previousElement: ObjectClose
+) : EmptyAccumulator<ObjectClose>() {
+
+    override val elementName: String = "object"
 }
