@@ -1,6 +1,10 @@
 package com.hcsc.de.claims.jsonParsingFour
 
 import com.hcsc.de.claims.helpers.*
+import com.hcsc.de.claims.jsonParsingFour.accumulators.Accumulator
+import com.hcsc.de.claims.jsonParsingFour.accumulators.EmptyAccumulator
+import com.hcsc.de.claims.jsonParsingFour.accumulators.LiteralValueAccumulator
+import com.hcsc.de.claims.jsonParsingFour.accumulators.RootAccumulator
 
 class JsonStructureParser {
 
