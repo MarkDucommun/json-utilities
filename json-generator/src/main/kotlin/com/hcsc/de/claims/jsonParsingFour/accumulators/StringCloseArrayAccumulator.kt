@@ -7,8 +7,8 @@ import com.hcsc.de.claims.jsonParsingFour.*
 data class StringCloseArrayAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
-        override val previousElement: StringClose,
         override val structureStack: List<MainStructure>,
+        override val previousElement: StringClose,
         override val previousClosable: ArrayStructureElement
 ) : BaseAccumulator<StringClose, ArrayStructureElement>() {
 
@@ -29,7 +29,9 @@ data class StringCloseArrayAccumulator(
                         Success<String, Accumulator<*, *>>(ArrayCloseEmptyAccumulator(
                                 idCounter = idCounter,
                                 previousElement = closeElement,
-                                structure = structure.plus(closeElement)
+                                structure = structure.plus(closeElement),
+                                previousClosable = newPreviousStructure,
+                                structureStack = newStructureStack
                         ))
                     }
                     is ArrayStructureElement -> {

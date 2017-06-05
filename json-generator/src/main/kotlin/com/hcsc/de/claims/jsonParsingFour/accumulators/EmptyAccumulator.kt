@@ -8,10 +8,6 @@ abstract class EmptyAccumulator<out previousElementType : JsonStructure>
 
     abstract val elementName: String
 
-    override val previousClosable: EmptyStructureElement = EmptyStructureElement
-
-    override val structureStack: List<MainStructure> = listOf(EmptyStructureElement)
-
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
         return when (char) {

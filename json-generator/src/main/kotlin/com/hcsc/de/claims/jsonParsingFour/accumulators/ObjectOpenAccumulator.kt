@@ -31,7 +31,9 @@ data class ObjectOpenAccumulator(
                         Success<String, Accumulator<*, *>>(ObjectCloseEmptyAccumulator(
                                 idCounter = idCounter,
                                 structure = structure.plus(close),
-                                previousElement = close
+                                previousElement = close,
+                                previousClosable = newPreviousStructure,
+                                structureStack = newStructureStack
                         ))
                     }
                     is ArrayStructureElement -> {

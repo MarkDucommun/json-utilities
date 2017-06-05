@@ -1,18 +1,20 @@
 package com.hcsc.de.claims.jsonParsingFour
 
-interface Open
+interface Open<out structureType: MainStructure> : JsonStructure {
+    val structureConstructor: (Long) -> structureType
+}
 
-interface Close
+interface Close : JsonStructure
 
-interface WithValue {
+interface WithValue : JsonStructure {
     val value: Char
 }
 
-sealed class JsonStructure {
-    abstract val id: Long
+interface JsonStructure {
+    val id: Long
 }
 
-sealed class MainStructure : JsonStructure()
+sealed class MainStructure : JsonStructure
 
 object EmptyStructureElement : MainStructure() {
     override val id: Long = 0
@@ -22,12 +24,16 @@ data class LiteralStructureElement(
         override val id: Long
 ) : MainStructure()
 
-sealed class LiteralElement : JsonStructure(), WithValue
+sealed class LiteralElement : JsonStructure, WithValue
 
 data class LiteralValue(
         override val id: Long,
         override val value: Char
-) : LiteralElement()
+) : LiteralElement(), Open<LiteralStructureElement> {
+
+    override val structureConstructor: (Long) -> LiteralStructureElement
+        get() = ::LiteralStructureElement
+}
 
 data class LiteralClose(
         override val id: Long,
@@ -36,11 +42,15 @@ data class LiteralClose(
 
 data class StringStructureElement(override val id: Long) : MainStructure()
 
-sealed class StringElement : JsonStructure()
+sealed class StringElement : JsonStructure
 
 data class StringOpen(
         override val id: Long
-) : StringElement(), Open
+) : StringElement(), Open<StringStructureElement> {
+
+    override val structureConstructor: (Long) -> StringStructureElement
+        get() = ::StringStructureElement
+}
 
 data class StringValue(
         override val id: Long,
@@ -57,9 +67,12 @@ data class StringClose(
 
 data class ArrayStructureElement(override val id: Long) : MainStructure()
 
-sealed class ArrayElement : JsonStructure()
+sealed class ArrayElement : JsonStructure
 
-data class ArrayOpen(override val id: Long) : ArrayElement(), Open
+data class ArrayOpen(override val id: Long) : ArrayElement(), Open<ArrayStructureElement> {
+    override val structureConstructor: (Long) -> ArrayStructureElement
+        get() = ::ArrayStructureElement
+}
 
 data class ArrayComma(override val id: Long) : ArrayElement()
 
@@ -71,9 +84,13 @@ data class OpenObjectStructure(override val id: Long) : ObjectStructureElement()
 
 data class ObjectWithKeyStructure(override val id: Long) : ObjectStructureElement()
 
-sealed class ObjectElement : JsonStructure()
+sealed class ObjectElement : JsonStructure
 
-data class ObjectOpen(override val id: Long) : ObjectElement(), Open
+data class ObjectOpen(override val id: Long) : ObjectElement(), Open<OpenObjectStructure> {
+
+    override val structureConstructor: (Long) -> OpenObjectStructure
+        get() = ::OpenObjectStructure
+}
 
 data class ObjectColon(override val id: Long) : ObjectElement()
 

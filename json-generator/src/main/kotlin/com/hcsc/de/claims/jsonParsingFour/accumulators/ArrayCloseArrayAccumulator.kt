@@ -41,7 +41,9 @@ data class ArrayCloseArrayAccumulator(
                         Success<String, Accumulator<*, *>>(ArrayCloseEmptyAccumulator(
                                 idCounter = idCounter,
                                 previousElement = closeElement,
-                                structure = structure.plus(closeElement)
+                                structure = structure.plus(closeElement),
+                                structureStack = newStructureStack,
+                                previousClosable = newPreviousStructure
                         ))
                     }
                     is ArrayStructureElement -> {

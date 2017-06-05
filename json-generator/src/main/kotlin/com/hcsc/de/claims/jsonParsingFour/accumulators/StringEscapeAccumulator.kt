@@ -10,23 +10,12 @@ data class StringEscapeAccumulator(
         override val structureStack: List<MainStructure>,
         override val previousElement: StringEscape,
         override val previousClosable: StringStructureElement
-) : BaseAccumulator<StringEscape, StringStructureElement>() {
+) : StringAccumulator<StringEscape>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
         return when (char) {
-            '"', '\\', '/' -> {
-
-                val stringElement = StringValue(id = previousClosable.id, value = char)
-
-                Success<String, Accumulator<*, *>>(StringValueAccumulator(
-                        idCounter = idCounter,
-                        structureStack = structureStack,
-                        previousElement = stringElement,
-                        structure = structure.plus(stringElement),
-                        previousClosable = previousClosable
-                ))
-            }
+            '"', '\\', '/' -> addStringValue(char)
             else -> fail("only quotes and slashes may follow escape characters")
         }
     }

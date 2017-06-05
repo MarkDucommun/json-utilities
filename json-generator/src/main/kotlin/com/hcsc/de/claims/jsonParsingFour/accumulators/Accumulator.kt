@@ -4,7 +4,7 @@ import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.jsonParsingFour.JsonStructure
 import com.hcsc.de.claims.jsonParsingFour.MainStructure
 
-interface Accumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure?> {
+interface Accumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure> {
 
     val idCounter: Long
 

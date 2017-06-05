@@ -4,8 +4,6 @@ import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.jsonParsingFour.EmptyStructureElement
 import com.hcsc.de.claims.jsonParsingFour.JsonStructure
 import com.hcsc.de.claims.jsonParsingFour.MainStructure
-import com.hcsc.de.claims.jsonParsingFour.accumulators.Accumulator
-import com.hcsc.de.claims.jsonParsingFour.accumulators.BaseAccumulator
 
 object RootAccumulator : BaseAccumulator<EmptyStructureElement, EmptyStructureElement>() {
 
