@@ -227,6 +227,58 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
                         elementClass = LiteralClose::class,
                         structureClass = EmptyStructureElement::class,
                         accumulatorConstructor = ::LiteralCloseEmptyAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = LiteralClose::class,
+                        structureClass = ArrayStructureElement::class,
+                        accumulatorConstructor = ::LiteralCloseArrayAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = LiteralClose::class,
+                        structureClass = EmptyStructureElement::class,
+                        accumulatorConstructor = ::LiteralCloseEmptyAccumulator
+                ),
+                // Array  ----------------------------------------------------------------------------------------------
+                ConstructorHolder(
+                        elementClass = ArrayOpen::class,
+                        structureClass = ArrayStructureElement::class,
+                        accumulatorConstructor = ::ArrayOpenAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ArrayComma::class,
+                        structureClass = ArrayStructureElement::class,
+                        accumulatorConstructor = ::ArrayCommaAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ArrayClose::class,
+                        structureClass = EmptyStructureElement::class,
+                        accumulatorConstructor = ::ArrayCloseEmptyAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ArrayClose::class,
+                        structureClass = ArrayStructureElement::class,
+                        accumulatorConstructor = ::ArrayCloseArrayAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ArrayClose::class,
+                        structureClass = OpenObjectStructure::class,
+                        accumulatorConstructor = ::ArrayCloseOpenObjectAccumulator
+                ),
+                // Object ----------------------------------------------------------------------------------------------
+                ConstructorHolder(
+                        elementClass = ObjectOpen::class,
+                        structureClass = OpenObjectStructure::class,
+                        accumulatorConstructor = ::ObjectOpenAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = StringClose::class,
+                        structureClass = ObjectWithKeyStructure::class,
+                        accumulatorConstructor = ::ObjectWithKeyAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ObjectColon::class,
+                        structureClass = ObjectWithKeyStructure::class,
+                        accumulatorConstructor = ::ObjectReadyForValueAccumulator
                 )
         )
     }

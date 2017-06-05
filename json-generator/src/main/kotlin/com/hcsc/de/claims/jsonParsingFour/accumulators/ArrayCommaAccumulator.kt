@@ -10,8 +10,8 @@ data class ArrayCommaAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
         override val structureStack: List<MainStructure>,
-        override val previousClosable: ArrayStructureElement,
-        override val previousElement: ArrayComma
+        override val previousElement: ArrayComma,
+        override val previousClosable: ArrayStructureElement
 ) : BaseAccumulator<ArrayComma, ArrayStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {

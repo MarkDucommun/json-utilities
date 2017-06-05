@@ -7,8 +7,8 @@ import com.hcsc.de.claims.jsonParsingFour.*
 data class LiteralCloseArrayAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
-        override val previousElement: LiteralClose,
         override val structureStack: List<MainStructure>,
+        override val previousElement: LiteralClose,
         override val previousClosable: ArrayStructureElement
 ) : BaseAccumulator<LiteralClose, ArrayStructureElement>() {
 
