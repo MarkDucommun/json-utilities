@@ -58,7 +58,7 @@ data class ArrayCloseOpenObjectAccumulator(
                                 idCounter = idCounter,
                                 structure = structure.plus(close),
                                 previousElement = close,
-                                structureStack = structureStack.dropLast(1).plus(modifiedNewPreviousStructure),
+                                structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure),
                                 previousClosable = modifiedNewPreviousStructure
                         ))
                     }

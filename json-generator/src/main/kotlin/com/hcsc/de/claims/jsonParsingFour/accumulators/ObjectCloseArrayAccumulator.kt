@@ -8,8 +8,8 @@ data class ObjectCloseArrayAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
         override val structureStack: List<MainStructure>,
-        override val previousClosable: ArrayStructureElement,
-        override val previousElement: ObjectClose
+        override val previousElement: ObjectClose,
+        override val previousClosable: ArrayStructureElement
 ) : BaseAccumulator<ObjectClose, ArrayStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {

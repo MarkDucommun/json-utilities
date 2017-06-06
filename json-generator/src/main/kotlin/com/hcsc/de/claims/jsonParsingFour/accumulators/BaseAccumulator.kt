@@ -174,7 +174,7 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
             constructors
                     .find { it.elementClass == elementClass && it.structureClass == structureClass }
                     ?.let { Success<String, ConstructorHolder<*, *>>(it) }
-                    ?: Failure("Could not find constructor")
+                    ?: Failure("Could not find constructor: ${elementClass.simpleName}, ${structureClass.simpleName}")
 
 
     data class ConstructorHolder<elementType : JsonStructure, structureType : MainStructure>(
@@ -235,8 +235,8 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
                 ),
                 ConstructorHolder(
                         elementClass = LiteralClose::class,
-                        structureClass = EmptyStructureElement::class,
-                        accumulatorConstructor = ::LiteralCloseEmptyAccumulator
+                        structureClass = OpenObjectStructure::class,
+                        accumulatorConstructor = ::LiteralCloseOpenObjectAccumulator
                 ),
                 // Array  ----------------------------------------------------------------------------------------------
                 ConstructorHolder(
@@ -279,6 +279,26 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
                         elementClass = ObjectColon::class,
                         structureClass = ObjectWithKeyStructure::class,
                         accumulatorConstructor = ::ObjectReadyForValueAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ObjectComma::class,
+                        structureClass = OpenObjectStructure::class,
+                        accumulatorConstructor = ::ObjectCommaAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ObjectClose::class,
+                        structureClass = EmptyStructureElement::class,
+                        accumulatorConstructor = ::ObjectCloseEmptyAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ObjectClose::class,
+                        structureClass = ArrayStructureElement::class,
+                        accumulatorConstructor = ::ObjectCloseArrayAccumulator
+                ),
+                ConstructorHolder(
+                        elementClass = ObjectClose::class,
+                        structureClass = OpenObjectStructure::class,
+                        accumulatorConstructor = ::ObjectCloseOpenObjectAccumulator
                 )
         )
     }

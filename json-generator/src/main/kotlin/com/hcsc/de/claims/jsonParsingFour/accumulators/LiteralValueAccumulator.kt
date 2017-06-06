@@ -20,7 +20,8 @@ data class LiteralValueAccumulator(
 
         return when (char) {
             ' ', '\n', '\r', '\t' -> when (enclosingStructure) {
-                is EmptyStructureElement, is ArrayStructureElement -> closeLiteral()
+                is EmptyStructureElement -> closeLiteral()
+                is ArrayStructureElement -> closeLiteral()
                 is ObjectWithKeyStructure -> closeLiteral()
                 else -> TODO("THIS REALLY SHOULD NEVER HAPPEN")
             }
@@ -123,14 +124,14 @@ data class LiteralValueAccumulator(
                     val objectClose = ObjectClose(newPreviousStructure.id)
 
                     when (evenNewerPreviousStructure) {
-                        EmptyStructureElement -> Success<String, Accumulator<*, *>>(ObjectCloseEmptyAccumulator(
+                        is EmptyStructureElement -> Success<String, Accumulator<*, *>>(ObjectCloseEmptyAccumulator(
                                 idCounter = idCounter,
                                 structure = structure.dropLast(1)
                                         .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
                                         .plus(objectClose),
                                 previousElement = objectClose,
-                                structureStack = newStructureStack,
-                                previousClosable = EmptyStructureElement
+                                structureStack = evenNewerStructureStack,
+                                previousClosable = evenNewerPreviousStructure
                         ))
                         is ArrayStructureElement -> Success<String, Accumulator<*, *>>(ObjectCloseArrayAccumulator(
                                 idCounter = idCounter,

@@ -8,8 +8,8 @@ data class ObjectCommaAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
         override val structureStack: List<MainStructure>,
-        override val previousClosable: OpenObjectStructure,
-        override val previousElement: ObjectComma
+        override val previousElement: ObjectComma,
+        override val previousClosable: OpenObjectStructure
 ) : BaseAccumulator<ObjectComma, OpenObjectStructure>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
