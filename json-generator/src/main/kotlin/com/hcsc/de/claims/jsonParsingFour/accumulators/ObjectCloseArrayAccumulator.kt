@@ -16,51 +16,13 @@ data class ObjectCloseArrayAccumulator(
 
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
-            ']' -> {
-
-                val newStructureStack = structureStack.dropLast(1)
-
-                val newPreviousStructure = newStructureStack.lastOrNull() ?: EmptyStructureElement
-
-                val close = ArrayClose(id = previousClosable.id)
-
-                when (newPreviousStructure) {
-                    is EmptyStructureElement -> {
-
-                        Success<String, Accumulator<*, *>>(ArrayCloseEmptyAccumulator(
-                                idCounter = idCounter,
-                                structure = structure.plus(close),
-                                previousElement = close,
-                                previousClosable = newPreviousStructure,
-                                structureStack = newStructureStack
-                        ))
-                    }
-                    is ArrayStructureElement -> {
-
-                        Success<String, Accumulator<*, *>>(ArrayCloseArrayAccumulator(
-                                idCounter = idCounter,
-                                structure = structure.plus(close),
-                                structureStack = newStructureStack,
-                                previousElement = close,
-                                previousClosable = newPreviousStructure
-                        ))
-                    }
-                    is ObjectWithKeyStructure -> {
-
-                        val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
-
-                        Success<String, Accumulator<*, *>>(ArrayCloseOpenObjectAccumulator(
-                                idCounter = idCounter,
-                                structure = structure.plus(close),
-                                structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure),
-                                previousElement = close,
-                                previousClosable = modifiedNewPreviousStructure
-                        ))
-                    }
-                    is LiteralStructureElement -> TODO("SHOULD NOT HAPPEN")
-                    is StringStructureElement -> TODO("SHOULD NOT HAPPEN")
-                    is OpenObjectStructure -> TODO("SHOULD NOT HAPPEN")
-                }
+            ']' -> when (enclosingStructure) {
+                is EmptyStructureElement -> closeStructure(::ArrayClose)
+                is ArrayStructureElement -> closeStructure(::ArrayClose)
+                is ObjectWithKeyStructure -> closeStructure(::ArrayClose)
+                is LiteralStructureElement -> TODO("SHOULD NOT HAPPEN")
+                is StringStructureElement -> TODO("SHOULD NOT HAPPEN")
+                is OpenObjectStructure -> TODO("SHOULD NOT HAPPEN")
             }
             else -> TODO()
         }

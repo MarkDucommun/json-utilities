@@ -15,6 +15,7 @@ data class ArrayCommaAccumulator(
 ) : BaseAccumulator<ArrayComma, ArrayStructureElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
+
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
             '"' -> openString()

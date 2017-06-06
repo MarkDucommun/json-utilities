@@ -15,20 +15,7 @@ data class ObjectCommaAccumulator(
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
-            '"' -> {
-
-                val open = StringOpen(id = idCounter)
-
-                val string = StringStructureElement(id = idCounter)
-
-                Success(StringOpenAccumulator(
-                        idCounter = idCounter + 1,
-                        structure = structure.plus(open),
-                        structureStack = structureStack.plus(string),
-                        previousElement = open,
-                        previousClosable = string
-                ))
-            }
+            '"' -> openString()
             else -> TODO()
 //            else -> fail("object key must be a string")
         }

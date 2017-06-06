@@ -142,6 +142,34 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
         }
     }
 
+    inline fun <reified lastElementType : Close, reified newElementType: JsonStructure> replaceLastElementAndAddNewElementAndCloseStructure(
+            lastElement: lastElementType,
+            newElement: newElementType
+    ): Result<String, Accumulator<*, *>> {
+
+        val newStructureStack = structureStack.dropLast(1)
+        val newPreviousClosable = newStructureStack.last()
+
+        val transformedPreviousClosable = when (newPreviousClosable) {
+            is OpenObjectStructure -> ObjectWithKeyStructure(id = newPreviousClosable.id)
+            is ObjectWithKeyStructure -> OpenObjectStructure(id = newPreviousClosable.id)
+            else -> newPreviousClosable
+        }
+
+        val structureClass: KClass<out MainStructure> = transformedPreviousClosable::class
+        val elementClass: KClass<newElementType> = newElementType::class
+
+        return findCastConstructor(elementClass, structureClass).flatMap { constructorHolder ->
+            Success<String, Accumulator<*, *>>(constructorHolder.accumulatorConstructor(
+                    idCounter,
+                    structure.dropLast(1).plus(lastElement).plus(newElement),
+                    newStructureStack.dropLast(1).plus(transformedPreviousClosable),
+                    newElement,
+                    transformedPreviousClosable
+            ))
+        }
+    }
+
     fun fail(message: String): Failure<String, Accumulator<*, *>> = Failure("Invalid JSON - $message")
 
     val unmodified: Success<String, Accumulator<*, *>> get() = Success(this)

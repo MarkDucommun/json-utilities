@@ -15,18 +15,7 @@ data class ObjectWithKeyAccumulator(
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
-            ':' -> {
-
-                val colon = ObjectColon(id = previousClosable.id)
-
-                Success(ObjectReadyForValueAccumulator(
-                        idCounter = idCounter,
-                        structure = structure.plus(colon),
-                        structureStack = structureStack,
-                        previousElement = colon,
-                        previousClosable = previousClosable
-                ))
-            }
+            ':' -> addElement(::ObjectColon)
             else -> fail("colon must follow an object key")
         }
     }

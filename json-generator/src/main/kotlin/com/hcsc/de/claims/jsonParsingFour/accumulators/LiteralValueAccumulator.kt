@@ -2,6 +2,7 @@ package com.hcsc.de.claims.jsonParsingFour.accumulators
 
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.helpers.flatMap
 import com.hcsc.de.claims.jsonParsingFour.*
 
 data class LiteralValueAccumulator(
@@ -28,140 +29,52 @@ data class LiteralValueAccumulator(
             ',' -> when (newPreviousStructure) {
                 is ArrayStructureElement -> {
 
-                    val arrayComma = ArrayComma(newPreviousStructure.id)
+                    val arrayComma = ArrayComma(id = newPreviousStructure.id)
 
-                    Success<String, Accumulator<*, *>>(ArrayCommaAccumulator(
-                            idCounter = idCounter,
-                            structure = structure.dropLast(1)
-                                    .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                    .plus(arrayComma),
-                            previousElement = arrayComma,
-                            structureStack = newStructureStack,
-                            previousClosable = newPreviousStructure
-                    ))
+                    val literalClose = LiteralClose(previousElement.id, previousElement.value)
+
+                    replaceLastElementAndAddNewElementAndCloseStructure(literalClose, arrayComma)
                 }
                 is ObjectWithKeyStructure -> {
 
                     val objectComma = ObjectComma(id = newPreviousStructure.id)
 
-                    val modifiedNewPreviousStructure = OpenObjectStructure(id = newPreviousStructure.id)
+                    val literalClose = LiteralClose(previousElement.id, previousElement.value)
 
-                    Success<String, Accumulator<*, *>>(ObjectCommaAccumulator(
-                            idCounter = idCounter,
-                            structure = structure.dropLast(1)
-                                    .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                    .plus(objectComma),
-                            previousElement = objectComma,
-                            structureStack = newStructureStack.dropLast(1).plus(modifiedNewPreviousStructure),
-                            previousClosable = modifiedNewPreviousStructure
-                    ))
+                    replaceLastElementAndAddNewElementAndCloseStructure(literalClose, objectComma)
                 }
                 is OpenObjectStructure -> TODO("THIS SHOULD NEVER HAPPEN")
-                EmptyStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                is EmptyStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
             }
             ']' -> when (newPreviousStructure) {
-                is ArrayStructureElement -> {
-
-                    val evenNewerStructureStack = newStructureStack.dropLast(1)
-
-                    val evenNewerPreviousStructure = evenNewerStructureStack.lastOrNull() ?: EmptyStructureElement
-
-                    val arrayClose = ArrayClose(newPreviousStructure.id)
-
-                    when (evenNewerPreviousStructure) {
-                        EmptyStructureElement -> Success<String, Accumulator<*, *>>(ArrayCloseEmptyAccumulator(
-                                idCounter = idCounter,
-                                structure = structure.dropLast(1)
-                                        .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                        .plus(arrayClose),
-                                previousElement = arrayClose,
-                                previousClosable = EmptyStructureElement,
-                                structureStack = evenNewerStructureStack
-                        ))
-                        is ArrayStructureElement -> Success<String, Accumulator<*, *>>(ArrayCloseArrayAccumulator(
-                                idCounter = idCounter,
-                                previousElement = arrayClose,
-                                structure = structure.dropLast(1)
-                                        .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                        .plus(arrayClose),
-                                structureStack = evenNewerStructureStack,
-                                previousClosable = evenNewerPreviousStructure
-                        ))
-                        is ObjectWithKeyStructure -> {
-
-                            val modifiedEvenNewerPreviousStructure = OpenObjectStructure(id = evenNewerPreviousStructure.id)
-
-                            Success<String, Accumulator<*, *>>(ArrayCloseOpenObjectAccumulator(
-                                    idCounter = idCounter,
-                                    previousElement = arrayClose,
-                                    structure = structure.dropLast(1)
-                                            .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                            .plus(arrayClose),
-                                    structureStack = evenNewerStructureStack.dropLast(1).plus(modifiedEvenNewerPreviousStructure),
-                                    previousClosable = modifiedEvenNewerPreviousStructure
-                            ))
-                        }
-                        is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
-                        is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
-                        is OpenObjectStructure -> TODO("THIS SHOULD NEVER HAPPEN")
-                    }
+                is ArrayStructureElement -> when (newStructureStack.dropLast(1).lastOrNull()) {
+                    is EmptyStructureElement -> closeLiteralAndEnclosingArray()
+                    is ArrayStructureElement -> closeLiteralAndEnclosingArray()
+                    is ObjectWithKeyStructure -> closeLiteralAndEnclosingArray()
+                    is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                    is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                    is OpenObjectStructure -> TODO("THIS SHOULD NEVER HAPPEN")
+                    null -> TODO("THIS SHOULD NEVER HAPPEN")
                 }
-                EmptyStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                is EmptyStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is OpenObjectStructure -> TODO("THIS SHOULD NEVER HAPPEN")
                 is ObjectWithKeyStructure -> TODO("THIS SHOULD NEVER HAPPEN")
             }
             '}' -> when (newPreviousStructure) {
-                is ObjectWithKeyStructure -> {
-
-                    val evenNewerStructureStack = newStructureStack.dropLast(1)
-
-                    val evenNewerPreviousStructure = evenNewerStructureStack.lastOrNull() ?: EmptyStructureElement
-
-                    val objectClose = ObjectClose(newPreviousStructure.id)
-
-                    when (evenNewerPreviousStructure) {
-                        is EmptyStructureElement -> Success<String, Accumulator<*, *>>(ObjectCloseEmptyAccumulator(
-                                idCounter = idCounter,
-                                structure = structure.dropLast(1)
-                                        .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                        .plus(objectClose),
-                                previousElement = objectClose,
-                                structureStack = evenNewerStructureStack,
-                                previousClosable = evenNewerPreviousStructure
-                        ))
-                        is ArrayStructureElement -> Success<String, Accumulator<*, *>>(ObjectCloseArrayAccumulator(
-                                idCounter = idCounter,
-                                structure = structure.dropLast(1)
-                                        .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                        .plus(objectClose),
-                                previousElement = objectClose,
-                                structureStack = evenNewerStructureStack,
-                                previousClosable = evenNewerPreviousStructure
-                        ))
-                        is ObjectWithKeyStructure -> {
-
-                            val modifiedEvenNewerPreviousStructure = OpenObjectStructure(id = evenNewerPreviousStructure.id)
-
-                            Success<String, Accumulator<*, *>>(ObjectCloseOpenObjectAccumulator(
-                                    idCounter = idCounter,
-                                    structure = structure.dropLast(1)
-                                            .plus(LiteralClose(id = previousElement.id, value = previousElement.value))
-                                            .plus(objectClose),
-                                    previousElement = objectClose,
-                                    structureStack = evenNewerStructureStack.dropLast(1).plus(modifiedEvenNewerPreviousStructure),
-                                    previousClosable = modifiedEvenNewerPreviousStructure
-                            ))
-                        }
-                        is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
-                        is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
-                        is OpenObjectStructure -> TODO("THIS SHOULD NEVER HAPPEN")
-                    }
+                is ObjectWithKeyStructure -> when (newStructureStack.dropLast(1).lastOrNull()) {
+                    is EmptyStructureElement -> closeLiteralAndEnclosingObject()
+                    is ArrayStructureElement -> closeLiteralAndEnclosingObject()
+                    is ObjectWithKeyStructure -> closeLiteralAndEnclosingObject()
+                    is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                    is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                    is OpenObjectStructure -> TODO("THIS SHOULD NEVER HAPPEN")
+                    null -> TODO("THIS SHOULD NEVER HAPPEN")
                 }
-                EmptyStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
+                is EmptyStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is LiteralStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is StringStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
                 is ArrayStructureElement -> TODO("THIS SHOULD NEVER HAPPEN")
@@ -170,6 +83,17 @@ data class LiteralValueAccumulator(
             else -> addValue(::LiteralValue, char)
         }
     }
+
+    fun closeLiteralAndEnclosingArray(): Result<String, Accumulator<*, *>> =
+            closeLiteralAndEnclosingStructure(::ArrayClose)
+
+    fun closeLiteralAndEnclosingObject(): Result<String, Accumulator<*, *>> =
+        closeLiteralAndEnclosingStructure(::ObjectClose)
+
+    inline fun <reified elementType: Close> closeLiteralAndEnclosingStructure(
+            crossinline elementConstructor: (Long) -> elementType
+    ): Result<String, Accumulator<*, *>> =
+            closeLiteral().flatMap { (it as BaseAccumulator).closeStructure(elementConstructor) }
 
     fun closeLiteral(): Result<String, Accumulator<*, *>> =
             replaceLastElementAndCloseStructure(LiteralClose(
