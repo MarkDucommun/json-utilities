@@ -6,6 +6,8 @@ interface Open<out structureType: MainStructure> : JsonStructure {
 
 interface Close : JsonStructure
 
+interface Comma : JsonStructure
+
 interface WithValue : JsonStructure {
     val value: Char
 }
@@ -15,6 +17,8 @@ interface JsonStructure {
 }
 
 sealed class MainStructure : JsonStructure
+
+sealed class ComplexStructure : MainStructure()
 
 object EmptyStructureElement : MainStructure() {
     override val id: Long = 0
@@ -65,7 +69,7 @@ data class StringClose(
         override val id: Long
 ) : StringElement(), Close
 
-data class ArrayStructureElement(override val id: Long) : MainStructure()
+data class ArrayStructureElement(override val id: Long) : ComplexStructure()
 
 sealed class ArrayElement : JsonStructure
 
@@ -74,11 +78,11 @@ data class ArrayOpen(override val id: Long) : ArrayElement(), Open<ArrayStructur
         get() = ::ArrayStructureElement
 }
 
-data class ArrayComma(override val id: Long) : ArrayElement()
+data class ArrayComma(override val id: Long) : ArrayElement(), Comma
 
 data class ArrayClose(override val id: Long) : ArrayElement(), Close
 
-sealed class ObjectStructureElement : MainStructure()
+sealed class ObjectStructureElement : ComplexStructure()
 
 data class OpenObjectStructure(override val id: Long) : ObjectStructureElement()
 
@@ -94,6 +98,6 @@ data class ObjectOpen(override val id: Long) : ObjectElement(), Open<OpenObjectS
 
 data class ObjectColon(override val id: Long) : ObjectElement()
 
-data class ObjectComma(override val id: Long) : ObjectElement()
+data class ObjectComma(override val id: Long) : ObjectElement(), Comma
 
 data class ObjectClose(override val id: Long) : ObjectElement(), Close
