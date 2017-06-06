@@ -52,7 +52,6 @@ dependencies {
 	compile("com.github.fge:json-schema-validator:2.2.6")
 	compile('org.apache.commons:commons-math3:3.6.1')
 	compile group: 'net.sourceforge.jdistlib', name: 'jdistlib', version: '0.4.5'
-//	compile group: 'com.github.lucarosellini.rJava', name: 'JRI', version: '0.9-7'
 	compile "org.renjin:renjin-script-engine:$renjinVersion"
 	compile "org.renjin.cran:exptest:1.2-b214"
 	compile "org.renjin.cran:fitdistrplus:1.0-8-b4"

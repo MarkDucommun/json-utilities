@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hcsc.de.claims.distributions.NormalDoubleDistribution
+import com.hcsc.de.claims.distributions.RealDistributionGenerator
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.*
+import com.hcsc.de.claims.renjinWrapper.Renjin
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import net.sourceforge.jdistlib.generic.GenericDistribution
@@ -146,8 +148,6 @@ class JsonSizeAnalyzerIntegrationTest {
         }
     }
 
-
-
     @Test
     fun `it writes a file that has a comma separated list of the root size of all the json documents`() {
 
@@ -202,6 +202,27 @@ class JsonSizeAnalyzerIntegrationTest {
     }
 
     @Test
+    fun `lets find out the distribution for this set of data`() {
+
+        val claimSizes = listOfClaimSizes().map(Int::toDouble)
+
+        val results = RealDistributionGenerator(Renjin).profile(claimSizes)
+
+        if (results is Success) {
+
+            val distribution = results.content.distribution
+
+            val generatedDistribution = List(1000) { distribution.random() }.map { it.ceilingOnEven() }.map { it.toInt() }.map { it.toDouble() }.toDoubleArray()
+
+            val result1 = DistributionTest.kolmogorov_smirnov_test(claimSizes.toDoubleArray(), generatedDistribution)
+
+            println()
+
+        }
+    }
+
+    @Test
+    @Ignore
     fun `some function groups a given distribution into 1000 buckets`() {
 
         val claimSizes = listOfClaimSizes().map(Int::toDouble)

@@ -10,14 +10,14 @@ import org.junit.Assert.fail
 infix fun <failureType, successType> Result<failureType, successType>.succeedsAnd(onSuccess: (successType) -> Unit) {
     when (this) {
         is Success -> onSuccess(this.content)
-        is Failure -> fail("Result should have been a Success")
+        is Failure -> fail("Result should have been a Success: $content")
     }
 }
 
 infix fun <failureType, successType> Result<failureType, successType>.succeedsAndShouldReturn(expectedObject: successType) {
     when (this) {
         is Success -> assertThat(content).isEqualTo(expectedObject)
-        is Failure -> fail("Result should have been a Success")
+        is Failure -> fail("Result should have been a Success: $content")
     }
 }
 
