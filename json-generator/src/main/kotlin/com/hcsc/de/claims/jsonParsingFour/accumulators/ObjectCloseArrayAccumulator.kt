@@ -16,6 +16,7 @@ data class ObjectCloseArrayAccumulator(
 
         return when (char) {
             ' ', '\n', '\r', '\t' -> unmodified
+            ',' -> addElement(::ArrayComma)
             ']' -> when (enclosingStructure) {
                 is EmptyStructureElement -> closeStructure(::ArrayClose)
                 is ArrayStructureElement -> closeStructure(::ArrayClose)

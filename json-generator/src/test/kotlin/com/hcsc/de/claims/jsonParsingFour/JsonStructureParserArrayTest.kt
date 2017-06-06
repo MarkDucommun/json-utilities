@@ -464,4 +464,18 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
                 ArrayClose(id = 1)
         )
     }
+
+    @Test
+    fun `it can create an array where the children are is empty objects`() {
+
+        "[{},{}]".jsonStructure succeedsAndShouldReturn listOf(
+                ArrayOpen(id = 1),
+                ObjectOpen(id = 2),
+                ObjectClose(id = 2),
+                ArrayComma(id = 1),
+                ObjectOpen(id = 3),
+                ObjectClose(id = 3),
+                ArrayClose(id = 1)
+        )
+    }
 }
