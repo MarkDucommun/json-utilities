@@ -10,7 +10,7 @@ data class ObjectWithKeyAccumulator(
         override val structureStack: List<MainStructure<*>>,
         override val previousElement: StringClose,
         override val previousClosable: ObjectWithKeyStructure
-) : BaseAccumulator<StringClose, ObjectWithKeyStructure, MainStructure<*>>() {
+) : BaseAccumulator<StringClose, ObjectWithKeyStructure, ObjectChildElement<*>>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {

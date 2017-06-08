@@ -5,3 +5,5 @@
 build/
 
 json-generator/src/test/resources/data/
+/src/
+/data/

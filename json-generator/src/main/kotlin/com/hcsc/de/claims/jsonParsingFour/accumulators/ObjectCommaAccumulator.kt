@@ -10,7 +10,7 @@ data class ObjectCommaAccumulator(
         override val structureStack: List<MainStructure<*>>,
         override val previousElement: ObjectComma,
         override val previousClosable: OpenObjectStructure
-) : BaseAccumulator<ObjectComma, OpenObjectStructure, MainStructure<*>>() {
+) : BaseAccumulator<ObjectComma, OpenObjectStructure, ObjectChildElement<*>>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {

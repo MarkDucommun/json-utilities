@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.jsonParsingFour
 
-interface Open<out structureType: MainStructure<childType>, childType: JsonStructure> : JsonStructure {
+interface Open<out structureType : MainStructure<childType>, childType : JsonStructure> : JsonStructure {
     val structureConstructor: (Long, List<childType>) -> structureType
 }
 
@@ -16,15 +16,10 @@ interface JsonStructure {
     val id: Long
 }
 
-sealed class MainStructure<out childType: JsonStructure> : JsonStructure {
+sealed class MainStructure<out childType : JsonStructure> : JsonStructure {
 
     abstract val children: List<childType>
-
-
-
 }
-
-sealed class ComplexStructure : MainStructure<MainStructure<*>>()
 
 object EmptyStructureElement : MainStructure<EmptyStructureElement>() {
 
@@ -83,7 +78,7 @@ data class StringClose(
 data class ArrayStructureElement(
         override val id: Long,
         override val children: List<MainStructure<*>>
-) : ComplexStructure()
+) : MainStructure<MainStructure<*>>()
 
 sealed class ArrayElement : JsonStructure
 
@@ -96,23 +91,29 @@ data class ArrayComma(override val id: Long) : ArrayElement(), Comma
 
 data class ArrayClose(override val id: Long) : ArrayElement(), Close
 
-sealed class ObjectStructureElement : ComplexStructure()
+sealed class ObjectStructureElement : MainStructure<ObjectChildElement<*>>()
+
+data class ObjectChildElement<out childType : MainStructure<*>>(
+        override val id: Long,
+        val key: StringStructureElement,
+        val value: MainStructure<childType>
+) : JsonStructure
 
 data class OpenObjectStructure(
         override val id: Long,
-        override val children: List<MainStructure<*>>
+        override val children: List<ObjectChildElement<*>>
 ) : ObjectStructureElement()
 
 data class ObjectWithKeyStructure(
         override val id: Long,
-        override val children: List<MainStructure<*>>
+        override val children: List<ObjectChildElement<*>>
 ) : ObjectStructureElement()
 
 sealed class ObjectElement : JsonStructure
 
-data class ObjectOpen(override val id: Long) : ObjectElement(), Open<OpenObjectStructure, MainStructure<*>> {
+data class ObjectOpen(override val id: Long) : ObjectElement(), Open<OpenObjectStructure, ObjectChildElement<*>> {
 
-    override val structureConstructor: (Long, List<MainStructure<*>>) -> OpenObjectStructure
+    override val structureConstructor: (Long, List<ObjectChildElement<*>>) -> OpenObjectStructure
         get() = ::OpenObjectStructure
 }
 

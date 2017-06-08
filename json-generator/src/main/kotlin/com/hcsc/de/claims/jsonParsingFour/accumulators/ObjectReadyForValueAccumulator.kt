@@ -9,7 +9,7 @@ data class ObjectReadyForValueAccumulator(
         override val structureStack: List<MainStructure<*>>,
         override val previousElement: ObjectColon,
         override val previousClosable: ObjectWithKeyStructure
-) : BaseAccumulator<ObjectColon, ObjectWithKeyStructure, MainStructure<*>>() {
+) : BaseAccumulator<ObjectColon, ObjectWithKeyStructure, ObjectChildElement<*>>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {

@@ -9,7 +9,7 @@ data class ObjectOpenAccumulator(
         override val structureStack: List<MainStructure<*>>,
         override val previousElement: ObjectOpen,
         override val previousClosable: OpenObjectStructure
-) : BaseAccumulator<ObjectOpen, OpenObjectStructure, MainStructure<*>>() {
+) : BaseAccumulator<ObjectOpen, OpenObjectStructure, ObjectChildElement<*>>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 

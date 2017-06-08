@@ -51,7 +51,6 @@ class JsonStructureParserObjectTest : JsonStructureParserBaseTest() {
         "{\"a\"a".jsonStructure failsWithMessage "Invalid JSON - colon must follow an object key"
     }
 
-
     @Test
     fun `it fails when the object is closed after a key but before a value`() {
 
