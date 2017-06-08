@@ -3,31 +3,6 @@ package com.hcsc.de.claims.distributions
 import com.hcsc.de.claims.helpers.*
 import java.util.*
 
-data class UnknownIntVariableBinWidthDistribution(
-        override val average: Int,
-        override val minimum: Int,
-        override val maximum: Int,
-        override val median: Int,
-        override val mode: Int,
-        override val bins: List<VariableWidthBin<Int>>
-) : UnknownVariableBinWidthDistribution<Int> {
-
-    private val random = Random()
-
-    // TODO make how we generate random values better
-    override fun random(): Int {
-
-        val index = random.nextInt(bins.size)
-
-        val bin = bins[index]
-
-        return bin.members[random.nextInt(bin.members.size)]
-//        return bin.startValue
-    }
-
-    override val numberOfBins: Int = bins.size
-}
-
 fun List<Int>.unknownVariableBinWidthDistribution(
         binCount: Int = 5,
         rangeMinimum: Int? = null,
@@ -47,10 +22,7 @@ fun List<Int>.unknownVariableBinWidthDistribution(
     val observedMinimum = sortedAndFilteredByMinimumAndMaximum.min() ?: 0
     val observedMaximum = sortedAndFilteredByMinimumAndMaximum.max() ?: 0
 
-    val actualMinimum = rangeMinimum ?: observedMinimum
-    val actualMaximum = rangeMaximum ?: observedMaximum
-
-    return UnknownIntVariableBinWidthDistribution(
+    return UnknownVariableBinWidthDistribution(
             average = sortedAndFilteredByMinimumAndMaximum.averageInt(),
             minimum = observedMinimum,
             maximum = observedMaximum,

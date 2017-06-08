@@ -1,40 +1,24 @@
+@file:JvmName("UnknownDualMemberVariableBinWidthDistributionKt")
+
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.averageInt
-import com.hcsc.de.claims.helpers.medianInt
-import com.hcsc.de.claims.helpers.modeInt
-
-
-data class UnknownDualMemberVariableBinWidthIntDistribution(
-        override val average: Int,
-        override val minimum: Int,
-        override val maximum: Int,
-        override val median: Int,
-        override val mode: Int,
-        override val bins: List<VariableDualMemberWidthBin<Int>>
-) : UnknownDualMemberVariableBinWidthDistribution<Int> {
-    override val numberOfBins: Int = bins.size
-
-    override fun random(): Int {
-        TODO("not implemented")
-    }
-}
+import com.hcsc.de.claims.helpers.*
 
 data class DistributionPair<out numberType : Number>(
         val one: List<numberType>,
         val two: List<numberType>
 )
 
-fun DistributionPair<Int>.unknownDualMemberVariableBinWidthDistribution(
+fun <numberType: Number> DistributionPair<numberType>.unknownDualMemberVariableBinWidthDistribution(
         minimumBinCount: Int = 5,
-        rangeMinimum: Int? = null,
-        rangeMaximum: Int? = null
-): UnknownDualMemberVariableBinWidthDistribution<Int> {
+        rangeMinimum: numberType? = null,
+        rangeMaximum: numberType? = null
+): UnknownDualMemberVariableBinWidthDistribution<Double> {
 
     val (listOne, listTwo) = this
 
-    val sortedOne: List<Int> = listOne.sorted()
-    val sortedTwo: List<Int> = listTwo.sorted()
+    val sortedOne = listOne.map(Number::toDouble).sorted()
+    val sortedTwo = listTwo.map(Number::toDouble).sorted()
 
     val listOneBinMembers = sortedOne.map { BinMember.BinMemberOne(it) }
     val listTwoBinMembers = sortedTwo.map { BinMember.BinMemberTwo(it) }
@@ -42,86 +26,122 @@ fun DistributionPair<Int>.unknownDualMemberVariableBinWidthDistribution(
     val combined = listOneBinMembers.plus(listTwoBinMembers)
 
     val sortedAndFilteredByMinimum = rangeMinimum
-            ?.let { combined.filterNot { it.value < rangeMinimum } }
+            ?.let { combined.filterNot { it.value < rangeMinimum.toDouble() } }
             ?: combined
 
     val sortedAndFilteredByMinimumAndMaximum = rangeMaximum
-            ?.let { sortedAndFilteredByMinimum.filterNot { it.value > rangeMaximum } }
+            ?.let { sortedAndFilteredByMinimum.filterNot { it.value > rangeMaximum.toDouble() } }
             ?: sortedAndFilteredByMinimum
 
-    val observedMinimum = sortedAndFilteredByMinimumAndMaximum.map { it.value }.min() ?: 0
-    val observedMaximum = sortedAndFilteredByMinimumAndMaximum.map { it.value }.max() ?: 0
+    val observedMinimum = sortedAndFilteredByMinimumAndMaximum.map { it.value }.min() ?: 0.0
+    val observedMaximum = sortedAndFilteredByMinimumAndMaximum.map { it.value }.max() ?: 0.0
 
-    return UnknownDualMemberVariableBinWidthIntDistribution(
-            average = sortedAndFilteredByMinimumAndMaximum.map { it.value }.averageInt(),
+    return UnknownDualMemberVariableBinWidthDistribution(
+            average = sortedAndFilteredByMinimumAndMaximum.map { it.value }.average(),
             minimum = observedMinimum,
             maximum = observedMaximum,
-            median = sortedAndFilteredByMinimumAndMaximum.map { it.value }.medianInt(),
-            mode = sortedAndFilteredByMinimumAndMaximum.map { it.value }.modeInt(),
-            bins = sortedAndFilteredByMinimumAndMaximum.asBin.maximizeBins(minimumBinCount)
+            median = sortedAndFilteredByMinimumAndMaximum.map { it.value }.median(),
+            mode = sortedAndFilteredByMinimumAndMaximum.map { it.value }.mode(),
+            bins = sortedAndFilteredByMinimumAndMaximum.asDoubleBin.maximizeDoubleBins(minimumBinCount)
     )
 }
 
-val UnknownDualMemberVariableBinWidthDistribution<Int>
-        .asTwoDistributions : Pair<UnknownVariableBinWidthDistribution<Int>, UnknownVariableBinWidthDistribution<Int>> get() {
+val <numberType: Number> UnknownDualMemberVariableBinWidthDistribution<numberType>
+        .asTwoDistributions : Pair<UnknownVariableBinWidthDistribution<Double>, UnknownVariableBinWidthDistribution<Double>> get() {
 
     val firstBins = this.bins.map {
-        val members = it.members.filter { it is BinMember.BinMemberOne<Int> }.map { it.value }
-        VariableWidthBin(startValue = it.startValue, endValue = it.endValue, members = members)
+        val members = it.members.filter { it is BinMember.BinMemberOne<numberType> }.map { it.value.toDouble() }
+        VariableWidthBin(startValue = it.startValue.toDouble(), endValue = it.endValue.toDouble(), members = members)
     }
 
     val firstMembers = firstBins.flatMap { it.members }
 
-    val secondBins = this.bins.map {
-        val members = it.members.filter { it is BinMember.BinMemberTwo<Int> }.map { it.value }
-        VariableWidthBin(startValue = it.startValue, endValue = it.endValue, members = members)
+    val secondBins: List<VariableWidthBin<Double>> = this.bins.map {
+        val members = it.members.filter { it is BinMember.BinMemberTwo<numberType> }.map { it.value.toDouble() }
+        VariableWidthBin(startValue = it.startValue.toDouble(), endValue = it.endValue.toDouble(), members = members)
     }
 
     val secondMembers = secondBins.flatMap { it.members }
 
     return Pair(
-            UnknownIntVariableBinWidthDistribution(
+            UnknownVariableBinWidthDistribution(
                     bins = firstBins,
-                    average = firstMembers.averageInt(),
-                    minimum = firstMembers.min() ?: 0,
-                    maximum = firstMembers.max() ?: 0,
-                    median = firstMembers.medianInt(),
-                    mode = firstMembers.modeInt()
+                    average = firstMembers.average(),
+                    minimum = firstMembers.min() ?: 0.0,
+                    maximum = firstMembers.max() ?: 0.0,
+                    median = firstMembers.median(),
+                    mode = firstMembers.mode()
             ),
-            UnknownIntVariableBinWidthDistribution(
+            UnknownVariableBinWidthDistribution(
                     bins = secondBins,
-                    average = secondMembers.averageInt(),
-                    minimum = secondMembers.min() ?: 0,
-                    maximum = secondMembers.max() ?: 0,
-                    median = secondMembers.medianInt(),
-                    mode = secondMembers.modeInt()
+                    average = secondMembers.average(),
+                    minimum = secondMembers.min() ?: 0.0,
+                    maximum = secondMembers.max() ?: 0.0,
+                    median = secondMembers.median(),
+                    mode = secondMembers.mode()
             )
     )
 }
 
-private fun VariableDualMemberWidthBin<Int>.maximizeBins(binCount: Int): List<VariableDualMemberWidthBin<Int>> {
+private fun VariableDualMemberWidthBin<Double>.maximizeDoubleBins(binCount: Int): List<VariableDualMemberWidthBin<Double>> {
 
-    val median = members.map { it.value }.averageInt()
+    return if (endValue - startValue > 0) {
 
-    val lower = members.filterNot { it.value >= median }
+        val rangeHolder = RangeHolder(low = startValue, middle = (endValue + startValue) / 2, high = endValue)
 
-    val upper = members.filter { it.value >= median }
+        val finalRangeHolder = List(5) { it }.fold(rangeHolder) { rangeHolder, _ ->
 
-    return if (endValue - startValue > 0
-            && lower.filter { it is BinMember.BinMemberOne }.count() > binCount
-            && lower.filter { it is BinMember.BinMemberTwo }.count() > binCount
-            && upper.filter { it is BinMember.BinMemberOne }.count() > binCount
-            && upper.filter { it is BinMember.BinMemberTwo }.count() > binCount) {
+            if (rangeHolder.isIncomplete) {
 
-        listOf(lower.asBin.maximizeBins(binCount), upper.asBin.maximizeBins(binCount)).flatten()
+                val lower = members.filterNot { it.value >= rangeHolder.middle }
+
+                val upper = members.filter { it.value >= rangeHolder.middle }
+
+                if (lower.isBinnable(binCount) && upper.isBinnable(binCount)) {
+                    rangeHolder.copy(isFinalBin = false, isIncomplete = false)
+                } else if (lower.isBinnable(binCount)) {
+                    rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
+                } else if (upper.isBinnable(binCount)) {
+                    rangeHolder.copy(low = rangeHolder.middle, middle = (rangeHolder.high + rangeHolder.middle) / 2)
+                } else {
+                    rangeHolder.copy(isFinalBin = true, isIncomplete = false)
+                }
+            } else {
+                rangeHolder
+            }
+        }
+
+        if (finalRangeHolder.isFinalBin) {
+            listOf(this)
+        } else {
+            val lower = members.filterNot { it.value >= rangeHolder.middle }.asDoubleBin.maximizeDoubleBins(binCount)
+
+            val upper = members.filter { it.value >= rangeHolder.middle }.asDoubleBin.maximizeDoubleBins(binCount)
+
+            lower.plus(upper)
+        }
     } else {
+
         listOf(this)
     }
 }
 
-private val List<BinMember<Int>>.asBin: VariableDualMemberWidthBin<Int>
+private fun <numberType: Number> List<BinMember<numberType>>.isBinnable(count: Int): Boolean {
+    return filter { it is BinMember.BinMemberOne }.count() > count
+            && filter { it is BinMember.BinMemberTwo }.count() > count
+}
+
+data class RangeHolder(
+        val low: Double,
+        val middle: Double,
+        val high: Double,
+        val isIncomplete: Boolean = true,
+        val isFinalBin: Boolean = false
+)
+
+private val List<BinMember<Double>>.asDoubleBin: VariableDualMemberWidthBin<Double>
     get() = VariableDualMemberWidthBin(
-            startValue = this.map { it.value }.min() ?: 0,
-            endValue = this.map { it.value }.max() ?: 0,
+            startValue = this.map { it.value }.min() ?: 0.0,
+            endValue = this.map { it.value }.max() ?: 0.0,
             members = this.sortedBy { it.value }
     )

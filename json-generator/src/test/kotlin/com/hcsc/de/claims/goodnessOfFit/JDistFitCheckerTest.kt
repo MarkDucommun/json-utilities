@@ -1,10 +1,17 @@
 package com.hcsc.de.claims.goodnessOfFit
 
 import com.hcsc.de.claims.distributionFitting.GenericDistributionRandomable
+import com.hcsc.de.claims.distributionFitting.Montreal.randomVariateGen
+import com.hcsc.de.claims.distributionFitting.MontrealDistribution
+import com.hcsc.de.claims.get
 import com.hcsc.de.claims.succeedsAnd
+import com.hcsc.de.claims.visualize
 import net.sourceforge.jdistlib.Normal
+import net.sourceforge.jdistlib.Weibull
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
+import umontreal.ssj.randvar.NormalGen
+import umontreal.ssj.randvar.RandomVariateGen
 
 class JDistFitCheckerTest {
 
@@ -13,31 +20,48 @@ class JDistFitCheckerTest {
     @Test
     fun `it returns a high pValue for values from the same distribution`() {
 
-        val randomable = GenericDistributionRandomable(Normal(100.0, 20.0))
+        listOf(1000, 10000, 100000).forEach { listSize ->
 
-        val firstList = List(10000) { randomable.random() }
+            val randomable = GenericDistributionRandomable(Normal(100.0, 20.0))
 
-        val secondList = List(10000) { randomable.random() }
+            val firstList = List(listSize) { randomable.random() }
 
-        subject.check(firstList, secondList) succeedsAnd {
-            assertThat(it).isGreaterThan(0.5)
+            val secondList = List(listSize) { randomable.random() }
+
+            subject.check(firstList, secondList) succeedsAnd {
+
+                if (it < 0.5) {
+                    visualize(firstList, secondList, 3)
+                }
+
+                println("$listSize: $it")
+
+                assertThat(it).isGreaterThan(0.5)
+            }
         }
     }
 
     @Test
     fun `it returns low pValue for values from different distributions`() {
 
-        val randomableOne = GenericDistributionRandomable(Normal(100.0, 20.0))
+        listOf(1000, 10000, 100000).forEach { listSize ->
 
-        val randomableTwo = GenericDistributionRandomable(Normal(2.0, 20.0))
+            val randomableOne = GenericDistributionRandomable(Normal(100.0, 20.0))
 
-        val firstList = List(10000) { randomableOne.random() }
+            val randomableTwo = randomVariateGen<NormalGen>(100.0, 20.0).get
 
-        val secondList = List(10000) { randomableTwo.random() }
+            val firstList = List(listSize) { randomableOne.random() }
 
-        subject.check(firstList, secondList) succeedsAnd {
-            println(it)
-            assertThat(it).isLessThan(0.5)
+            val secondList = List(listSize) { randomableTwo.random() }
+
+            visualize(firstList, secondList, 2)
+
+            subject.check(firstList, firstList.dropLast(firstList.size / 2)) succeedsAnd {
+
+                println("$listSize: $it")
+
+//                assertThat(it).isLessThan(0.05)
+            }
         }
     }
 }

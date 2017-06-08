@@ -4,28 +4,6 @@ import com.hcsc.de.claims.helpers.median
 import com.hcsc.de.claims.helpers.mode
 import java.util.*
 
-data class UnknownDoubleVariableBinWidthDistribution(
-        override val average: Double,
-        override val minimum: Double,
-        override val maximum: Double,
-        override val median: Double,
-        override val mode: Double,
-        override val bins: List<VariableWidthBin<Double>>
-) : UnknownVariableBinWidthDistribution<Double> {
-
-    private val random = Random()
-
-    override fun random(): Double {
-
-        val index = random.nextInt(bins.size)
-
-        val bin = bins[index]
-
-        return bin.members[random.nextInt(bin.members.size)]
-    }
-
-    override val numberOfBins: Int = bins.size
-}
 
 fun List<Double>.unknownVariableBinWidthDistribution(
         binCount: Int = 5,
@@ -46,7 +24,7 @@ fun List<Double>.unknownVariableBinWidthDistribution(
     val observedMinimum = sortedAndFilteredByMinimumAndMaximum.min() ?: 0.0
     val observedMaximum = sortedAndFilteredByMinimumAndMaximum.max() ?: 0.0
 
-    return UnknownDoubleVariableBinWidthDistribution(
+    return UnknownVariableBinWidthDistribution(
             average = sortedAndFilteredByMinimumAndMaximum.average(),
             minimum = observedMinimum,
             maximum = observedMaximum,

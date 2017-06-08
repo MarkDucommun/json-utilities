@@ -9,6 +9,7 @@ import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Success
 import com.hcsc.de.claims.distributionFitting.FitDistrPlus
+import com.hcsc.de.claims.distributionFitting.Montreal
 import com.hcsc.de.claims.succeedsAndShouldReturn
 import com.nhaarman.mockito_kotlin.*
 import net.sourceforge.jdistlib.Weibull
@@ -191,9 +192,9 @@ class HistogrammerTest {
 
         val startingDistribution = Weibull(2.0, 20.0)
 
-        val list = List(10000) { startingDistribution.random() }
+        val list = List(100000) { startingDistribution.random() }
 
-        val result = RealDistributionGenerator(FitDistrPlus).profile(list)
+        val result = RealDistributionGenerator(Montreal).profile(list)
 
         val distribution = when (result) {
             is Success -> result.content.distribution

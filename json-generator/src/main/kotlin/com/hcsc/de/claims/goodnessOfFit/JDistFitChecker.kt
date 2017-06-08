@@ -1,21 +1,19 @@
 package com.hcsc.de.claims.goodnessOfFit
 
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.wrapExternalLibraryUsageAsResult
+import com.hcsc.de.claims.distributions.DistributionPair
+import com.hcsc.de.claims.distributions.asTwoDistributions
+import com.hcsc.de.claims.distributions.chiSquaredTest
+import com.hcsc.de.claims.distributions.unknownDualMemberVariableBinWidthDistribution
+import com.hcsc.de.claims.helpers.*
 import net.sourceforge.jdistlib.disttest.DistributionTest
+import umontreal.ssj.gof.GofFormat
 import umontreal.ssj.gof.GofStat
 
 class JDistFitChecker<in numberType : Number> : FitChecker<numberType> {
 
     override fun check(listOne: List<numberType>, listTwo: List<numberType>): Result<String, Double> {
 
-        return wrapExternalLibraryUsageAsResult {
-
-            val kolmogorov_smirnov_test = DistributionTest.kolmogorov_smirnov_test(
-                    listOne.map(Number::toDouble).toDoubleArray(),
-                    listTwo.map(Number::toDouble).toDoubleArray()
-            )
-            kolmogorov_smirnov_test[1]
-        }
+        return DistributionPair(listOne, listTwo)
+                .chiSquaredTest(100).map { it.pValue }
     }
 }

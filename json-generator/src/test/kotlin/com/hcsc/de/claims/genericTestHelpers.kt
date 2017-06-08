@@ -34,3 +34,15 @@ fun <numberType: Number> List<numberType>.visualize(seconds: Int = 60) {
 
     chart.stop()
 }
+
+fun <numberType: Number> visualize(listOne: List<numberType>, listTwo: List<numberType>, seconds: Int = 60) {
+
+    val chart = histogrammer.create(listOne.map(Number::toDouble), listTwo.map(Number::toDouble)).get
+
+    chart.render()
+
+    Thread.sleep(seconds * 1000L)
+
+    chart.stop()
+}
+
