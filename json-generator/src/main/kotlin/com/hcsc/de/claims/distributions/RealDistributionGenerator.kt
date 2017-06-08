@@ -1,30 +1,36 @@
 package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.*
-import com.hcsc.de.claims.renjinWrapper.R
+import com.hcsc.de.claims.renjinWrapper.ParametricFitter
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import java.util.*
 
 class RealDistributionGenerator(
-        private val r: R
+        private val parametricFitter: ParametricFitter
 ) : DistributionGenerator<Double> {
 
     val random = Random()
 
     override fun profile(list: List<Double>): Result<String, DistributionProfile<Double>> {
 
+        return profileWith(list, listOf(
+                deepNonParametricDistributionGenerator
+        ))
+    }
+
+    fun profileWith(
+            list: List<Double>,
+            distributionCreators: List<(List<Double>) -> Result<String, Randomable<Double>>>
+    ): Result<String, DistributionProfile<Double>> {
+
         val doubleList = list.map { it }
 
         val results = if (doubleList.size > 1000) {
 
+            // TODO ensure correct sample size for statistical significance
             val randomSample = List(100) { doubleList[random.nextInt(doubleList.size)] }
 
-            listOf(
-                    normalDistributionGenerator,
-                    gammaDistributionGenerator,
-                    weibullDistributionGenerator,
-                    lognormalDistributionGenerator
-            ).map { fn ->
+            distributionCreators.map { fn ->
 
                 randomSample.generateDistribution(fn).map {
 
@@ -40,12 +46,7 @@ class RealDistributionGenerator(
 
         } else {
 
-            listOf(
-                    normalDistributionGenerator,
-                    gammaDistributionGenerator,
-                    weibullDistributionGenerator,
-                    lognormalDistributionGenerator
-            ).map { fn ->
+            distributionCreators.map { fn ->
                 doubleList.generateDistribution(fn)
             }.traverse().map { it.sortedByDescending { it.pValue } }.map { it.first() }
         }
@@ -66,10 +67,26 @@ class RealDistributionGenerator(
         }
     }
 
-    val gammaDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { r.gammaDistribution(it) }
-    val lognormalDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { r.lognormalDistribution(it) }
-    val weibullDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { r.weibullDistribution(it) }
+    val gammaDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { parametricFitter.gammaDistribution(it) }
+    val lognormalDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { parametricFitter.lognormalDistribution(it) }
+    val weibullDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { parametricFitter.weibullDistribution(it) }
     val normalDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { Success(it.normalDoubleDistribution) }
+    val deepNonParametricDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = {
+
+
+        val unknownVariableBinWidthDistribution = it.unknownVariableBinWidthDistribution(it.size.toDouble().sqrt().ceiling().toInt())
+
+        val result = unknownVariableBinWidthDistribution.toDistributedBinDistribution()
+
+        when (result) {
+            is Success -> Success<String, Randomable<Double>>(result.content)
+            is Failure -> Failure(result.content)
+        }
+    }
+    val shallowNonParametricDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = {
+
+        Success(it.unknownVariableBinWidthDistribution(it.size.toDouble().sqrt().ceiling().toInt()))
+    }
 
     data class DistributionGeneratorAndPValue(
             val distribution: (List<Double>) -> Result<String, Randomable<Double>>,

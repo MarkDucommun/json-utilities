@@ -11,7 +11,7 @@ import org.junit.Test
 
 class RealDistributionGeneratorTest {
 
-    val subject = RealDistributionGenerator(r = Renjin)
+    val subject = RealDistributionGenerator(parametricFitter = Renjin)
 
     val size = 10000
 
@@ -26,9 +26,11 @@ class RealDistributionGeneratorTest {
 
             val generatedDist = distributionProfile.distribution
 
+            val newList = List(size) { distribution.random() }
+
             val generatedList = List(size) { generatedDist.random() }
 
-            val result = DistributionTest.kolmogorov_smirnov_test(list.toDoubleArray(), generatedList.toDoubleArray())
+            val result = DistributionTest.kolmogorov_smirnov_test(newList.toDoubleArray(), generatedList.toDoubleArray())
 
             assertThat(result[1]).isGreaterThan(0.05)
         }
@@ -45,9 +47,11 @@ class RealDistributionGeneratorTest {
 
             val generatedDist = distributionProfile.distribution
 
+            val newList = List(size) { distribution.random() }
+
             val generatedList = List(size) { generatedDist.random() }
 
-            val result = DistributionTest.kolmogorov_smirnov_test(list.toDoubleArray(), generatedList.toDoubleArray())
+            val result = DistributionTest.kolmogorov_smirnov_test(newList.toDoubleArray(), generatedList.toDoubleArray())
 
             assertThat(result[1]).isGreaterThan(0.05)
         }
@@ -64,9 +68,11 @@ class RealDistributionGeneratorTest {
 
             val generatedDist = distributionProfile.distribution
 
+            val newList = List(size) { distribution.random() }
+
             val generatedList = List(size) { generatedDist.random() }
 
-            val result = DistributionTest.kolmogorov_smirnov_test(list.toDoubleArray(), generatedList.toDoubleArray())
+            val result = DistributionTest.kolmogorov_smirnov_test(newList.toDoubleArray(), generatedList.toDoubleArray())
 
             assertThat(result[1]).isGreaterThan(0.05)
         }

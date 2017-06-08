@@ -2,7 +2,7 @@ package com.hcsc.de.claims.distributions
 
 interface UnknownFixedBinWidthDistribution<out numberType : Number> : BinDistribution<numberType> {
     val numberOfBins: Int
-    val sizeOfBin: Int
+    val sizeOfBin: numberType
     override val bins: List<FixedWidthBin<numberType>>
 }
 

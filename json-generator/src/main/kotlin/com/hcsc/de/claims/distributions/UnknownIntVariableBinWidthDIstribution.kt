@@ -1,8 +1,6 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.averageInt
-import com.hcsc.de.claims.helpers.medianInt
-import com.hcsc.de.claims.helpers.modeInt
+import com.hcsc.de.claims.helpers.*
 import java.util.*
 
 data class UnknownIntVariableBinWidthDistribution(
@@ -16,6 +14,7 @@ data class UnknownIntVariableBinWidthDistribution(
 
     private val random = Random()
 
+    // TODO make how we generate random values better
     override fun random(): Int {
 
         val index = random.nextInt(bins.size)

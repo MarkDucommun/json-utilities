@@ -2,17 +2,21 @@ package com.hcsc.de.claims.renjinWrapper
 
 import com.hcsc.de.claims.distributions.Randomable
 import com.hcsc.de.claims.helpers.*
-import com.sun.tools.javah.Gen
 import net.sourceforge.jdistlib.Gamma
 import net.sourceforge.jdistlib.LogNormal
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.generic.GenericDistribution
+import flanagan.analysis.Regression
 import org.renjin.script.RenjinScriptEngineFactory
 import org.renjin.sexp.DoubleArrayVector
 import org.renjin.sexp.ListVector
 
-interface R {
+interface ParametricFitter {
+
+    //Distributions "beta", "cauchy", "chi-squared", "exponential", "f", "gamma", "geometric",
+    // "log-normal", "lognormal", "logistic", "negative binomial", "normal",
+    // "Poisson", "t" and "weibull" are recognised, case being ignored.
 
     fun weibullParameters(list: List<Double>): Result<String, WeibullParameters>
 
@@ -66,13 +70,50 @@ data class NormalParameters(
 class GenericDistributionRandomable (
         private val genericDistribution: GenericDistribution
 ): Randomable<Double> {
-
     override fun random(): Double {
         return genericDistribution.random()
     }
 }
 
-object Renjin : R {
+object Flanagan : ParametricFitter {
+
+    override fun weibullParameters(list: List<Double>): Result<String, WeibullParameters> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun weibullDistribution(list: List<Double>): Result<String, Randomable<Double>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun normalParameters(list: List<Double>): Result<String, NormalParameters> {
+        Regression()
+
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun normalDistribution(list: List<Double>): Result<String, Randomable<Double>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun gammaParameters(list: List<Double>): Result<String, GammaParameters> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun gammaDistribution(list: List<Double>): Result<String, Randomable<Double>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun lognormalParameters(list: List<Double>): Result<String, LognormalParameters> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun lognormalDistribution(list: List<Double>): Result<String, Randomable<Double>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+}
+
+object Renjin : ParametricFitter {
 
     override fun weibullDistribution(list: List<Double>): Result<String, Randomable<Double>> {
         return weibullParameters(list).map { it.distribution }
