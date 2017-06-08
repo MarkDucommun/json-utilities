@@ -9,17 +9,17 @@ class ChartHistogrammer<in numberType : Number>(
         private val chartCreator: ChartCreator
 ) : Histogrammer<numberType> {
 
-    override fun create(list: List<numberType>): Result<String, BarChart> =
-            createBarChart(listOf(list))
+    override fun create(list: List<numberType>, name: String): Result<String, BarChart> =
+            createBarChart(listOf(list), name)
 
     override fun create(firstList: List<numberType>, secondList: List<numberType>): Result<String, BarChart> =
             listOf(
                     firstList.asBinList.map { it.asDataset("1") },
                     secondList.asBinList.map { it.asInvertedDataset("2") }
-            ).traverse().flatMap { it.asBarChart }
+            ).traverse().flatMap { it.asBarChart("Chart") }
 
-    private fun createBarChart(lists: List<List<numberType>>): Result<String, BarChart> =
-            lists.asBinLists.flatMap { it.asDataSets.asBarChart }
+    private fun createBarChart(lists: List<List<numberType>>, title: String = "Chart"): Result<String, BarChart> =
+            lists.asBinLists.flatMap { it.asDataSets.asBarChart(title) }
 
     private val List<List<numberType>>.asBinLists: Result<String, List<List<FixedWidthBin<Double>>>>
         get() = map { it.asBinList }.traverse()
@@ -30,9 +30,9 @@ class ChartHistogrammer<in numberType : Number>(
     private val List<List<FixedWidthBin<Double>>>.asDataSets: List<DataSet>
         get() = mapIndexed { index, bins -> bins.asDataset("${index + 1}") }
 
-    private val List<DataSet>.asBarChart: Result<String, BarChart>
-        get() = chartCreator.createBarChart(ChartRequest(
-                name = "Chart",
+    private fun List<DataSet>.asBarChart(name: String): Result<String, BarChart>
+         = chartCreator.createBarChart(ChartRequest(
+                name = name,
                 xLabel = "size",
                 yLabel = "count",
                 dataSets = this

@@ -1,7 +1,7 @@
 package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.*
-import com.hcsc.de.claims.renjinWrapper.Renjin
+import com.hcsc.de.claims.distributionFitting.FitDistrPlus
 import java.util.*
 
 data class DistributedBinDistribution<out numberType : Number>(
@@ -23,7 +23,7 @@ data class DistributedBinDistribution<out numberType : Number>(
 
 fun UnknownVariableBinWidthDistribution<Double>.toDistributedBinDistribution(): Result<String, DistributedBinDistribution<Double>> {
 
-    val generator = RealDistributionGenerator(Renjin)
+    val generator = RealDistributionGenerator(FitDistrPlus)
 
     return bins
             .map { bin ->

@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.renjinWrapper.Renjin
+import com.hcsc.de.claims.distributionFitting.FitDistrPlus
 import com.hcsc.de.claims.succeedsAnd
 import net.sourceforge.jdistlib.Gamma
 import net.sourceforge.jdistlib.LogNormal
@@ -11,7 +11,7 @@ import org.junit.Test
 
 class RealDistributionGeneratorTest {
 
-    val subject = RealDistributionGenerator(parametricFitter = Renjin)
+    val subject = RealDistributionGenerator(parametricFitter = FitDistrPlus)
 
     val size = 10000
 

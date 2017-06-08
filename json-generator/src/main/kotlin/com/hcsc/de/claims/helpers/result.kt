@@ -81,3 +81,11 @@ fun <failureType, successType> List<Result<failureType, successType>>.traverse()
         }
     }
 }
+
+fun <successType> wrapExternalLibraryUsageAsResult(defaultMessage: String = "Something went wrong!", fn: () -> successType): Result<String, successType> {
+    return try {
+        Success(fn.invoke())
+    } catch (e: Exception) {
+        Failure(e.message ?: defaultMessage)
+    }
+}

@@ -58,6 +58,7 @@ dependencies {
 	compile "org.renjin.cran:fitdistrplus:1.0-8-b4"
 	compile 'jfree:jfreechart:1.0.13'
 	compile name: 'flanagan'
+	compile 'ca.umontreal.iro.simul:ssj:3.2.1'
 	runtime('com.h2database:h2')
 	runtime('org.postgresql:postgresql')
 	testCompile('org.springframework.boot:spring-boot-starter-test')

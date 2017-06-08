@@ -1,7 +1,7 @@
 package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.*
-import com.hcsc.de.claims.renjinWrapper.ParametricFitter
+import com.hcsc.de.claims.distributionFitting.ParametricFitter
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import java.util.*
 

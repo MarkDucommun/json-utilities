@@ -8,7 +8,7 @@ import com.hcsc.de.claims.distributions.NormalDoubleDistribution
 import com.hcsc.de.claims.distributions.RealDistributionGenerator
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.*
-import com.hcsc.de.claims.renjinWrapper.Renjin
+import com.hcsc.de.claims.distributionFitting.FitDistrPlus
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import net.sourceforge.jdistlib.generic.GenericDistribution
@@ -206,7 +206,7 @@ class JsonSizeAnalyzerIntegrationTest {
 
         val claimSizes = listOfClaimSizes().map(Int::toDouble)
 
-        val results = RealDistributionGenerator(Renjin).profile(claimSizes)
+        val results = RealDistributionGenerator(FitDistrPlus).profile(claimSizes)
 
         if (results is Success) {
 

@@ -52,3 +52,8 @@ infix fun <failureType, successType> SingleResult<failureType, successType>.fail
         }
     }
 }
+
+val <failureType, successType> Result<failureType, successType>.get: successType get() = when (this) {
+    is Success -> content
+    is Failure -> throw RuntimeException("Failure: ${content.toString()}")
+}

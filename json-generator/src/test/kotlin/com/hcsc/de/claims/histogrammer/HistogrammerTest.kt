@@ -8,12 +8,9 @@ import com.hcsc.de.claims.failsWithMessage
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.Failure
 import com.hcsc.de.claims.helpers.Success
-import com.hcsc.de.claims.helpers.ceilingOnEven
-import com.hcsc.de.claims.renjinWrapper.Renjin
+import com.hcsc.de.claims.distributionFitting.FitDistrPlus
 import com.hcsc.de.claims.succeedsAndShouldReturn
 import com.nhaarman.mockito_kotlin.*
-import net.sourceforge.jdistlib.Cauchy
-import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.Weibull
 import org.junit.Ignore
 import org.junit.Test
@@ -163,7 +160,7 @@ class HistogrammerTest {
 
         val list = listOfClaimSizes().map { it / 1000.0 }
 
-        val result = RealDistributionGenerator(Renjin).profile(list)
+        val result = RealDistributionGenerator(FitDistrPlus).profile(list)
 
         val distribution = when (result) {
             is Success -> result.content.distribution
@@ -196,7 +193,7 @@ class HistogrammerTest {
 
         val list = List(10000) { startingDistribution.random() }
 
-        val result = RealDistributionGenerator(Renjin).profile(list)
+        val result = RealDistributionGenerator(FitDistrPlus).profile(list)
 
         val distribution = when (result) {
             is Success -> result.content.distribution
