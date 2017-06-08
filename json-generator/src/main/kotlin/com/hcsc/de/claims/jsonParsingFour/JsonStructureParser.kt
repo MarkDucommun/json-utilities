@@ -38,6 +38,6 @@ class JsonStructureParser {
         }
     }
 
-    fun rootAccumulatorResult(): Result<String, Accumulator<JsonStructure, MainStructure>> =
+    fun rootAccumulatorResult(): Result<String, Accumulator<JsonStructure, MainStructure<*>>> =
             Success(RootAccumulator)
 }

@@ -4,7 +4,7 @@ import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.jsonParsingFour.*
 
 abstract class EmptyAccumulator<out previousElementType : JsonStructure>
-    : BaseAccumulator<previousElementType, EmptyStructureElement>() {
+    : BaseAccumulator<previousElementType, EmptyStructureElement, EmptyStructureElement>() {
 
     abstract val elementName: String
 

@@ -3,7 +3,7 @@ package com.hcsc.de.claims.jsonParsingFour.accumulators
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.jsonParsingFour.*
 
-abstract class CloseOpenObjectAccumulator<out closeType: Close> : BaseAccumulator<closeType, OpenObjectStructure>() {
+abstract class CloseOpenObjectAccumulator<out closeType: Close> : BaseAccumulator<closeType, OpenObjectStructure, MainStructure<*>>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {

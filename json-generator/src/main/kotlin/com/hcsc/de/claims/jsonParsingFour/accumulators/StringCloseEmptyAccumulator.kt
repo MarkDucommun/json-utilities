@@ -8,7 +8,7 @@ import com.hcsc.de.claims.jsonParsingFour.StringClose
 data class StringCloseEmptyAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
-        override val structureStack: List<MainStructure>,
+        override val structureStack: List<MainStructure<*>>,
         override val previousElement: StringClose,
         override val previousClosable: EmptyStructureElement
 ) : EmptyAccumulator<StringClose>() {

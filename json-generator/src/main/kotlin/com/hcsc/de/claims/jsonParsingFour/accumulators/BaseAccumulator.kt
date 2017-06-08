@@ -7,7 +7,7 @@ import com.hcsc.de.claims.helpers.flatMap
 import com.hcsc.de.claims.jsonParsingFour.*
 import kotlin.reflect.KClass
 
-abstract class BaseAccumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure>
+abstract class BaseAccumulator<out previousElementType : JsonStructure, out previousClosableType : MainStructure<childType>, out childType: JsonStructure>
     : Accumulator<previousElementType, previousClosableType> {
 
     fun openString(): Result<String, Accumulator<*, *>> = openStructure(::StringOpen)
@@ -19,7 +19,7 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
     fun openLiteral(char: Char): Result<String, Accumulator<*, *>> =
             openStructure(LiteralValue(id = idCounter, value = char))
 
-    inline fun <reified elementType : Open<*>> openStructure(
+    inline fun <reified elementType : Open<MainStructure<childType>, childType>, reified childType: JsonStructure> openStructure(
             constructor: (Long) -> elementType
     ): Result<String, Accumulator<*, *>> = openStructure(constructor(idCounter))
 
@@ -36,11 +36,11 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
             constructor: (Long) -> elementType
     ): Result<String, Accumulator<*, *>> = closeStructure(constructor(previousClosable.id))
 
-    inline fun <reified elementType : Open<structureType>, reified structureType : MainStructure> openStructure(
+    inline fun <reified elementType : Open<structureType, childType>, reified structureType : MainStructure<*>, reified childType: JsonStructure> openStructure(
             element: elementType
     ): Result<String, Accumulator<*, *>> {
 
-        val structureElement: structureType = element.structureConstructor(idCounter)
+        val structureElement: structureType = element.structureConstructor(idCounter, emptyList())
 
         val structureClass: KClass<out structureType> = structureElement::class
         val elementClass: KClass<elementType> = elementType::class
@@ -49,7 +49,7 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
             Success<String, Accumulator<*, *>>(constructorHolder.accumulatorConstructor(
                     idCounter + 1,
                     structure.plus(element),
-                    structureStack.plus(structureElement),
+                    structureStack.plus(element = structureElement),
                     element,
                     structureElement
             ))
@@ -96,12 +96,12 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
         val newPreviousClosable = newStructureStack.last()
 
         val transformedPreviousClosable = when (newPreviousClosable) {
-            is OpenObjectStructure -> ObjectWithKeyStructure(id = newPreviousClosable.id)
-            is ObjectWithKeyStructure -> OpenObjectStructure(id = newPreviousClosable.id)
+            is OpenObjectStructure -> ObjectWithKeyStructure(id = newPreviousClosable.id, children = newPreviousClosable.children)
+            is ObjectWithKeyStructure -> OpenObjectStructure(id = newPreviousClosable.id, children = newPreviousClosable.children)
             else -> newPreviousClosable
         }
 
-        val structureClass: KClass<out MainStructure> = transformedPreviousClosable::class
+        val structureClass: KClass<out MainStructure<*>> = transformedPreviousClosable::class
         val elementClass: KClass<elementType> = elementType::class
 
         return findCastConstructor(elementClass, structureClass).flatMap { constructorHolder ->
@@ -123,12 +123,12 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
         val newPreviousClosable = newStructureStack.last()
 
         val transformedPreviousClosable = when (newPreviousClosable) {
-            is OpenObjectStructure -> ObjectWithKeyStructure(id = newPreviousClosable.id)
-            is ObjectWithKeyStructure -> OpenObjectStructure(id = newPreviousClosable.id)
+            is OpenObjectStructure -> ObjectWithKeyStructure(id = newPreviousClosable.id, children = newPreviousClosable.children)
+            is ObjectWithKeyStructure -> OpenObjectStructure(id = newPreviousClosable.id, children = newPreviousClosable.children)
             else -> newPreviousClosable
         }
 
-        val structureClass: KClass<out MainStructure> = transformedPreviousClosable::class
+        val structureClass: KClass<out MainStructure<*>> = transformedPreviousClosable::class
         val elementClass: KClass<elementType> = elementType::class
 
         return findCastConstructor(elementClass, structureClass).flatMap { constructorHolder ->
@@ -151,12 +151,12 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
         val newPreviousClosable = newStructureStack.last()
 
         val transformedPreviousClosable = when (newPreviousClosable) {
-            is OpenObjectStructure -> ObjectWithKeyStructure(id = newPreviousClosable.id)
-            is ObjectWithKeyStructure -> OpenObjectStructure(id = newPreviousClosable.id)
+            is OpenObjectStructure -> ObjectWithKeyStructure(id = newPreviousClosable.id, children = newPreviousClosable.children)
+            is ObjectWithKeyStructure -> OpenObjectStructure(id = newPreviousClosable.id, children = newPreviousClosable.children)
             else -> newPreviousClosable
         }
 
-        val structureClass: KClass<out MainStructure> = transformedPreviousClosable::class
+        val structureClass: KClass<out MainStructure<*>> = transformedPreviousClosable::class
         val elementClass: KClass<newElementType> = newElementType::class
 
         return findCastConstructor(elementClass, structureClass).flatMap { constructorHolder ->
@@ -174,13 +174,13 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
 
     val unmodified: Success<String, Accumulator<*, *>> get() = Success(this)
 
-    val enclosingStructure: MainStructure = try {
+    val enclosingStructure: MainStructure<*> = try {
         structureStack.dropLast(1).last()
     } catch (e: Exception) {
         EmptyStructureElement
     }
 
-    fun <elementType : JsonStructure, structureType : MainStructure> findCastConstructor(
+    fun <elementType : JsonStructure, structureType : MainStructure<childType>, childType: JsonStructure> findCastConstructor(
             elementClass: KClass<elementType>,
             structureClass: KClass<out structureType>
     ): Result<String, ConstructorHolder<elementType, structureType>> =
@@ -195,7 +195,7 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
                         }
                     }
 
-    fun <elementType : JsonStructure, structureType : MainStructure> findConstructor(
+    fun <elementType : JsonStructure, structureType : MainStructure<*>> findConstructor(
             elementClass: KClass<elementType>,
             structureClass: KClass<out structureType>
     ): Result<String, ConstructorHolder<*, *>> =
@@ -205,10 +205,10 @@ abstract class BaseAccumulator<out previousElementType : JsonStructure, out prev
                     ?: Failure("Could not find constructor: ${elementClass.simpleName}, ${structureClass.simpleName}")
 
 
-    data class ConstructorHolder<elementType : JsonStructure, structureType : MainStructure>(
+    data class ConstructorHolder<elementType : JsonStructure, structureType : MainStructure<*>>(
             val elementClass: KClass<elementType>,
             val structureClass: KClass<structureType>,
-            val accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure>, elementType, structureType) -> Accumulator<elementType, structureType>
+            val accumulatorConstructor: (Long, List<JsonStructure>, List<MainStructure<*>>, elementType, structureType) -> Accumulator<elementType, structureType>
     )
 
     companion object {

@@ -4,7 +4,7 @@ import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.jsonParsingFour.*
 
 abstract class StringAccumulator<out previousElementType : StringElement>
-    : BaseAccumulator<previousElementType, StringStructureElement>() {
+    : BaseAccumulator<previousElementType, StringStructureElement, StringElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 

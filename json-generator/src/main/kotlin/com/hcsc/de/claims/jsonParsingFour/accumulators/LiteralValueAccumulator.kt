@@ -8,10 +8,10 @@ import com.hcsc.de.claims.jsonParsingFour.*
 data class LiteralValueAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
-        override val structureStack: List<MainStructure>,
+        override val structureStack: List<MainStructure<*>>,
         override val previousElement: LiteralValue,
         override val previousClosable: LiteralStructureElement
-) : BaseAccumulator<LiteralValue, LiteralStructureElement>() {
+) : BaseAccumulator<LiteralValue, LiteralStructureElement, LiteralElement>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
@@ -93,7 +93,7 @@ data class LiteralValueAccumulator(
     inline fun <reified elementType: Close> closeLiteralAndEnclosingStructure(
             crossinline elementConstructor: (Long) -> elementType
     ): Result<String, Accumulator<*, *>> =
-            closeLiteral().flatMap { (it as BaseAccumulator).closeStructure(elementConstructor) }
+            closeLiteral().flatMap { (it as BaseAccumulator<*, *, *>).closeStructure(elementConstructor) }
 
     fun closeLiteral(): Result<String, Accumulator<*, *>> =
             replaceLastElementAndCloseStructure(LiteralClose(

@@ -7,10 +7,10 @@ import com.hcsc.de.claims.jsonParsingFour.*
 data class ObjectWithKeyAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
-        override val structureStack: List<MainStructure>,
+        override val structureStack: List<MainStructure<*>>,
         override val previousElement: StringClose,
         override val previousClosable: ObjectWithKeyStructure
-) : BaseAccumulator<StringClose, ObjectWithKeyStructure>() {
+) : BaseAccumulator<StringClose, ObjectWithKeyStructure, MainStructure<*>>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
         return when (char) {

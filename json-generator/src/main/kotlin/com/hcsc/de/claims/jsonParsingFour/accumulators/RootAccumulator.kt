@@ -5,7 +5,7 @@ import com.hcsc.de.claims.jsonParsingFour.EmptyStructureElement
 import com.hcsc.de.claims.jsonParsingFour.JsonStructure
 import com.hcsc.de.claims.jsonParsingFour.MainStructure
 
-object RootAccumulator : BaseAccumulator<EmptyStructureElement, EmptyStructureElement>() {
+object RootAccumulator : BaseAccumulator<EmptyStructureElement, EmptyStructureElement, EmptyStructureElement>() {
 
     override val idCounter: Long = 1
 
@@ -13,7 +13,7 @@ object RootAccumulator : BaseAccumulator<EmptyStructureElement, EmptyStructureEl
 
     override val previousElement: EmptyStructureElement = EmptyStructureElement
 
-    override val structureStack: List<MainStructure> = listOf(EmptyStructureElement)
+    override val structureStack: List<MainStructure<*>> = listOf(EmptyStructureElement)
 
     override val previousClosable: EmptyStructureElement = EmptyStructureElement
 

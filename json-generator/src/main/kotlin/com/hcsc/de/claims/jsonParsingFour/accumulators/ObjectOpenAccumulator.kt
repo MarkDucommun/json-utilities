@@ -6,10 +6,10 @@ import com.hcsc.de.claims.jsonParsingFour.*
 data class ObjectOpenAccumulator(
         override val idCounter: Long,
         override val structure: List<JsonStructure>,
-        override val structureStack: List<MainStructure>,
+        override val structureStack: List<MainStructure<*>>,
         override val previousElement: ObjectOpen,
         override val previousClosable: OpenObjectStructure
-) : BaseAccumulator<ObjectOpen, OpenObjectStructure>() {
+) : BaseAccumulator<ObjectOpen, OpenObjectStructure, MainStructure<*>>() {
 
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
