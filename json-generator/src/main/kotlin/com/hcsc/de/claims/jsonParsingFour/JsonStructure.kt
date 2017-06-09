@@ -37,7 +37,7 @@ sealed class LiteralElement : JsonStructure, WithValue
 data class LiteralValue(
         override val id: Long,
         override val value: Char
-) : LiteralElement(), Open<LiteralStructureElement, LiteralElement> {
+) : LiteralElement(), Open<LiteralStructureElement, LiteralElement>, Close {
 
     override val structureConstructor: (Long, List<LiteralElement>) -> LiteralStructureElement = ::LiteralStructureElement
 }
@@ -49,16 +49,16 @@ data class LiteralClose(
 
 data class StringStructureElement(
         override val id: Long,
-        override val children: List<StringElement>
-) : MainStructure<StringElement>()
+        override val children: List<StringValue>
+) : MainStructure<StringValue>()
 
 sealed class StringElement : JsonStructure
 
 data class StringOpen(
         override val id: Long
-) : StringElement(), Open<StringStructureElement, StringElement> {
+) : StringElement(), Open<StringStructureElement, StringValue> {
 
-    override val structureConstructor: (Long, List<StringElement>) -> StringStructureElement
+    override val structureConstructor: (Long, List<StringValue>) -> StringStructureElement
         get() = ::StringStructureElement
 }
 

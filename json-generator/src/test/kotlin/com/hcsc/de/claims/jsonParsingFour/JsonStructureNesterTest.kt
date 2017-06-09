@@ -1,8 +1,7 @@
 package com.hcsc.de.claims.jsonParsingFour
 
-import com.hcsc.de.claims.succeedsAnd
+import com.hcsc.de.claims.failsWithMessage
 import com.hcsc.de.claims.succeedsAndShouldReturn
-import org.junit.Assert.*
 import org.junit.Test
 
 class JsonStructureNesterTest {
@@ -10,13 +9,168 @@ class JsonStructureNesterTest {
     @Test
     fun `it returns an empty StringStructureElement`() {
 
-        listOf(StringOpen(id = 1), StringClose(id = 1)).nested succeedsAndShouldReturn StringStructureElement(id = 1, children = emptyList())
+        listOf(
+                StringOpen(id = 1),
+                StringClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                StringStructureElement(id = 1, children = emptyList())
     }
 
     @Test
     fun `it returns an StringStructureElement with some values`() {
 
-        listOf(StringOpen(id = 1), StringClose(id = 1)).nested succeedsAndShouldReturn StringStructureElement(id = 1, children = emptyList())
+        listOf(
+                StringOpen(id = 1),
+                StringValue(id = 1, value = 'a'),
+                StringClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                StringStructureElement(id = 1, children = listOf(StringValue(id = 1, value = 'a')))
+    }
+
+    @Test
+    fun `it fails appropriately when other than a string value is in a string open and close`() {
+
+        listOf(
+                StringOpen(id = 1),
+                LiteralValue(id = 1, value = 'a'),
+                StringClose(id = 1)
+        ).nested failsWithMessage "Invalid JSON - something went wrong"
+    }
+
+    @Test
+    fun `it fails appropriately when a string is not opened with a string open`() {
+
+        listOf(
+                StringValue(id = 1, value = 'a'),
+                StringClose(id = 1)
+        ).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
+    }
+
+    @Test
+    fun `it fails appropriately when a string is not closed with a string closed`() {
+
+        listOf(
+                StringOpen(id = 1),
+                StringValue(id = 1, value = 'a')
+        ).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
+    }
+
+    @Test
+    fun `it fails appropriately when a strings open and close does not have matching ids`() {
+
+        listOf(
+                StringOpen(id = 1),
+                StringValue(id = 1, value = 'a'),
+                StringClose(id = 2)
+        ).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
+    }
+
+    @Test
+    fun `it fails appropriately when a string does not have matching ids`() {
+
+        listOf(
+                StringOpen(id = 1),
+                StringValue(id = 2, value = 'a'),
+                StringClose(id = 1)
+        ).nested failsWithMessage "Invalid JSON - something went wrong"
+    }
+
+    @Test
+    fun `it returns a LiteralStructureElement`() {
+
+        listOf(
+                LiteralValue(id = 1, value = 'a'),
+                LiteralClose(id = 1, value = 'b')
+        ).nested succeedsAndShouldReturn LiteralStructureElement(id = 1, children = listOf(
+                LiteralValue(id = 1, value = 'a'),
+                LiteralClose(id = 1, value = 'b')
+        ))
+    }
+
+    @Test
+    fun `it returns a LiteralStructureElement even if there is no close at the end of the literal value`() {
+
+        listOf(
+                LiteralValue(id = 1, value = 'a'),
+                LiteralValue(id = 1, value = 'b')
+        ).nested succeedsAndShouldReturn LiteralStructureElement(id = 1, children = listOf(
+                LiteralValue(id = 1, value = 'a'),
+                LiteralValue(id = 1, value = 'b')
+        ))
+    }
+
+    @Test
+    fun `it fails if literals have anything other than literals in them`() {
+
+        listOf(
+                LiteralValue(id = 1, value = 'a'),
+                StringValue(id = 1, value = 'b'),
+                LiteralClose(id = 1, value = 'b')
+        ).nested failsWithMessage "Invalid JSON - something went wrong"
+    }
+
+    @Test
+    fun `it fails if literals do not have matching ids`() {
+
+        listOf(
+                LiteralValue(id = 1, value = 'a'),
+                LiteralValue(id = 2, value = 'b'),
+                LiteralValue(id = 1, value = 'b')
+        ).nested failsWithMessage "Invalid JSON - something went wrong"
+    }
+
+    @Test
+    fun `it returns an empty ArrayStructureElement`() {
+
+        listOf(
+                ArrayOpen(id = 1),
+                ArrayClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                ArrayStructureElement(id = 1, children = emptyList())
+    }
+
+    @Test
+    fun `it returns an array element with one string ArrayStructureElement`() {
+
+        listOf(
+                ArrayOpen(id = 1),
+                StringOpen(id = 2),
+                StringClose(id = 2),
+                ArrayClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                ArrayStructureElement(id = 1, children = listOf(
+                        StringStructureElement(id = 2, children = emptyList())
+                ))
+    }
+
+    @Test
+    fun `it returns an array element with two children ArrayStructureElement`() {
+
+        listOf(
+                ArrayOpen(id = 1),
+                StringOpen(id = 2),
+                StringClose(id = 2),
+                ArrayComma(id = 1),
+                StringOpen(id = 3),
+                StringClose(id = 3),
+                ArrayClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                ArrayStructureElement(id = 1, children = listOf(
+                        StringStructureElement(id = 2, children = emptyList()),
+                        StringStructureElement(id = 3, children = emptyList())
+                ))
+    }
+
+    @Test
+    fun `it fails if nothing comes before a comma`() {
+
+        listOf(
+                ArrayOpen(id = 1),
+                ArrayComma(id = 1),
+                StringOpen(id = 3),
+                StringClose(id = 3),
+                ArrayClose(id = 1)
+        ).nested failsWithMessage "Invalid JSON - array child can't be empty"
     }
 
     private val subject = JsonStructureNester()
