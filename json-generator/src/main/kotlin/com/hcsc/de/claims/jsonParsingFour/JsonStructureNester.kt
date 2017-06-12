@@ -1,107 +1,114 @@
 package com.hcsc.de.claims.jsonParsingFour
 
 import com.hcsc.de.claims.helpers.*
-import sun.applet.Main
 
 class JsonStructureNester {
 
     fun nest(structure: List<JsonStructure>): Result<String, MainStructure<*>> {
 
-        val first = structure.first()
-        val last = structure.last()
+        return (structure.firstOrNull() matches structure.lastOrNull()).flatMap { (open, close) ->
 
-        return if (first is Open<*, *> && last is Close && first.id == last.id) {
-
-            val nestedStructure = first.structureConstructor.invoke(first.id, emptyList())
+            val nestedStructure = open.structureConstructor.invoke(open.id, emptyList())
 
             when (nestedStructure) {
                 is EmptyStructureElement -> TODO()
-                is LiteralStructureElement -> {
-
-                    structure.ensureIdsMatch().flatMap {
-
-                        val initial: Result<String, List<LiteralElement>> = Success(emptyList<LiteralElement>())
-
-                        structure.fold(initial) { result, child ->
-
-                            result.flatMap { literalValueList ->
-
-                                when (child) {
-                                    is LiteralElement -> Success<String, List<LiteralElement>>(literalValueList.plus(child))
-                                    else -> Failure<String, List<LiteralElement>>("Invalid JSON - something went wrong")
-                                }
-                            }
-                        }.map { children ->
-                            nestedStructure.copy(children = children) as MainStructure<*>
-                        }
-                    }
-                }
-                is StringStructureElement -> {
-
-                    structure.drop(1).dropLast(1).ensureIdsMatch(structure.firstOrNull()?.id).flatMap { children ->
-
-                        val initial: Result<String, List<StringValue>> = Success(emptyList<StringValue>())
-
-                        children.fold(initial) { result, child ->
-
-                            result.flatMap { stringValueList ->
-
-                                when (child) {
-                                    is StringValue -> Success<String, List<StringValue>>(stringValueList.plus(child))
-                                    else -> Failure<String, List<StringValue>>("Invalid JSON - something went wrong")
-                                }
-                            }
-                        }.map { children ->
-                            nestedStructure.copy(children = children) as MainStructure<*>
-                        }
-                    }
-                }
-                is ArrayStructureElement -> {
-
-                    val childrenStructure = structure.drop(1).dropLast(1)
-
-                    if (childrenStructure.isEmpty()) {
-                        Success<String, MainStructure<*>>(nestedStructure)
-                    } else {
-                        val initial: Result<String, ArrayStructureAccumulator> = Success(ArrayStructureAccumulator())
-
-                        childrenStructure.fold(initial) { result, structure ->
-                            result.flatMap { accumulator ->
-                                when (structure) {
-                                    is ArrayComma -> if (accumulator.currentList.isEmpty()) {
-                                        Failure<String, ArrayStructureAccumulator>("Invalid JSON - array child can't be empty")
-                                    } else {
-                                        Success<String, ArrayStructureAccumulator>(
-                                                accumulator.copy(
-                                                        lists = accumulator.lists.plus(element = accumulator.currentList),
-                                                        currentList = emptyList()
-                                                )
-                                        )
-                                    }
-                                    else -> Success<String, ArrayStructureAccumulator>(
-                                            accumulator.copy(currentList = accumulator.currentList.plus(structure))
-                                    )
-                                }
-                            }
-                        }.flatMap { accumulator ->
-                            if (accumulator.currentList.isEmpty()) {
-                                Failure<String, MainStructure<*>>("")
-                            } else {
-
-                                accumulator.lists.plus(element = accumulator.currentList).map { childStructure ->
-
-                                    nest(childStructure)
-                                }.traverse().map { children ->
-                                    nestedStructure.copy(children = children) as MainStructure<*>
-                                }
-                            }
-                        }
-                    }
-                }
-                is OpenObjectStructure, is ObjectWithKeyStructure -> TODO()
+                is LiteralStructureElement -> nestedStructure.addChildren(
+                        id = open.id,
+                        children = structure
+                )
+                is StringStructureElement -> nestedStructure.addChildren(
+                        id = open.id,
+                        children = structure.withoutEnclosingStructures
+                )
+                is ArrayStructureElement -> nestedStructure.addChildren(children = structure.withoutEnclosingStructures)
+                is OpenObjectStructure -> nestedStructure.addChildren(children = structure.withoutEnclosingStructures)
+                is ObjectWithKeyStructure -> TODO()
             }
+        }
+    }
+
+    fun LiteralStructureElement.addChildren(id: Long, children: List<JsonStructure>): Result<String, MainStructure<*>> {
+
+        return children
+                .ensureIdsMatch(id)
+                .flatMap { it.castChildren<LiteralElement>() }
+                .map { children -> copy(children = children) as MainStructure<*> }
+    }
+
+    fun StringStructureElement.addChildren(id: Long, children: List<JsonStructure>): Result<String, MainStructure<*>> {
+
+        return children
+                .ensureIdsMatch(id)
+                .flatMap { it.castChildren<StringValue>() }
+                .map { children -> copy(children = children) as MainStructure<*> }
+    }
+
+    fun ArrayStructureElement.addChildren(children: List<JsonStructure>): Result<String, MainStructure<*>> {
+
+        return if (children.isEmpty()) {
+            Success<String, MainStructure<*>>(this)
         } else {
-            Failure("Invalid JSON - start and end of structure don't match")
+            children.splitBy<ArrayComma>().map {
+
+                if (it.isNotEmpty()) {
+                    nest(it)
+                } else {
+                    Failure<String, MainStructure<*>>("Invalid JSON - array child can't be empty")
+                }
+            }.traverse().map { children -> copy(children = children) as MainStructure<*> }
+        }
+    }
+    
+    fun OpenObjectStructure.addChildren(children: List<JsonStructure>): Result<String, MainStructure<*>> {
+
+        return if (children.isEmpty()) {
+            Success<String, MainStructure<*>>(this)
+        } else {
+            children.splitBy<ObjectComma>().mapIndexed { index, it ->
+
+                if (it.isNotEmpty()) {
+
+                    val structures = it.splitBy<ObjectColon>()
+
+                    if (structures.size == 2) {
+
+                        structures.map { nest(it) }.traverse().flatMap {
+
+                            val key = it[0]
+                            val value = it[1]
+
+                            if (key is StringStructureElement) {
+                                Success<String, ObjectChildElement<*>>(
+                                        ObjectChildElement(id = index + 1L, key = key, value = value)
+                                )
+                            } else {
+                                Failure<String, ObjectChildElement<*>>("")
+                            }
+                        }
+                    } else {
+                        Failure<String, ObjectChildElement<*>>("")
+                    }
+                } else {
+
+                    Failure<String, ObjectChildElement<*>>("")
+                }
+            }.traverse().map { childObjects -> copy(children = childObjects) as MainStructure<*> }
+        }
+    }
+
+    inline fun <reified childType : JsonStructure> List<JsonStructure>.castChildren(): Result<String, List<childType>> {
+
+        val initial: Result<String, List<childType>> = Success(emptyList<childType>())
+
+        return fold(initial) { result, child ->
+
+            result.flatMap { castChildList ->
+
+                when (child) {
+                    is childType -> Success<String, List<childType>>(castChildList.plus(child))
+                    else -> Failure<String, List<childType>>("Invalid JSON - something went wrong")
+                }
+            }
         }
     }
 
@@ -116,8 +123,44 @@ class JsonStructureNester {
         }
     }
 
-    data class ArrayStructureAccumulator(
+    inline fun <reified elementType : JsonStructure> List<JsonStructure>.splitBy(): List<List<JsonStructure>> =
+
+            fold(StructureAccumulator()) { accumulator, structure ->
+
+                when (structure) {
+                    is elementType -> accumulator.closeCurrentList
+                    else -> accumulator.addStructure(structure)
+                }
+            }.let { it.finalStructure }
+
+    val List<JsonStructure>.withoutEnclosingStructures: List<JsonStructure> get() = drop(1).dropLast(1)
+
+    // TODO check that open and close are the same type!
+    infix fun JsonStructure?.matches(close: JsonStructure?): Result<String, OpenClose> {
+
+        return if (this is Open<*, *> && close is Close && id == close.id) {
+            Success(OpenClose(open = this, close = close))
+        } else {
+            Failure("Invalid JSON - start and end of structure don't match")
+        }
+    }
+
+    data class OpenClose(
+            val open: Open<*, *>,
+            val close: Close
+    )
+
+    data class StructureAccumulator(
             val lists: List<List<JsonStructure>> = emptyList(),
             val currentList: List<JsonStructure> = emptyList()
-    )
+    ) {
+
+        fun addStructure(value: JsonStructure): StructureAccumulator =
+                copy(currentList = currentList.plus(value))
+
+        val closeCurrentList: StructureAccumulator
+            get() = copy(lists = lists.plus(element = currentList), currentList = emptyList())
+
+        val finalStructure: List<List<JsonStructure>> get() = lists.plus(element = currentList)
+    }
 }

@@ -1,6 +1,9 @@
 package com.hcsc.de.claims.jsonParsingFour
 
+import kotlin.reflect.KClass
+
 interface Open<out structureType : MainStructure<childType>, childType : JsonStructure> : JsonStructure {
+
     val structureConstructor: (Long, List<childType>) -> structureType
 }
 
@@ -96,7 +99,7 @@ sealed class ObjectStructureElement : MainStructure<ObjectChildElement<*>>()
 data class ObjectChildElement<out childType : MainStructure<*>>(
         override val id: Long,
         val key: StringStructureElement,
-        val value: MainStructure<childType>
+        val value: childType
 ) : JsonStructure
 
 data class OpenObjectStructure(

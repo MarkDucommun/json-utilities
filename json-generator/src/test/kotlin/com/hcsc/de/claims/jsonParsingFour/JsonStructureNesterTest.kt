@@ -7,6 +7,18 @@ import org.junit.Test
 class JsonStructureNesterTest {
 
     @Test
+    fun `it fails if no elements are passed in`() {
+
+        emptyList<JsonStructure>().nested failsWithMessage "Invalid JSON - start and end of structure don't match"
+    }
+
+    @Test
+    fun `it fails if only one element is passed in`() {
+
+        listOf(StringOpen(id = 1)).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
+    }
+
+    @Test
     fun `it returns an empty StringStructureElement`() {
 
         listOf(
@@ -171,6 +183,81 @@ class JsonStructureNesterTest {
                 StringClose(id = 3),
                 ArrayClose(id = 1)
         ).nested failsWithMessage "Invalid JSON - array child can't be empty"
+    }
+
+    @Test
+    fun `it returns an empty ObjectStructureElement`() {
+
+        listOf(
+                ObjectOpen(id = 1),
+                ObjectClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                OpenObjectStructure(id = 1, children = emptyList())
+    }
+
+    @Test
+    fun `it returns an ObjectStructureElement with a single child`() {
+
+        listOf(
+                ObjectOpen(id = 1),
+                StringOpen(id = 2),
+                StringValue(id = 2, value = 'a'),
+                StringClose(id = 2),
+                ObjectColon(id = 1),
+                LiteralValue(id = 3, value = '1'),
+                ObjectClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                OpenObjectStructure(id = 1, children = listOf(
+                        ObjectChildElement(
+                                id = 1,
+                                key = StringStructureElement(id = 2, children = listOf(
+                                        StringValue(id = 2, value = 'a')
+                                )),
+                                value = LiteralStructureElement(id = 3, children = listOf(
+                                        LiteralValue(id = 3, value = '1')
+                                ))
+                        )
+                ))
+    }
+
+    @Test
+    fun `it returns an ObjectStructureElement with two children`() {
+
+        listOf(
+                ObjectOpen(id = 1),
+                StringOpen(id = 2),
+                StringValue(id = 2, value = 'a'),
+                StringClose(id = 2),
+                ObjectColon(id = 1),
+                LiteralValue(id = 3, value = '1'),
+                ObjectComma(id = 1),
+                StringOpen(id = 4),
+                StringValue(id = 4, value = 'b'),
+                StringClose(id = 4),
+                ObjectColon(id = 1),
+                LiteralValue(id = 5, value = '2'),
+                ObjectClose(id = 1)
+        ).nested succeedsAndShouldReturn
+                OpenObjectStructure(id = 1, children = listOf(
+                        ObjectChildElement(
+                                id = 1,
+                                key = StringStructureElement(id = 2, children = listOf(
+                                        StringValue(id = 2, value = 'a')
+                                )),
+                                value = LiteralStructureElement(id = 3, children = listOf(
+                                        LiteralValue(id = 3, value = '1')
+                                ))
+                        ),
+                        ObjectChildElement(
+                                id = 2,
+                                key = StringStructureElement(id = 4, children = listOf(
+                                        StringValue(id = 4, value = 'b')
+                                )),
+                                value = LiteralStructureElement(id = 5, children = listOf(
+                                        LiteralValue(id = 5, value = '2')
+                                ))
+                        )
+                ))
     }
 
     private val subject = JsonStructureNester()
