@@ -1,6 +1,7 @@
 package com.hcsc.de.claims.jsonSizing
 
 import com.hcsc.de.claims.distributions.Distribution
+import com.hcsc.de.claims.distributions.Probability
 
 sealed class JsonSizeOverview<out numberType: Number> {
     abstract val name: String
@@ -20,7 +21,7 @@ data class JsonSizeObjectOverview<out numberType: Number>(
 
 data class JsonSizeObjectChild<out numberType: Number>(
         val overview: JsonSizeOverview<numberType>,
-        val presence: Distribution<Double>
+        val presence: Probability
 )
 
 data class JsonSizeArrayOverview<out numberType: Number>(

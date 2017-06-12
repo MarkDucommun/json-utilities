@@ -2,7 +2,6 @@ package com.hcsc.de.claims.distributionFitting
 
 import com.hcsc.de.claims.distributions.Randomable
 import com.hcsc.de.claims.helpers.Result
-import net.sourceforge.jdistlib.Gamma
 import net.sourceforge.jdistlib.LogNormal
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.Weibull

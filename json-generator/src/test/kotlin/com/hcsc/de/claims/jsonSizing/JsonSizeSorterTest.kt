@@ -2,6 +2,8 @@ package com.hcsc.de.claims.jsonSizing
 
 import com.hcsc.de.claims.distributions.NormalDoubleDistribution
 import com.hcsc.de.claims.distributions.NormalIntDistribution
+import com.hcsc.de.claims.distributions.RatioProbability
+import com.hcsc.de.claims.get
 import com.hcsc.de.claims.succeedsAndShouldReturn
 import org.junit.Test
 
@@ -52,15 +54,7 @@ class JsonSizeSorterTest {
                                         median = 1,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(
-                                        average = 1.0,
-                                        minimum = 1.0,
-                                        maximum = 1.0,
-                                        mode = 1.0,
-                                        median = 1.0,
-                                        standardDeviation = 0.0
-                                )
-                        ),
+                                presence = fullProbability),
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
                                         average = 2,
@@ -70,15 +64,7 @@ class JsonSizeSorterTest {
                                         median = 2,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(
-                                        average = 1.0,
-                                        minimum = 1.0,
-                                        maximum = 1.0,
-                                        mode = 1.0,
-                                        median = 1.0,
-                                        standardDeviation = 0.0
-                                )
-                        ))
+                                presence = fullProbability))
         )
 
         sorter.sort(input) succeedsAndShouldReturn JsonSizeObjectOverview(
@@ -101,15 +87,7 @@ class JsonSizeSorterTest {
                                         median = 2,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(
-                                        average = 1.0,
-                                        minimum = 1.0,
-                                        maximum = 1.0,
-                                        mode = 1.0,
-                                        median = 1.0,
-                                        standardDeviation = 0.0
-                                )
-                        ),
+                                presence = fullProbability),
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
                                         average = 1,
@@ -119,15 +97,7 @@ class JsonSizeSorterTest {
                                         median = 1,
                                         standardDeviation = 0.0
                                 )),
-                                presence = NormalDoubleDistribution(
-                                        average = 1.0,
-                                        minimum = 1.0,
-                                        maximum = 1.0,
-                                        mode = 1.0,
-                                        median = 1.0,
-                                        standardDeviation = 0.0
-                                )
-                        ))
+                                presence = fullProbability))
         )
     }
 
@@ -164,15 +134,7 @@ class JsonSizeSorterTest {
                                                 median = 1,
                                                 standardDeviation = 0.0
                                         )),
-                                        presence = NormalDoubleDistribution(
-                                                average = 1.0,
-                                                minimum = 1.0,
-                                                maximum = 1.0,
-                                                mode = 1.0,
-                                                median = 1.0,
-                                                standardDeviation = 0.0
-                                        )
-                                ),
+                                        presence = fullProbability),
                                 JsonSizeObjectChild(
                                         overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
                                                 average = 2,
@@ -182,15 +144,7 @@ class JsonSizeSorterTest {
                                                 median = 2,
                                                 standardDeviation = 0.0
                                         )),
-                                        presence = NormalDoubleDistribution(
-                                                average = 1.0,
-                                                minimum = 1.0,
-                                                maximum = 1.0,
-                                                mode = 1.0,
-                                                median = 1.0,
-                                                standardDeviation = 0.0
-                                        )
-                                ))
+                                        presence = fullProbability))
                 ),
                 numberOfChildren = NormalIntDistribution(
                         average = 1,
@@ -232,15 +186,7 @@ class JsonSizeSorterTest {
                                                 median = 2,
                                                 standardDeviation = 0.0
                                         )),
-                                        presence = NormalDoubleDistribution(
-                                                average = 1.0,
-                                                minimum = 1.0,
-                                                maximum = 1.0,
-                                                mode = 1.0,
-                                                median = 1.0,
-                                                standardDeviation = 0.0
-                                        )
-                                ),
+                                        presence = fullProbability),
                                 JsonSizeObjectChild(
                                         overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
                                                 average = 1,
@@ -251,15 +197,7 @@ class JsonSizeSorterTest {
                                                 standardDeviation = 0.0
                                         ))
                                         ,
-                                        presence = NormalDoubleDistribution(
-                                                average = 1.0,
-                                                minimum = 1.0,
-                                                maximum = 1.0,
-                                                mode = 1.0,
-                                                median = 1.0,
-                                                standardDeviation = 0.0
-                                        )
-                                ))
+                                        presence = fullProbability))
                 ),
                 numberOfChildren = NormalIntDistribution(
                         average = 1,
@@ -306,15 +244,7 @@ class JsonSizeSorterTest {
                                                         median = 1,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(
-                                                        average = 1.0,
-                                                        minimum = 1.0,
-                                                        maximum = 1.0,
-                                                        mode = 1.0,
-                                                        median = 1.0,
-                                                        standardDeviation = 0.0
-                                                )
-                                        ),
+                                                presence = fullProbability),
                                         JsonSizeObjectChild(
                                                 overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
                                                         average = 2,
@@ -324,25 +254,9 @@ class JsonSizeSorterTest {
                                                         median = 2,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(
-                                                        average = 1.0,
-                                                        minimum = 1.0,
-                                                        maximum = 1.0,
-                                                        mode = 1.0,
-                                                        median = 1.0,
-                                                        standardDeviation = 0.0
-                                                )
-                                        ))
+                                                presence = fullProbability))
                         ),
-                        presence = NormalDoubleDistribution(
-                                average = 1.0,
-                                minimum = 1.0,
-                                maximum = 1.0,
-                                mode = 1.0,
-                                median = 1.0,
-                                standardDeviation = 0.0
-                        )
-                ))
+                        presence = fullProbability))
         )
 
         sorter.sort(complexObject) succeedsAndShouldReturn JsonSizeObjectOverview(
@@ -376,15 +290,7 @@ class JsonSizeSorterTest {
                                                         median = 2,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(
-                                                        average = 1.0,
-                                                        minimum = 1.0,
-                                                        maximum = 1.0,
-                                                        mode = 1.0,
-                                                        median = 1.0,
-                                                        standardDeviation = 0.0
-                                                )
-                                        ),
+                                                presence = fullProbability),
                                         JsonSizeObjectChild(
                                                 overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
                                                         average = 1,
@@ -394,26 +300,12 @@ class JsonSizeSorterTest {
                                                         median = 1,
                                                         standardDeviation = 0.0
                                                 )),
-                                                presence = NormalDoubleDistribution(
-                                                        average = 1.0,
-                                                        minimum = 1.0,
-                                                        maximum = 1.0,
-                                                        mode = 1.0,
-                                                        median = 1.0,
-                                                        standardDeviation = 0.0
-                                                )
-                                        )
+                                                presence = fullProbability)
                                 )
                         ),
-                        presence = NormalDoubleDistribution(
-                                average = 1.0,
-                                minimum = 1.0,
-                                maximum = 1.0,
-                                mode = 1.0,
-                                median = 1.0,
-                                standardDeviation = 0.0
-                        )
-                ))
+                        presence = fullProbability))
         )
     }
+
+    val fullProbability = RatioProbability.create(1.0).get
 }
