@@ -11,7 +11,6 @@ import com.hcsc.de.claims.succeedsAnd
 import com.nhaarman.mockito_kotlin.*
 import junit.framework.Assert.fail
 import org.assertj.core.api.KotlinAssertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
 
 class JsonSizeAnalyzerTest {
@@ -26,8 +25,10 @@ class JsonSizeAnalyzerTest {
         on { generateJsonSizeOverview(any()) } doReturn defaultOverviewResult
     }
 
+    val defaultDistribution: Distribution<Double> = mock()
+
     val mockDistributionGenerator: DistributionGenerator<Double> = mock {
-        on { profile(any()) } doReturn Success(DistributionProfile(0.0, mock()))
+        on { profile(any()) } doReturn Success(DistributionProfile(0.0, defaultDistribution))
     }
 
     val jsonSizeAnalyzer = SingleThreadJsonSizeAnalyzer(
@@ -72,21 +73,21 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum JsonSizeObject with JsonSizeEmpty`() {
 
+        val expectedDistribution = mock<Distribution<Double>>()
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(0.0, expectedDistribution)))
+
         val node1 = JsonSizeObject(name = "A", size = 10, children = emptyList())
         val node2 = JsonSizeEmpty(name = "A")
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
+            mockGeneratorReceivedInAnyOrder(listOf(10.0, 0.0))
+
             assertThat(it).isEqualTo(JsonSizeObjectOverview(
                     name = "A",
-                    size = NormalIntDistribution(
-                            average = 5,
-                            minimum = 0,
-                            maximum = 10,
-                            mode = 10,
-                            median = 5,
-                            standardDeviation = 5.0
-                    ),
+                    size = expectedDistribution.asIntDistribution,
                     children = emptyList()
             ))
         }
@@ -95,6 +96,11 @@ class JsonSizeAnalyzerTest {
 
     @Test
     fun `it can sum JsonSizeArray and JsonSizeEmpty`() {
+
+        val expectedDistribution = mock<Distribution<Double>>()
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(0.0, expectedDistribution)))
 
         val childNode = JsonSizeLeafNode(name = "a", size = 1)
 
@@ -116,29 +122,16 @@ class JsonSizeAnalyzerTest {
 
             mockAnalyzerReceivedInAnyOrder(listOf(normalizedChild))
 
+            mockGeneratorReceivedInAnyOrder(listOf(15.0, 0.0), listOf(1.0, 0.0))
+
             assertThat(it).isEqualToComparingFieldByFieldRecursively(JsonSizeArrayOverview(
                     name = "A",
-                    size = NormalIntDistribution(
-                            average = 7,
-                            minimum = 0,
-                            maximum = 15,
-                            mode = 15,
-                            median = 7,
-                            standardDeviation = 7.516648189186454
-                    ),
-                    numberOfChildren = NormalIntDistribution(
-                            average = 1,
-                            minimum = 0,
-                            maximum = 1,
-                            mode = 1,
-                            median = 0,
-                            standardDeviation = 0.7071067811865476
-                    ),
+                    size = expectedDistribution.asIntDistribution,
+                    numberOfChildren = expectedDistribution.asIntDistribution,
                     averageChild = childOverview
             ))
         }
     }
-
 
     @Test
     fun `it cannot sum JsonSizeNodes that are named differently`() {
@@ -176,51 +169,6 @@ class JsonSizeAnalyzerTest {
     }
 
     @Test
-    @Ignore("TODO NOT A VALID TEST, DO WE NEED SOME FORM OF ARRAY CHILD TO PROHIBIT THIS SETUP FROM EVER HAPPENING?")
-    fun `it cannot sum JsonSizeArrays that have different types of children in any given Array`() {
-
-        val node1 = JsonSizeArray(
-                name = "A",
-                size = 15,
-                children = listOf(
-                        JsonSizeLeafNode(name = "A", size = 10),
-                        JsonSizeLeafNode(name = "B", size = 10)
-                )
-        )
-        val node2 = JsonSizeArray(
-                name = "A",
-                size = 15,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 15))
-        )
-
-        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
-
-            assertThat(message).isEqualTo("Nodes do not match")
-        }
-    }
-
-    @Test
-    @Ignore("TODO NOT A VALID TEST, DO WE NEED SOME FORM OF ARRAY CHILD TO PROHIBIT THIS SETUP FROM EVER HAPPENING?")
-    fun `it cannot sum JsonSizeArrays that are shaped differently`() {
-
-        val node1 = JsonSizeArray(
-                name = "A",
-                size = 15,
-                children = listOf(JsonSizeLeafNode(name = "0", size = 10))
-        )
-        val node2 = JsonSizeArray(
-                name = "A",
-                size = 15,
-                children = listOf(JsonSizeLeafNode(name = "1", size = 15))
-        )
-
-        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
-
-            assertThat(message).isEqualTo("Nodes do not match")
-        }
-    }
-
-    @Test
     fun `it can sum a list of simple JsonSizeLeafNodes`() {
 
         val expectedDistribution = mock<Distribution<Double>>()
@@ -245,6 +193,11 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum a list of JsonSizeObjects`() {
 
+        val expectedDistribution = mock<Distribution<Double>>()
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(0.0, expectedDistribution)))
+
         val childOverview = JsonSizeLeafOverview<Int>(name = "a", size = mock())
 
         whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
@@ -268,18 +221,13 @@ class JsonSizeAnalyzerTest {
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
+            mockGeneratorReceivedInAnyOrder(listOf(15.0, 24.0))
+
             mockAnalyzerReceivedInAnyOrder(listOf(child1, child2))
 
             assertThat(it).isEqualToComparingFieldByFieldRecursively(JsonSizeObjectOverview(
                     name = "A",
-                    size = NormalIntDistribution(
-                            average = 19,
-                            minimum = 15,
-                            maximum = 24,
-                            mode = 24,
-                            median = 19,
-                            standardDeviation = 4.527692569068709
-                    ),
+                    size = expectedDistribution.asIntDistribution,
                     children = listOf(JsonSizeObjectChild(
                             overview = childOverview,
                             presence = expectedProbability
@@ -327,14 +275,7 @@ class JsonSizeAnalyzerTest {
 
             assertThat(it).isEqualToComparingFieldByFieldRecursively(JsonSizeObjectOverview(
                     name = "A",
-                    size = NormalIntDistribution(
-                            average = 19,
-                            minimum = 15,
-                            maximum = 24,
-                            mode = 24,
-                            median = 19,
-                            standardDeviation = 4.527692569068709
-                    ),
+                    size = defaultDistribution.asIntDistribution,
                     children = listOf(
                             JsonSizeObjectChild(
                                     overview = childOverview,
@@ -349,6 +290,56 @@ class JsonSizeAnalyzerTest {
                                     presence = halfProbability
                             ))
             ))
+        }
+    }
+
+    @Test
+    fun `it can handle empty JsonSizeArrays`() {
+
+        val childOverview = JsonSizeLeafOverview<Int>(name = "a", size = mock())
+
+        whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
+                .doReturn(Success<String, JsonSizeOverview<Int>>(childOverview))
+
+        val expectedDistribution = mock<Distribution<Double>>()
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(0.0, expectedDistribution)))
+
+        val node1 = JsonSizeArray(
+                name = "top",
+                size = 48,
+                children = emptyList()
+        )
+
+        val child1 = JsonSizeLeafNode(name = "A", size = 6)
+        val child2 = JsonSizeLeafNode(name = "A", size = 10)
+        val child3 = JsonSizeLeafNode(name = "A", size = 20)
+
+        val node2 = JsonSizeArray(
+                name = "top",
+                size = 63,
+                children = listOf(
+                        child1,
+                        child2,
+                        child3
+                )
+        )
+
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
+
+            val normalizedChild = listOf(child1, child2, child3).map { it.copy(name = "averageChild") }
+
+            mockAnalyzerReceivedInAnyOrder(normalizedChild)
+
+            assertThat(it).isEqualToComparingFieldByFieldRecursively(
+                    JsonSizeArrayOverview(
+                            name = "top",
+                            size = expectedDistribution.asIntDistribution,
+                            averageChild = childOverview,
+                            numberOfChildren = expectedDistribution.asIntDistribution
+                    )
+            )
         }
     }
 
@@ -387,65 +378,6 @@ class JsonSizeAnalyzerTest {
                     }
                 }.filter { it }.size != 1) fail("Was not called with: $childList")
             }
-        }
-    }
-
-    @Test
-    fun `it can handle empty JsonSizeArrays`() {
-
-        val childOverview = JsonSizeLeafOverview<Int>(name = "a", size = mock())
-
-        whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
-                .doReturn(Success<String, JsonSizeOverview<Int>>(childOverview))
-
-        val node1 = JsonSizeArray(
-                name = "top",
-                size = 48,
-                children = emptyList()
-        )
-
-        val child1 = JsonSizeLeafNode(name = "A", size = 6)
-        val child2 = JsonSizeLeafNode(name = "A", size = 10)
-        val child3 = JsonSizeLeafNode(name = "A", size = 20)
-
-        val node2 = JsonSizeArray(
-                name = "top",
-                size = 63,
-                children = listOf(
-                        child1,
-                        child2,
-                        child3
-                )
-        )
-
-        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
-
-            val normalizedChild = listOf(child1, child2, child3).map { it.copy(name = "averageChild") }
-
-            mockAnalyzerReceivedInAnyOrder(normalizedChild)
-
-            assertThat(it).isEqualToComparingFieldByFieldRecursively(
-                    JsonSizeArrayOverview(
-                            name = "top",
-                            size = NormalIntDistribution(
-                                    average = 55,
-                                    minimum = 48,
-                                    maximum = 63,
-                                    mode = 63,
-                                    median = 55,
-                                    standardDeviation = 7.516648189186454
-                            ),
-                            averageChild = childOverview,
-                            numberOfChildren = NormalIntDistribution(
-                                    average = 1,
-                                    minimum = 0,
-                                    maximum = 3,
-                                    mode = 3,
-                                    median = 1,
-                                    standardDeviation = 1.5811388300841898
-                            )
-                    )
-            )
         }
     }
 

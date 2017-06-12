@@ -1,9 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributions.DistributionGenerator
-import com.hcsc.de.claims.distributions.NormalIntDistribution
-import com.hcsc.de.claims.distributions.RatioProbability
-import com.hcsc.de.claims.distributions.asIntDistribution
+import com.hcsc.de.claims.distributions.*
 import com.hcsc.de.claims.helpers.*
 import kotlin.reflect.KClass
 
@@ -54,73 +51,31 @@ class SingleThreadJsonSizeAnalyzer(
         }
     }
 
-    private fun List<JsonSizeLeafNode>.generateAveragedLeafNode(): Result<String, JsonSizeOverview<Int>> {
-
-        return distributionGenerator.profile(map { it.size.toDouble() }).map {
-            JsonSizeLeafOverview(
-                    name = first().name,
-                    size = it.distribution.asIntDistribution
-            )
-        }
-    }
-
-    private fun List<JsonSizeObject>.generateAveragedObjectNode(): Result<String, JsonSizeOverview<Int>> {
-
-        return collectAllChildrenNames()
-                .map { generateJsonSizeObjectChild(name = it) }
-                .traverse()
-                .map { JsonSizeObjectOverview(
-                            name = first().name,
-                            size = this.sizeDistribution,
-                            children = it
-                    )
-                }
-    }
-
-    private fun List<JsonSizeObject>.generateJsonSizeObjectChild(name: String): Result<String, JsonSizeObjectChild<Int>> {
-
-        return findAllChildrenByName(name).let { childrenWithName ->
-
-            childrenWithName.presenceProbability.flatMap { probability ->
-
-                childrenWithName
-                        .filterNotNull()
-                        .generateOverview()
-                        .map { JsonSizeObjectChild(overview = it, presence = probability) }
+    private fun List<JsonSizeLeafNode>.generateAveragedLeafNode(): Result<String, JsonSizeOverview<Int>> =
+            sizeDistributionFromNode.map { sizeDistribution ->
+                JsonSizeLeafOverview(
+                        name = first().name,
+                        size = sizeDistribution
+                )
             }
-        }
-    }
 
-    private val List<JsonSizeNode?>.presenceProbability: Result<String, RatioProbability>
-        get() = RatioProbability.create(presenceRatio)
+    private fun List<JsonSizeObject>.generateAveragedObjectNode(): Result<String, JsonSizeOverview<Int>> =
+            collectAllChildrenNames()
+                    .map { generateJsonSizeObjectChild(name = it) }
+                    .traverse()
+                    .flatMap { createObjectOverview(children = it) }
 
-    private val List<JsonSizeNode?>.presenceRatio: Double get() = filterNotNull().size.toDouble() / size
+    private fun List<JsonSizeArray>.generateAveragedArrayNode(): Result<String, JsonSizeOverview<Int>> =
+            flatMap { array -> array.childrenWithNormalizedNames }
+                    .generateOverview()
+                    .flatMap { generateJsonSizeArrayOverview(averageChild = it) }
 
-    private fun List<JsonSizeObject>.findAllChildrenByName(name: String): List<JsonSizeNode?> {
-        return map { it.children.find { it.name == name } }
-    }
-
-    private fun List<JsonSizeArray>.generateAveragedArrayNode(): Result<String, JsonSizeOverview<Int>> {
-
-        return flatMap { array -> array.childrenWithNormalizedNames }.generateOverview().map { averageChild ->
-
-            JsonSizeArrayOverview(
-                    name = first().name,
-                    size = sizeDistribution,
-                    averageChild = averageChild,
-                    numberOfChildren = numberOfChildrenDistribution
-            )
-        }
-    }
-
-    private fun List<JsonSizeNode>.ensureNodesHaveSameName(): Result<String, Unit> {
-
-        return if (this.map(JsonSizeNode::name).toSet().size > 1) {
-            Failure<String, Unit>(content = "Nodes do not match")
-        } else {
-            EMPTY_SUCCESS
-        }
-    }
+    private fun List<JsonSizeNode>.ensureNodesHaveSameName(): Result<String, Unit> =
+            if (this.map(JsonSizeNode::name).toSet().size > 1) {
+                Failure<String, Unit>(content = "Nodes do not match")
+            } else {
+                EMPTY_SUCCESS
+            }
 
     private fun List<JsonSizeNode>.ensureNodesAreSameType(): Result<String, String> {
 
@@ -142,12 +97,55 @@ class SingleThreadJsonSizeAnalyzer(
         }
     }
 
-    private fun List<JsonSizeObject>.collectAllChildrenNames(): Set<String> {
-        return flatMap { it.children.map { it.name } }.toSet()
-    }
+    private fun List<JsonSizeObject>.createObjectOverview(
+            children: List<JsonSizeObjectChild<Int>>
+    ): Result<String, JsonSizeOverview<Int>> =
+            sizeDistributionFromNode.map { sizeDistribution ->
+                JsonSizeObjectOverview(
+                        name = first().name,
+                        size = sizeDistribution,
+                        children = children
+                )
+            }
 
-    private val JsonSizeArray.childrenWithNormalizedNames: List<JsonSizeNode> get() {
-        return children.map {
+    private fun List<JsonSizeObject>.generateJsonSizeObjectChild(
+            name: String
+    ): Result<String, JsonSizeObjectChild<Int>> =
+            findAllChildrenByName(name).let { childrenWithName ->
+
+                childrenWithName.presenceProbability.flatMap { probability ->
+
+                    childrenWithName
+                            .filterNotNull()
+                            .generateOverview()
+                            .map { JsonSizeObjectChild(overview = it, presence = probability) }
+                }
+            }
+
+    private fun List<JsonSizeArray>.generateJsonSizeArrayOverview(
+            averageChild: JsonSizeOverview<Int>
+    ): Result<String, JsonSizeOverview<Int>> =
+            sizeDistributionFromNode.flatMap { sizeDistribution ->
+
+                map { it.numberOfChildren }.sizeDistributionInt.map { it ->
+
+                    JsonSizeArrayOverview(
+                            name = first().name,
+                            size = sizeDistribution,
+                            averageChild = averageChild,
+                            numberOfChildren = it
+                    ) as JsonSizeOverview<Int>
+                }
+            }
+
+    private fun List<JsonSizeObject>.findAllChildrenByName(name: String): List<JsonSizeNode?> =
+            map { it.children.find { it.name == name } }
+
+    private fun List<JsonSizeObject>.collectAllChildrenNames(): Set<String> =
+            flatMap { it.children.map { it.name } }.toSet()
+
+    private val JsonSizeArray.childrenWithNormalizedNames: List<JsonSizeNode>
+        get() = children.map {
             when (it) {
                 is JsonSizeLeafNode -> it.copy(name = "averageChild")
                 is JsonSizeObject -> it.copy(name = "averageChild")
@@ -155,29 +153,22 @@ class SingleThreadJsonSizeAnalyzer(
                 is JsonSizeEmpty -> it.copy(name = "averageChild")
             }
         }
-    }
-
-    private val List<JsonSizeNode>.sizeDistribution: NormalIntDistribution
-        get() = map(JsonSizeNode::size).distribution
 
     private val JsonSizeArray.numberOfChildren: Int get() = children.size
 
-    private val List<JsonSizeArray>.numberOfChildrenDistribution: NormalIntDistribution
-        get() = map { it.numberOfChildren }.distribution
+    private val List<JsonSizeNode?>.presenceProbability: Result<String, RatioProbability>
+        get() = RatioProbability.create(presenceRatio)
 
-    private val List<Int>.distribution: NormalIntDistribution get() {
+    private val List<JsonSizeNode?>.presenceRatio: Double get() = filterNotNull().size.toDouble() / size
 
-        val average = averageInt()
+    private val List<JsonSizeNode>.sizeDistributionFromNode: Result<String, Distribution<Int>>
+        get() = map(JsonSizeNode::size).sizeDistributionInt
 
-        return NormalIntDistribution(
-                average = average,
-                minimum = min() ?: 0,
-                maximum = max() ?: 0,
-                mode = modeInt(),
-                median = medianInt(),
-                standardDeviation = map { member -> (member - average).square() }.average().sqrt()
-        )
-    }
+    private val List<Int>.sizeDistributionInt: Result<String, Distribution<Int>>
+        get() = map(Int::toDouble).sizeDistribution.map { it.asIntDistribution }
+
+    private val List<Double>.sizeDistribution: Result<String, Distribution<Double>>
+        get() = distributionGenerator.profile(this).map { it.distribution }
 
     private fun emptySizeArray(name: String) = JsonSizeArray(name = name, size = 0, children = emptyList())
 
