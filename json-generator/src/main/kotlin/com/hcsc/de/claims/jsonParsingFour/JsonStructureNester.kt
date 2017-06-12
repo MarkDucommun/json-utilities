@@ -20,14 +20,21 @@ class JsonStructureNester {
                         id = open.id,
                         children = structure.withoutEnclosingStructures
                 )
-                is ArrayStructureElement -> nestedStructure.addChildren(children = structure.withoutEnclosingStructures)
-                is OpenObjectStructure -> nestedStructure.addChildren(children = structure.withoutEnclosingStructures)
+                is ArrayStructureElement -> nestedStructure.addChildren(
+                        children = structure.withoutEnclosingStructures
+                )
+                is OpenObjectStructure -> nestedStructure.addChildren(
+                        children = structure.withoutEnclosingStructures
+                )
                 is ObjectWithKeyStructure -> TODO()
             }
         }
     }
 
-    fun LiteralStructureElement.addChildren(id: Long, children: List<JsonStructure>): Result<String, MainStructure<*>> {
+    fun LiteralStructureElement.addChildren(
+            id: Long,
+            children: List<JsonStructure>
+    ): Result<String, MainStructure<*>> {
 
         return children
                 .ensureIdsMatch(id)
@@ -35,7 +42,10 @@ class JsonStructureNester {
                 .map { children -> copy(children = children) as MainStructure<*> }
     }
 
-    fun StringStructureElement.addChildren(id: Long, children: List<JsonStructure>): Result<String, MainStructure<*>> {
+    fun StringStructureElement.addChildren(
+            id: Long,
+            children: List<JsonStructure>
+    ): Result<String, MainStructure<*>> {
 
         return children
                 .ensureIdsMatch(id)
@@ -43,57 +53,70 @@ class JsonStructureNester {
                 .map { children -> copy(children = children) as MainStructure<*> }
     }
 
-    fun ArrayStructureElement.addChildren(children: List<JsonStructure>): Result<String, MainStructure<*>> {
+    fun ArrayStructureElement.addChildren(
+            children: List<JsonStructure>
+    ): Result<String, MainStructure<*>> {
 
         return if (children.isEmpty()) {
             Success<String, MainStructure<*>>(this)
         } else {
-            children.splitBy<ArrayComma>().map {
-
-                if (it.isNotEmpty()) {
-                    nest(it)
-                } else {
-                    Failure<String, MainStructure<*>>("Invalid JSON - array child can't be empty")
-                }
-            }.traverse().map { children -> copy(children = children) as MainStructure<*> }
+            children
+                    .splitBy<ArrayComma>()
+                    .map { it.asArrayChild }
+                    .traverse()
+                    .map { children -> copy(children = children) as MainStructure<*> }
         }
     }
-    
-    fun OpenObjectStructure.addChildren(children: List<JsonStructure>): Result<String, MainStructure<*>> {
+
+    fun OpenObjectStructure.addChildren(
+            children: List<JsonStructure>
+    ): Result<String, MainStructure<*>> {
 
         return if (children.isEmpty()) {
             Success<String, MainStructure<*>>(this)
         } else {
-            children.splitBy<ObjectComma>().mapIndexed { index, it ->
-
-                if (it.isNotEmpty()) {
-
-                    val structures = it.splitBy<ObjectColon>()
-
-                    if (structures.size == 2) {
-
-                        structures.map { nest(it) }.traverse().flatMap {
-
-                            val key = it[0]
-                            val value = it[1]
-
-                            if (key is StringStructureElement) {
-                                Success<String, ObjectChildElement<*>>(
-                                        ObjectChildElement(id = index + 1L, key = key, value = value)
-                                )
-                            } else {
-                                Failure<String, ObjectChildElement<*>>("")
-                            }
-                        }
-                    } else {
-                        Failure<String, ObjectChildElement<*>>("")
-                    }
-                } else {
-
-                    Failure<String, ObjectChildElement<*>>("")
-                }
-            }.traverse().map { childObjects -> copy(children = childObjects) as MainStructure<*> }
+            children
+                    .splitBy<ObjectComma>()
+                    .map { it.asObjectChild }
+                    .traverse()
+                    .map { childObjects -> copy(children = childObjects) as MainStructure<*> }
         }
+    }
+
+    private val List<JsonStructure>.isNotEmpty: Result<Unit, List<JsonStructure>>
+        get() = if (isNotEmpty()) Success(this) else Failure(Unit)
+
+    private val List<JsonStructure>.asArrayChild: Result<String, MainStructure<*>> get() {
+        return isNotEmpty
+                .flatMapError { Failure<String, List<JsonStructure>>("Invalid JSON - array child can't be empty") }
+                .flatMap { nest(it) }
+    }
+
+    private val List<JsonStructure>.asObjectChild: Result<String, ObjectChildElement<*>> get() {
+
+        return isNotEmpty
+                .flatMapError { Failure<String, List<JsonStructure>>("") }
+                .flatMap { it.splitBy<ObjectColon>()
+                        .asTwoMembers
+                        .flatMap { (key, value) -> Pair(nest(key), nest(value)).traverse() }
+                        .flatMap { it.asStringKeyAndValue }
+                        .map { (key, value) -> ObjectChildElement(id = value.id, key = key, value = value) }
+                }
+    }
+
+    private val Pair<MainStructure<*>, MainStructure<*>>.asStringKeyAndValue: Result<String, Pair<StringStructureElement, MainStructure<*>>> get() {
+
+        val (key, value) = this
+
+        return if ( key is StringStructureElement) {
+            Success<String, Pair<StringStructureElement, MainStructure<*>>>(Pair(key, value))
+        } else {
+            TODO()
+        }
+    }
+
+    private val List<List<JsonStructure>>.asTwoMembers: Result<String, Pair<List<JsonStructure>, List<JsonStructure>>> get() {
+        return if (this.size == 2) Success(Pair(first(), last())) else TODO()
     }
 
     inline fun <reified childType : JsonStructure> List<JsonStructure>.castChildren(): Result<String, List<childType>> {
@@ -116,7 +139,7 @@ class JsonStructureNester {
 
         val ids = map(JsonStructure::id).toSet()
 
-        return if (size == 0 || (ids.size == 1 && id == null || id == ids.first())) {
+        return if (size == 0 || (ids.size == 1 && (id == null || id == ids.first()))) {
             Success(this)
         } else {
             Failure("Invalid JSON - something went wrong")

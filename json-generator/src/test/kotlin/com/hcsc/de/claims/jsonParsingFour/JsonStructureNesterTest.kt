@@ -209,7 +209,7 @@ class JsonStructureNesterTest {
         ).nested succeedsAndShouldReturn
                 OpenObjectStructure(id = 1, children = listOf(
                         ObjectChildElement(
-                                id = 1,
+                                id = 3,
                                 key = StringStructureElement(id = 2, children = listOf(
                                         StringValue(id = 2, value = 'a')
                                 )),
@@ -223,6 +223,7 @@ class JsonStructureNesterTest {
     @Test
     fun `it returns an ObjectStructureElement with two children`() {
 
+        // {"a":1,"b":2}
         listOf(
                 ObjectOpen(id = 1),
                 StringOpen(id = 2),
@@ -240,7 +241,7 @@ class JsonStructureNesterTest {
         ).nested succeedsAndShouldReturn
                 OpenObjectStructure(id = 1, children = listOf(
                         ObjectChildElement(
-                                id = 1,
+                                id = 3,
                                 key = StringStructureElement(id = 2, children = listOf(
                                         StringValue(id = 2, value = 'a')
                                 )),
@@ -249,7 +250,7 @@ class JsonStructureNesterTest {
                                 ))
                         ),
                         ObjectChildElement(
-                                id = 2,
+                                id = 5,
                                 key = StringStructureElement(id = 4, children = listOf(
                                         StringValue(id = 4, value = 'b')
                                 )),
