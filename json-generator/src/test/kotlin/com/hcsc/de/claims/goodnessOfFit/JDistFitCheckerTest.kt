@@ -44,7 +44,7 @@ class JDistFitCheckerTest {
     @Test
     fun `it returns low pValue for values from different distributions`() {
 
-        listOf(1000, 10000, 100000).forEach { listSize ->
+        listOf(100, 1000, 10000, 100000).forEach { listSize ->
 
             val randomableOne = GenericDistributionRandomable(Normal(100.0, 20.0))
 
@@ -55,9 +55,12 @@ class JDistFitCheckerTest {
             val secondList = List(listSize) { randomableTwo.random() }
 
             println("listSize: $listSize - ")
+
             visualize(firstList, secondList, 2)
-            listOf(20, 40, 60, 90, 120, 150, 180, 200, 250).forEach { binCount ->
-                subject.check(firstList, firstList.dropLast(firstList.size / 2), binCount) succeedsAnd {
+
+            listOf(5, 20, 40, 60, 90, 120, 150, 180, 200, 250).forEach { binCount ->
+
+                subject.check(firstList, secondList, binCount) succeedsAnd {
 
                     println("$binCount: $it")
 
