@@ -13,8 +13,11 @@ class RealDistributionGenerator(
 
     override fun profile(list: List<Double>): Result<String, DistributionProfile<Double>> {
 
+        println("Generating distribution!")
+
         return profileWith(list, listOf(
-                deepNonParametricDistributionGenerator
+                normalDistributionGenerator
+//                deepNonParametricDistributionGenerator
         ))
     }
 

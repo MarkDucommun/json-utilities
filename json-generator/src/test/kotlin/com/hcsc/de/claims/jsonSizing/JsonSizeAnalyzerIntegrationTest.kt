@@ -9,6 +9,8 @@ import com.hcsc.de.claims.distributions.RealDistributionGenerator
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.*
 import com.hcsc.de.claims.distributionFitting.FitDistrPlus
+import com.hcsc.de.claims.distributionFitting.Montreal
+import com.hcsc.de.claims.get
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import net.sourceforge.jdistlib.generic.GenericDistribution
@@ -25,40 +27,25 @@ class JsonSizeAnalyzerIntegrationTest {
     fun `it reads in some files and creates a size analysis`() {
 
         val files = listOf(
-                "src/test/resources/data/deidentifiedClaims1.json",
-                "src/test/resources/data/deidentifiedClaims2.json",
-                "src/test/resources/data/deidentifiedClaims3.json",
-                "src/test/resources/data/deidentifiedClaims4.json"
+                "src/test/resources/data/deidentifiedClaims1.json"
+//                "src/test/resources/data/deidentifiedClaims2.json",
+//                "src/test/resources/data/deidentifiedClaims3.json",
+//                "src/test/resources/data/deidentifiedClaims4.json"
         )
 
         val fileReader = RawByteStringFileReader()
 
-        val rawClaims = files.flatMap {
-            val result = fileReader.read(it)
-
-            when (result) {
-                is Success -> result.content.split("\n")
-                is Failure -> throw RuntimeException(result.content)
-            }
-        }
+        val rawClaims = files.flatMap { fileReader.read(it).get.split("\n") }.subList(0, 5)
 
         val jsonSizer = JsonSizer()
 
-        val listOfJsonSizes = rawClaims.filterNot { it.isBlank() }.map {
-            val result = jsonSizer.calculateSize(it)
+        val listOfJsonSizes = rawClaims.filterNot { it.isBlank() }.map { jsonSizer.calculateSize(it).get }
 
-            when (result) {
-                is Success -> result.content
-                is Failure -> throw RuntimeException(result.content)
-            }
-        }
+        val jsonSizeAnalyzer = SingleThreadJsonSizeAnalyzer(distributionGenerator = RealDistributionGenerator(Montreal))
 
-//        val jsonSizeAnalyzer = JsonSizeAnalyzer()
+        val result = jsonSizeAnalyzer.generateJsonSizeOverview(listOfJsonSizes).get
 
-//        val result = jsonSizeAnalyzer.generateJsonSizeOverview(listOfJsonSizes).blockingGet()
-//
-//        val overview = (result as Success).content
-//
+        println()
 //        val listOfTopLevelSizes = listOfJsonSizes.map { it.size.toDouble() }
 //
 //        val topLevelSizeDistribution = listOfTopLevelSizes.distribution
