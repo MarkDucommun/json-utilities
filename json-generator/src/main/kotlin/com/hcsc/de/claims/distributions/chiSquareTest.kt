@@ -41,7 +41,8 @@ fun List<Int>.chiSquaredTestFromList(expected: List<Int>, binCount: Int = 5): Re
 fun <numberType: Number> DistributionPair<numberType>.chiSquaredTest(binCount: Int = 10): Result<String, ChiSquareValue> {
 
     val (distOne, distTwo) = this.unknownDualMemberVariableBinWidthDistribution(binCount).asTwoDistributions
-
+    val actualBins = distOne.bins.count()
+    print("actual bins: $actualBins, ")
     return distOne.doubleChiSquaredTest(distTwo)
 }
 

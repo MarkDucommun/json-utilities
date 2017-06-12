@@ -11,9 +11,9 @@ import umontreal.ssj.gof.GofStat
 
 class JDistFitChecker<in numberType : Number> : FitChecker<numberType> {
 
-    override fun check(listOne: List<numberType>, listTwo: List<numberType>): Result<String, Double> {
+    override fun check(listOne: List<numberType>, listTwo: List<numberType>, binCount: Int): Result<String, Double> {
 
         return DistributionPair(listOne, listTwo)
-                .chiSquaredTest(100).map { it.pValue }
+                .chiSquaredTest(binCount).map { it.pValue }
     }
 }

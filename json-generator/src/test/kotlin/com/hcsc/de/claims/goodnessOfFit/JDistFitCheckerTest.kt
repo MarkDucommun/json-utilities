@@ -54,14 +54,18 @@ class JDistFitCheckerTest {
 
             val secondList = List(listSize) { randomableTwo.random() }
 
+            println("listSize: $listSize - ")
             visualize(firstList, secondList, 2)
+            listOf(20, 40, 60, 90, 120, 150, 180, 200, 250).forEach { binCount ->
+                subject.check(firstList, firstList.dropLast(firstList.size / 2), binCount) succeedsAnd {
 
-            subject.check(firstList, firstList.dropLast(firstList.size / 2)) succeedsAnd {
-
-                println("$listSize: $it")
+                    println("$binCount: $it")
 
 //                assertThat(it).isLessThan(0.05)
+                }
             }
+            println()
         }
+
     }
 }

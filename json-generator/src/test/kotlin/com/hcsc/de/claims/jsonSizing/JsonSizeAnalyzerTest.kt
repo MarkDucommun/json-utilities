@@ -1,17 +1,39 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributions.NormalDoubleDistribution
-import com.hcsc.de.claims.distributions.NormalIntDistribution
+import com.hcsc.de.claims.distributions.*
 import com.hcsc.de.claims.failsAnd
-import com.hcsc.de.claims.helpers.SingleResult
+import com.hcsc.de.claims.failsWithMessage
+import com.hcsc.de.claims.get
+import com.hcsc.de.claims.helpers.Failure
+import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.helpers.Success
 import com.hcsc.de.claims.succeedsAnd
+import com.nhaarman.mockito_kotlin.*
+import junit.framework.Assert.fail
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
 
 class JsonSizeAnalyzerTest {
 
-    val jsonSizeAnalyzer = JsonSizeAnalyzer()
+    val defaultSizeOverview = JsonSizeLeafOverview<Int>(
+            name = "",
+            size = mock()
+    )
+    val defaultOverviewResult: Success<String, JsonSizeOverview<Int>> = Success(defaultSizeOverview)
+
+    val mockJsonSizeAnalyzer: JsonSizeAnalyzer = mock {
+        on { generateJsonSizeOverview(any()) } doReturn defaultOverviewResult
+    }
+
+    val mockDistributionGenerator: DistributionGenerator<Double> = mock {
+        on { profile(any()) } doReturn Success(DistributionProfile(0.0, mock()))
+    }
+
+    val jsonSizeAnalyzer = SingleThreadJsonSizeAnalyzer(
+            analyzer = mockJsonSizeAnalyzer,
+            distributionGenerator = mockDistributionGenerator
+    )
 
     @Test
     fun `it cannot sum JsonSizeNodes that are different non-empty types`() {
@@ -28,21 +50,21 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum JsonSizeLeafNodes and JsonSizeEmpty`() {
 
+        val expectedDistribution = mock<Distribution<Double>>()
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(0.0, expectedDistribution)))
+
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeEmpty(name = "A")
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
+            mockGeneratorReceivedInAnyOrder(listOf(10.0, 0.0))
+
             assertThat(it).isEqualTo(JsonSizeLeafOverview(
                     name = "A",
-                    size = NormalIntDistribution(
-                            average = 5,
-                            minimum = 0,
-                            maximum = 10,
-                            mode = 10,
-                            median = 5,
-                            standardDeviation = 5.0
-                    )
+                    size = expectedDistribution.asIntDistribution
             ))
         }
     }
@@ -74,14 +96,25 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum JsonSizeArray and JsonSizeEmpty`() {
 
+        val childNode = JsonSizeLeafNode(name = "a", size = 1)
+
+        val childOverview = JsonSizeLeafOverview<Int>(name = "a", size = mock())
+
+        whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
+                .doReturn(Success<String, JsonSizeOverview<Int>>(childOverview))
+
         val node1 = JsonSizeEmpty(name = "A")
         val node2 = JsonSizeArray(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "A", size = 10))
+                children = listOf(childNode)
         )
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
+
+            val normalizedChild = childNode.copy(name = "averageChild")
+
+            mockAnalyzerReceivedInAnyOrder(listOf(normalizedChild))
 
             assertThat(it).isEqualToComparingFieldByFieldRecursively(JsonSizeArrayOverview(
                     name = "A",
@@ -101,17 +134,7 @@ class JsonSizeAnalyzerTest {
                             median = 0,
                             standardDeviation = 0.7071067811865476
                     ),
-                    averageChild = JsonSizeLeafOverview(
-                            name = "averageChild",
-                            size = NormalIntDistribution(
-                                    average = 10,
-                                    minimum = 10,
-                                    maximum = 10,
-                                    mode = 10,
-                                    median = 10,
-                                    standardDeviation = 0.0
-                            )
-                    )
+                    averageChild = childOverview
             ))
         }
     }
@@ -130,7 +153,10 @@ class JsonSizeAnalyzerTest {
     }
 
     @Test
-    fun `it cannot sum JsonSizeObjects that have children with different key types`() {
+    fun `it fails if the delegated size analyzer fails`() {
+
+        whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
+                .doReturn(Failure("I failed!"))
 
         val node1 = JsonSizeObject(
                 name = "A",
@@ -146,10 +172,7 @@ class JsonSizeAnalyzerTest {
                         children = listOf(JsonSizeLeafNode(name = "A", size = 10))))
         )
 
-        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsAnd { message ->
-
-            assertThat(message).isEqualTo("Nodes are not the same type")
-        }
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) failsWithMessage "I failed!"
     }
 
     @Test
@@ -200,37 +223,52 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum a list of simple JsonSizeLeafNodes`() {
 
+        val expectedDistribution = mock<Distribution<Double>>()
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(0.0, expectedDistribution)))
+
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeLeafNode(name = "A", size = 15)
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
-            assertThat(it).isEqualTo(JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
-                    average = 13,
-                    minimum = 10,
-                    maximum = 15,
-                    mode = 15,
-                    median = 12,
-                    standardDeviation = 2.5495097567963922
-            )))
+            mockGeneratorReceivedInAnyOrder(listOf(10.0, 15.0))
+
+            assertThat(it).isEqualTo(JsonSizeLeafOverview(
+                    name = "A",
+                    size = expectedDistribution.asIntDistribution
+            ))
         }
     }
 
     @Test
     fun `it can sum a list of JsonSizeObjects`() {
 
+        val childOverview = JsonSizeLeafOverview<Int>(name = "a", size = mock())
+
+        whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
+                .doReturn(Success<String, JsonSizeOverview<Int>>(childOverview))
+
+        val child1 = JsonSizeLeafNode(name = "B", size = 10)
+        val child2 = JsonSizeLeafNode(name = "B", size = 19)
+
         val node1 = JsonSizeObject(
                 name = "A",
                 size = 15,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 10))
+                children = listOf(child1)
         )
         val node2 = JsonSizeObject(
                 name = "A",
                 size = 24,
-                children = listOf(JsonSizeLeafNode(name = "B", size = 19))
+                children = listOf(child2)
         )
 
+        val expectedProbability = RatioProbability.create(1.0).get
+
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
+
+            mockAnalyzerReceivedInAnyOrder(listOf(child1, child2))
 
             assertThat(it).isEqualToComparingFieldByFieldRecursively(JsonSizeObjectOverview(
                     name = "A",
@@ -243,22 +281,8 @@ class JsonSizeAnalyzerTest {
                             standardDeviation = 4.527692569068709
                     ),
                     children = listOf(JsonSizeObjectChild(
-                            overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
-                                    average = 15,
-                                    minimum = 10,
-                                    maximum = 19,
-                                    mode = 19,
-                                    median = 14,
-                                    standardDeviation = 4.527692569068709
-                            )),
-                            presence = NormalDoubleDistribution(
-                                    average = 1.0,
-                                    minimum = 1.0,
-                                    maximum = 1.0,
-                                    mode = 1.0,
-                                    median = 1.0,
-                                    standardDeviation = 0.0
-                            )
+                            overview = childOverview,
+                            presence = expectedProbability
                     ))
             ))
         }
@@ -267,24 +291,39 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum a list of JsonSizeObjects with different keys`() {
 
+        val childOverview = JsonSizeLeafOverview<Int>(name = "a", size = mock())
+
+        whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
+                .doReturn(Success<String, JsonSizeOverview<Int>>(childOverview))
+
+        val bChild1 = JsonSizeLeafNode(name = "B", size = 10)
+        val bChild2 = JsonSizeLeafNode(name = "B", size = 19)
+        val cChild = JsonSizeLeafNode(name = "C", size = 15)
+        val dChild = JsonSizeLeafNode(name = "D", size = 25)
+
         val node1 = JsonSizeObject(
                 name = "A",
                 size = 15,
                 children = listOf(
-                        JsonSizeLeafNode(name = "B", size = 10),
-                        JsonSizeLeafNode(name = "C", size = 15)
+                        bChild1,
+                        cChild
                 )
         )
         val node2 = JsonSizeObject(
                 name = "A",
                 size = 24,
                 children = listOf(
-                        JsonSizeLeafNode(name = "B", size = 19),
-                        JsonSizeLeafNode(name = "D", size = 25)
+                        bChild2,
+                        dChild
                 )
         )
 
+        val fullProbability = RatioProbability.create(1.0).get
+        val halfProbability = RatioProbability.create(0.5).get
+
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
+
+            mockAnalyzerReceivedInAnyOrder(listOf(bChild1, bChild2), listOf(cChild), listOf(dChild))
 
             assertThat(it).isEqualToComparingFieldByFieldRecursively(JsonSizeObjectOverview(
                     name = "A",
@@ -298,193 +337,66 @@ class JsonSizeAnalyzerTest {
                     ),
                     children = listOf(
                             JsonSizeObjectChild(
-                                    overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
-                                            average = 15,
-                                            minimum = 10,
-                                            maximum = 19,
-                                            mode = 19,
-                                            median = 14,
-                                            standardDeviation = 4.527692569068709
-                                    )),
-                                    presence = NormalDoubleDistribution(
-                                            average = 1.0,
-                                            minimum = 1.0,
-                                            maximum = 1.0,
-                                            mode = 1.0,
-                                            median = 1.0,
-                                            standardDeviation = 0.0
-                                    )
+                                    overview = childOverview,
+                                    presence = fullProbability
                             ),
                             JsonSizeObjectChild(
-                                    overview = JsonSizeLeafOverview(name = "C", size = NormalIntDistribution(
-                                            average = 15,
-                                            minimum = 15,
-                                            maximum = 15,
-                                            mode = 15,
-                                            median = 15,
-                                            standardDeviation = 0.0
-                                    )),
-                                    presence = NormalDoubleDistribution(
-                                            average = 0.5,
-                                            minimum = 0.0,
-                                            maximum = 1.0,
-                                            mode = 0.5,
-                                            median = 1.0,
-                                            standardDeviation = 0.5
-                                    )
+                                    overview = childOverview,
+                                    presence = halfProbability
                             ),
                             JsonSizeObjectChild(
-                                    overview = JsonSizeLeafOverview(name = "D", size = NormalIntDistribution(
-                                            average = 25,
-                                            minimum = 25,
-                                            maximum = 25,
-                                            mode = 25,
-                                            median = 25,
-                                            standardDeviation = 0.0
-                                    )),
-                                    presence = NormalDoubleDistribution(
-                                            average = 0.5,
-                                            minimum = 0.0,
-                                            maximum = 1.0,
-                                            mode = 0.5,
-                                            median = 1.0,
-                                            standardDeviation = 0.5
-                                    )
+                                    overview = childOverview,
+                                    presence = halfProbability
                             ))
             ))
         }
     }
 
-    @Test
-    fun `it can sum a list of JsonSizeNodes with JsonSizeArrays to create an averaged node`() {
+    fun mockAnalyzerReceivedInAnyOrder(vararg children: List<JsonSizeNode>) {
 
-        val node1 = JsonSizeArray(
-                name = "top",
-                size = 48,
-                children = listOf(
-                        JsonSizeObject(name = "0", size = 20,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 4),
-                                        JsonSizeLeafNode(name = "B", size = 5)
+        argumentCaptor<List<JsonSizeNode>>().apply {
 
-                                )
-                        ),
-                        JsonSizeObject(name = "1", size = 25,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 6),
-                                        JsonSizeLeafNode(name = "B", size = 8)
-                                )
-                        )
-                )
-        )
+            verify(mockJsonSizeAnalyzer, times(children.size)).generateJsonSizeOverview(capture())
 
-        val node2 = JsonSizeArray(
-                name = "top",
-                size = 63,
-                children = listOf(
-                        JsonSizeObject(name = "0", size = 25,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 6),
-                                        JsonSizeLeafNode(name = "B", size = 8)
-                                )
-                        ),
-                        JsonSizeObject(name = "1", size = 35,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 10),
-                                        JsonSizeLeafNode(name = "B", size = 14)
-                                )
-                        ),
-                        JsonSizeObject(name = "1", size = 35,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 20),
-                                        JsonSizeLeafNode(name = "B", size = 14)
-                                )
-                        )
-                )
-        )
+            children.forEach { childList ->
+                if (allValues.map {
+                    try {
+                        assertThat(it).containsExactlyInAnyOrder(*childList.toTypedArray())
+                        true
+                    } catch (e: AssertionError) {
+                        false
+                    }
+                }.filter { it }.size != 1) fail("Was not called with: $childList")
+            }
+        }
+    }
 
-        val result = jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2)
+    fun mockGeneratorReceivedInAnyOrder(vararg children: List<Double>) {
 
-        result succeedsAnd {
+        argumentCaptor<List<Double>>().apply {
 
+            verify(mockDistributionGenerator, times(children.size)).profile(capture())
 
-            val jsonSizeArrayOverview = it as JsonSizeArrayOverview
-
-            assertThat(jsonSizeArrayOverview.name).isEqualTo("top")
-
-            assertThat(jsonSizeArrayOverview.size).isEqualTo(NormalIntDistribution(
-                    average = 55,
-                    minimum = 48,
-                    maximum = 63,
-                    mode = 63,
-                    median = 55,
-                    standardDeviation = 7.516648189186454
-            ))
-
-            assertThat(jsonSizeArrayOverview.averageChild).isEqualToComparingFieldByFieldRecursively(
-                    JsonSizeObjectOverview(
-                            name = "averageChild",
-                            size = NormalIntDistribution(
-                                    average = 28,
-                                    minimum = 20,
-                                    maximum = 35,
-                                    mode = 35,
-                                    median = 25,
-                                    standardDeviation = 6.0
-                            ),
-                            children = listOf(
-                                    JsonSizeObjectChild(
-                                            overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
-                                                    average = 9,
-                                                    minimum = 4,
-                                                    maximum = 20,
-                                                    mode = 6,
-                                                    median = 6,
-                                                    standardDeviation = 5.744562646538029
-                                            )),
-                                            presence = NormalDoubleDistribution(
-                                                    average = 1.0,
-                                                    minimum = 1.0,
-                                                    maximum = 1.0,
-                                                    mode = 1.0,
-                                                    median = 1.0,
-                                                    standardDeviation = 0.0
-                                            )
-                                    ),
-                                    JsonSizeObjectChild(
-                                            overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
-                                                    average = 9,
-                                                    minimum = 5,
-                                                    maximum = 14,
-                                                    mode = 14,
-                                                    median = 8,
-                                                    standardDeviation = 3.687817782917155
-                                            )),
-                                            presence = NormalDoubleDistribution(
-                                                    average = 1.0,
-                                                    minimum = 1.0,
-                                                    maximum = 1.0,
-                                                    mode = 1.0,
-                                                    median = 1.0,
-                                                    standardDeviation = 0.0
-                                            ))
-                            )
-                    )
-            )
-
-            assertThat(jsonSizeArrayOverview.numberOfChildren).isEqualTo(NormalIntDistribution(
-                    average = 3,
-                    minimum = 2,
-                    maximum = 3,
-                    mode = 3,
-                    median = 2,
-                    standardDeviation = 0.7071067811865476
-            ))
+            children.forEach { childList ->
+                if (allValues.map {
+                    try {
+                        assertThat(it).containsExactlyInAnyOrder(*childList.toTypedArray())
+                        true
+                    } catch (e: AssertionError) {
+                        false
+                    }
+                }.filter { it }.size != 1) fail("Was not called with: $childList")
+            }
         }
     }
 
     @Test
     fun `it can handle empty JsonSizeArrays`() {
+
+        val childOverview = JsonSizeLeafOverview<Int>(name = "a", size = mock())
+
+        whenever(mockJsonSizeAnalyzer.generateJsonSizeOverview(any()))
+                .doReturn(Success<String, JsonSizeOverview<Int>>(childOverview))
 
         val node1 = JsonSizeArray(
                 name = "top",
@@ -492,113 +404,52 @@ class JsonSizeAnalyzerTest {
                 children = emptyList()
         )
 
+        val child1 = JsonSizeLeafNode(name = "A", size = 6)
+        val child2 = JsonSizeLeafNode(name = "A", size = 10)
+        val child3 = JsonSizeLeafNode(name = "A", size = 20)
+
         val node2 = JsonSizeArray(
                 name = "top",
                 size = 63,
                 children = listOf(
-                        JsonSizeObject(name = "0", size = 25,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 6),
-                                        JsonSizeLeafNode(name = "B", size = 8)
-                                )
-                        ),
-                        JsonSizeObject(name = "1", size = 35,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 10),
-                                        JsonSizeLeafNode(name = "B", size = 14)
-                                )
-                        ),
-                        JsonSizeObject(name = "1", size = 35,
-                                children = listOf(
-                                        JsonSizeLeafNode(name = "A", size = 20),
-                                        JsonSizeLeafNode(name = "B", size = 14)
-                                )
-                        )
+                        child1,
+                        child2,
+                        child3
                 )
         )
 
-        val result = jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2)
+        jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
-        result succeedsAnd {
+            val normalizedChild = listOf(child1, child2, child3).map { it.copy(name = "averageChild") }
 
-            assertThat(it is JsonSizeArrayOverview).isTrue()
+            mockAnalyzerReceivedInAnyOrder(normalizedChild)
 
-            val jsonSizeArrayOverview = it as JsonSizeArrayOverview
-
-            assertThat(jsonSizeArrayOverview.name).isEqualTo("top")
-
-            assertThat(jsonSizeArrayOverview.size).isEqualTo(NormalIntDistribution(
-                    average = 55,
-                    minimum = 48,
-                    maximum = 63,
-                    mode = 63,
-                    median = 55,
-                    standardDeviation = 7.516648189186454
-            ))
-
-            assertThat(jsonSizeArrayOverview.averageChild).isEqualToComparingFieldByFieldRecursively(
-                    JsonSizeObjectOverview(
-                            name = "averageChild",
+            assertThat(it).isEqualToComparingFieldByFieldRecursively(
+                    JsonSizeArrayOverview(
+                            name = "top",
                             size = NormalIntDistribution(
-                                    average = 31,
-                                    minimum = 25,
-                                    maximum = 35,
-                                    mode = 35,
-                                    median = 35,
-                                    standardDeviation = 4.760952285695233
+                                    average = 55,
+                                    minimum = 48,
+                                    maximum = 63,
+                                    mode = 63,
+                                    median = 55,
+                                    standardDeviation = 7.516648189186454
                             ),
-                            children = listOf(
-                                    JsonSizeObjectChild(
-                                            overview = JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
-                                                    average = 12,
-                                                    minimum = 6,
-                                                    maximum = 20,
-                                                    mode = 20,
-                                                    median = 10,
-                                                    standardDeviation = 5.887840577551898
-                                            )),
-                                            presence = NormalDoubleDistribution(
-                                                    average = 1.0,
-                                                    minimum = 1.0,
-                                                    maximum = 1.0,
-                                                    mode = 1.0,
-                                                    median = 1.0,
-                                                    standardDeviation = 0.0
-                                            )
-                                    ),
-                                    JsonSizeObjectChild(
-                                            overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
-                                                    average = 12,
-                                                    minimum = 8,
-                                                    maximum = 14,
-                                                    mode = 14,
-                                                    median = 14,
-                                                    standardDeviation = 2.8284271247461903
-                                            )),
-                                            presence = NormalDoubleDistribution(
-                                                    average = 1.0,
-                                                    minimum = 1.0,
-                                                    maximum = 1.0,
-                                                    mode = 1.0,
-                                                    median = 1.0,
-                                                    standardDeviation = 0.0
-                                            ))
+                            averageChild = childOverview,
+                            numberOfChildren = NormalIntDistribution(
+                                    average = 1,
+                                    minimum = 0,
+                                    maximum = 3,
+                                    mode = 3,
+                                    median = 1,
+                                    standardDeviation = 1.5811388300841898
                             )
                     )
             )
-
-            assertThat(jsonSizeArrayOverview.numberOfChildren).isEqualTo(NormalIntDistribution(
-                    average = 1,
-                    minimum = 0,
-                    maximum = 3,
-                    mode = 3,
-                    median = 1,
-                    standardDeviation = 1.5811388300841898
-            ))
         }
     }
 
-    private fun JsonSizeAnalyzer.generateJsonSizeOverview(vararg nodes: JsonSizeNode): SingleResult<String, JsonSizeOverview<Int>> {
+    private fun SingleThreadJsonSizeAnalyzer.generateJsonSizeOverview(vararg nodes: JsonSizeNode): Result<String, JsonSizeOverview<Int>> {
 
         return generateJsonSizeOverview(nodes = nodes.asList())
     }

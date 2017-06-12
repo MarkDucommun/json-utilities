@@ -53,21 +53,21 @@ class JsonSizeAnalyzerIntegrationTest {
             }
         }
 
-        val jsonSizeAnalyzer = JsonSizeAnalyzer()
+//        val jsonSizeAnalyzer = JsonSizeAnalyzer()
 
-        val result = jsonSizeAnalyzer.generateJsonSizeOverview(listOfJsonSizes).blockingGet()
-
-        val overview = (result as Success).content
-
-        val listOfTopLevelSizes = listOfJsonSizes.map { it.size.toDouble() }
-
-        val topLevelSizeDistribution = listOfTopLevelSizes.distribution
-
-        val normal = Normal(topLevelSizeDistribution.average, topLevelSizeDistribution.standardDeviation)
-
-        val period = topLevelSizeDistribution.maximum / 1000
-
-        listOfTopLevelSizes.groupBy { (it / (period)).toInt() }
+//        val result = jsonSizeAnalyzer.generateJsonSizeOverview(listOfJsonSizes).blockingGet()
+//
+//        val overview = (result as Success).content
+//
+//        val listOfTopLevelSizes = listOfJsonSizes.map { it.size.toDouble() }
+//
+//        val topLevelSizeDistribution = listOfTopLevelSizes.distribution
+//
+//        val normal = Normal(topLevelSizeDistribution.average, topLevelSizeDistribution.standardDeviation)
+//
+//        val period = topLevelSizeDistribution.maximum / 1000
+//
+//        listOfTopLevelSizes.groupBy { (it / (period)).toInt() }
 
         //ChiSquareTest().chiSquare()
 
