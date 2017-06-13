@@ -65,6 +65,7 @@ fun <numberType : Number> DistributionPair<numberType>.unknownDualMemberVariable
                 }
 
                 if (splitBins.binSplit != null) {
+
                     val newBins = sortedBins.filterNot { splitBins.binSplit.identifyingCharacteristic == it.identifyingCharacteristic }.plus(splitBins.newBins)
 
                     binHolder.copy(bins = newBins)
@@ -95,7 +96,7 @@ fun <numberType : Number> DistributionPair<numberType>.unknownDualMemberVariable
 
         it.render()
 
-        Thread.sleep(500)
+        Thread.sleep(5000)
 
         it.stop()
 
@@ -150,71 +151,71 @@ val <numberType : Number> UnknownDualMemberVariableBinWidthDistribution<numberTy
     )
 }
 
-//private fun VariableDualMemberWidthBin<Double>.maximizeDoubleBinsRecursively(binCount: Int): List<VariableDualMemberWidthBin<Double>> {
-//
-//    return if (isSplittable(binCount)) {
-//
-//        val rangeHolder = RangeHolder(low = startValue, middle = (endValue + startValue) / 2, high = endValue)
-//
-//        val finalRangeHolder = List(5) { it }.fold(rangeHolder) { rangeHolder, _ ->
-//
-//            if (rangeHolder.isIncomplete) {
-//
-//                val lower = members.filterNot { it.value >= rangeHolder.middle }.asDoubleBin
-//
-//                val upper = members.filter { it.value >= rangeHolder.middle }.asDoubleBin
-//
-//                if (lower.isValid(binCount) && upper.isValid(binCount)) {
-//                    rangeHolder.copy(isFinalBin = false, isIncomplete = false)
-//                } else if (lower.isValid(binCount)) {
-//                    rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
-//                } else if (upper.isValid(binCount)) {
-//                    rangeHolder.copy(low = rangeHolder.middle, middle = (rangeHolder.high + rangeHolder.middle) / 2)
-//                } else {
-//                    rangeHolder.copy(isFinalBin = true, isIncomplete = false)
-//                }
-//            } else {
-//                rangeHolder
-//            }
-//        }
-//
-//        if (finalRangeHolder.isFinalBin) {
-//            listOf(this)
-//        } else {
-//
-//            val lowerBin = members.filterNot { it.value >= rangeHolder.middle }.asDoubleBin
-//            val upperBin = members.filter { it.value >= rangeHolder.middle }.asDoubleBin
-//
-//            if (lowerBin.isValid(binCount) && upperBin.isValid(binCount)) {
-//
-//                val lower = lowerBin.maximizeDoubleBinsRecursively(binCount)
-//                val upper = upperBin.maximizeDoubleBinsRecursively(binCount)
-//
-//                lower.plus(upper)
-//            } else {
-//                listOf(this)
-//            }
-//
-//        }
-//    } else {
-//
-//        listOf(this)
-//    }
-//}
+private fun VariableDualMemberWidthBin<Double>.maximizeDoubleBinsRecursively(binCount: Int): List<VariableDualMemberWidthBin<Double>> {
+
+    return if (isSplittable(binCount)) {
+
+        val rangeHolder = RangeHolder(low = startValue, middle = (endValue + startValue) / 2, high = endValue)
+
+        val finalRangeHolder = List(5) { it }.fold(rangeHolder) { rangeHolder, _ ->
+
+            if (rangeHolder.isIncomplete) {
+
+                val lower = members.filterNot { it.value >= rangeHolder.middle }.asDoubleBin
+
+                val upper = members.filter { it.value >= rangeHolder.middle }.asDoubleBin
+
+                if (lower.isValid(binCount) && upper.isValid(binCount)) {
+                    rangeHolder.copy(isFinalBin = false, isIncomplete = false)
+                } else if (lower.isValid(binCount)) {
+                    rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
+                } else if (upper.isValid(binCount)) {
+                    rangeHolder.copy(low = rangeHolder.middle, middle = (rangeHolder.high + rangeHolder.middle) / 2)
+                } else {
+                    rangeHolder.copy(isFinalBin = true, isIncomplete = false)
+                }
+            } else {
+                rangeHolder
+            }
+        }
+
+        if (finalRangeHolder.isFinalBin) {
+            listOf(this)
+        } else {
+
+            val lowerBin = members.filterNot { it.value >= rangeHolder.middle }.asDoubleBin
+            val upperBin = members.filter { it.value >= rangeHolder.middle }.asDoubleBin
+
+            if (lowerBin.isValid(binCount) && upperBin.isValid(binCount)) {
+
+                val lower = lowerBin.maximizeDoubleBinsRecursively(binCount)
+                val upper = upperBin.maximizeDoubleBinsRecursively(binCount)
+
+                lower.plus(upper)
+            } else {
+                listOf(this)
+            }
+
+        }
+    } else {
+
+        listOf(this)
+    }
+}
 
 private fun VariableDualMemberWidthBin<Double>.splitBin(binCount: Int): List<VariableDualMemberWidthBin<Double>> {
 
     return if (isSplittable(binCount)) {
 
-        val memberOneMedian = memberOneValues.average()
+        val memberOneAverage = memberOneValues.average()
 
-        val memberTwoMedian = memberTwoValues.average()
+        val memberTwoAverage = memberTwoValues.average()
 
-        val (low, high) = if (memberOneMedian < memberTwoMedian) memberOneMedian to memberTwoMedian else memberTwoMedian to memberOneMedian
+        val (low, high) = if (memberOneAverage < memberTwoAverage) memberOneAverage to memberTwoAverage else memberTwoAverage to memberOneAverage
 
         val rangeHolder = RangeHolder(low = low, middle = (low + high) / 2, high = high)
 
-        val finalRangeHolder = List(100) { it }.fold(rangeHolder) { rangeHolder, _ ->
+        val finalRangeHolder = List(Math.log(high - low).ceiling().toInt()) { it }.fold(rangeHolder) { rangeHolder, _ ->
 
             if (rangeHolder.isIncomplete) {
 

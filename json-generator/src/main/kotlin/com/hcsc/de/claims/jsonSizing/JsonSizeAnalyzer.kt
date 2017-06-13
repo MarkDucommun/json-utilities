@@ -62,60 +62,62 @@ class JsonSizeAnalyzer(
 
     private inline fun List<JsonSizeObject>.generateAveragedObjectNode(): SingleResult<String, JsonSizeOverview<Int>> {
 
-        return this.collectAllChildrenNames().flatMapSuccess { childrenNames ->
-
-            val a: List<SingleResult<String, JsonSizeOverview<Int>>> = this.generateOverviewsForEachChildByNames(childrenNames)
-
-            childrenNames
-                    .map { name ->
-
-                        doOnComputationThreadAndFlatten {
-
-                            val findAllChildrenByName = this.findAllChildrenByName(name)
-
-                            val difference = size - findAllChildrenByName.size
-
-                            val childrenPresence = List(difference) { 0.0 }.plus(List(findAllChildrenByName.size) { 1.0 })
-
-                            val result: Result<String, DistributionProfile<Double>> = distributionGenerator.profile(childrenPresence)
-
-                            when (result) {
-                                is Success -> {
-
-                                    result.content.distribution
-
-                                    val childResult: SingleResult<String, JsonSizeOverview<Int>> = findAllChildrenByName.generateOverview()
-
-                                    childResult.flatMap {  }
-
-//                                    Single.just(findAllChildrenByName.generateOverview().flatMapSuccess { it ->
+//        return this.collectAllChildrenNames().flatMapSuccess { childrenNames ->
 //
-//                                        val child: JsonSizeObjectChild<Int> = JsonSizeObjectChild(overview = it, presence = result.content.distribution)
+//            val a: List<SingleResult<String, JsonSizeOverview<Int>>> = this.generateOverviewsForEachChildByNames(childrenNames)
 //
-//                                        Success<String, JsonSizeObjectChild<Int>>(child) as Result<String, JsonSizeObjectChild<Int>>
-//                                    })
-                                    TODO()
-                                }
-                                is Failure -> TODO()
-                            }
-                        }
-                    }
-                    .concat()
-                    .toList()
-                    .map { results ->
-                        results.traverse().flatMap { children ->
+//            childrenNames
+//                    .map { name ->
+//
+//                        doOnComputationThreadAndFlatten {
+//
+//                            val findAllChildrenByName = this.findAllChildrenByName(name)
+//
+//                            val difference = size - findAllChildrenByName.size
+//
+//                            val childrenPresence = List(difference) { 0.0 }.plus(List(findAllChildrenByName.size) { 1.0 })
+//
+//                            val result: Result<String, DistributionProfile<Double>> = distributionGenerator.profile(childrenPresence)
+//
+//                            when (result) {
+//                                is Success -> {
+//
+//                                    result.content.distribution
+//
+//                                    val childResult: SingleResult<String, JsonSizeOverview<Int>> = findAllChildrenByName.generateOverview()
+//
+//                                    childResult.flatMap {  }
+//
+////                                    Single.just(findAllChildrenByName.generateOverview().flatMapSuccess { it ->
+////
+////                                        val child: JsonSizeObjectChild<Int> = JsonSizeObjectChild(overview = it, presence = result.content.distribution)
+////
+////                                        Success<String, JsonSizeObjectChild<Int>>(child) as Result<String, JsonSizeObjectChild<Int>>
+////                                    })
+//                                    TODO()
+//                                }
+//                                is Failure -> TODO()
+//                            }
+//                        }
+//                    }
+//                    .concat()
+//                    .toList()
+//                    .map { results ->
+//                        results.traverse().flatMap { children ->
+//
+//                            distributionGenerator.profile(map(JsonSizeObject::size).map(Int::toDouble)).map {
+//
+//                                JsonSizeObjectOverview(
+//                                        name = first().name,
+//                                        size = it.distribution.asIntDistribution,
+//                                        children = children
+//                                ) as JsonSizeOverview<Int>
+//                            }
+//                        }
+//                    }
+//        }
 
-                            distributionGenerator.profile(map(JsonSizeObject::size).map(Int::toDouble)).map {
-
-                                JsonSizeObjectOverview(
-                                        name = first().name,
-                                        size = it.distribution.asIntDistribution,
-                                        children = children
-                                ) as JsonSizeOverview<Int>
-                            }
-                        }
-                    }
-        }
+        TODO()
     }
 
     private fun List<JsonSizeObject>.generateOverviewsForEachChildByNames(names: Set<String>) =
