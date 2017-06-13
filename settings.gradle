@@ -1,5 +1,6 @@
 include 'json-deidentification',
         'json-generator',
+        'json-parsing',
         'kotlin-jackson-helpers',
         'results',
         'result-test-helpers'
