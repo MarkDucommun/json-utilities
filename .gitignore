@@ -3,7 +3,6 @@
 .idea/
 .gradle/
 build/
-
 /json-generator/src/test/resources/data/
 /json-generator/claim-size-list.csv
 /src/main/resources/yan0510.json

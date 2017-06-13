@@ -1,0 +1,25 @@
+apply from: "../gradle/scripts/kotlin.gradle"
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+bootRepackage {
+	enabled = false
+}
+
+dependencies {
+
+	compile project(':results')
+	compile project(':distributions')
+	compile project(':distribution-fitting')
+	compile project(':collection-helpers')
+	compile project(':kotlin-jackson-helpers')
+
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.8.7")
+
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('net.wuerl.kotlin:assertj-core-kotlin:0.1.3')
+	testCompile('com.nhaarman:mockito-kotlin:1.4.0')
+
+	testCompile project(':result-test-helpers')
+}

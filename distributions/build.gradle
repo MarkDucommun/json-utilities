@@ -1,0 +1,17 @@
+apply from: "../gradle/scripts/kotlin.gradle"
+apply from: "../gradle/scripts/statistics.gradle"
+
+
+dependencies {
+
+	compile project(':results')
+	compile project(':math-helpers')
+	compile project(':collection-helpers')
+	compile project(':kotlin-jackson-helpers')
+
+	testCompile 'net.wuerl.kotlin:assertj-core-kotlin:0.1.3'
+	testCompile 'com.nhaarman:mockito-kotlin:1.4.0'
+	testCompile 'junit:junit:4.12'
+
+	testCompile project(':result-test-helpers')
+}
