@@ -1,4 +1,4 @@
-package com.hcsc.de.claims.jsonParsing
+package com.hcsc.de.claims.jsonParsingFour
 
 sealed class JsonNode
 
