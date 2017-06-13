@@ -1,5 +1,8 @@
 package com.hcsc.de.claims.distributions
 
+import com.hcsc.de.claims.helpers.median
+import umontreal.ssj.util.Num
+
 
 data class UnknownDualMemberVariableBinWidthDistribution<out numberType : Number>(
         override val bins: List<VariableDualMemberWidthBin<numberType>>,
@@ -22,9 +25,25 @@ data class VariableDualMemberWidthBin<out numberType : Number>(
         val endValue: numberType,
         val members: List<BinMember<numberType>>
 ) : Bin {
-    val memberOneCount: Int = members.filter { it is BinMember.BinMemberOne }.size
-    val memberTwoCount: Int = members.filter { it is BinMember.BinMemberTwo }.size
+
+    val range: Double = endValue.toDouble() - startValue.toDouble()
+
+    val memberOnes: List<BinMember<numberType>> = members.filter { it is BinMember.BinMemberOne }
+    val memberTwos: List<BinMember<numberType>> = members.filter { it is BinMember.BinMemberTwo }
+
+    val membersValues: List<Double> = members.map { it.value }.map(Number::toDouble)
+
+    val median: Double = membersValues.median()
+    val average: Double = membersValues.average()
+
+    val memberOneValues: List<Double> = memberOnes.map { it.value }.map(Number::toDouble)
+    val memberTwoValues: List<Double> = memberTwos.map { it.value }.map(Number::toDouble)
+
+    val memberOneCount: Int = memberOnes.size
+    val memberTwoCount: Int = memberTwos.size
+
     override val count: Int = members.size
+    override val identifyingCharacteristic: numberType = startValue
 }
 
 sealed class BinMember<out numberType : Number>(

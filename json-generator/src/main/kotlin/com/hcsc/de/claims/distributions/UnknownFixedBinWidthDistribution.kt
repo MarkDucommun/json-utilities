@@ -9,4 +9,6 @@ interface UnknownFixedBinWidthDistribution<out numberType : Number> : BinDistrib
 data class FixedWidthBin<out numberType : Number>(
         val startValue: numberType,
         override val count: Int
-) : Bin
+) : Bin {
+    override val identifyingCharacteristic: numberType = startValue
+}

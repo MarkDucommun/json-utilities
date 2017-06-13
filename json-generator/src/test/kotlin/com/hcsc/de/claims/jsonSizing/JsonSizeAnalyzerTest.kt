@@ -1,17 +1,35 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributions.NormalDoubleDistribution
-import com.hcsc.de.claims.distributions.NormalIntDistribution
+import com.hcsc.de.claims.distributions.*
 import com.hcsc.de.claims.failsAnd
 import com.hcsc.de.claims.helpers.SingleResult
+import com.hcsc.de.claims.helpers.Success
 import com.hcsc.de.claims.succeedsAnd
+import com.nhaarman.mockito_kotlin.*
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
 
 class JsonSizeAnalyzerTest {
 
-    val jsonSizeAnalyzer = JsonSizeAnalyzer()
+    val defaultDistribution: Distribution<Double> = object : Distribution<Double> {
+        override val average: Double = 1.0
+        override val minimum: Double = 1.0
+        override val maximum: Double = 1.0
+        override val mode: Double = 1.0
+        override val median: Double = 1.0
+
+        override fun random(): Double {
+            return 1.0
+        }
+
+    }
+
+    val mockDistributionGenerator: DistributionGenerator<Double> = mock {
+        on { profile(any()) } doReturn Success(DistributionProfile(pValue = 0.0, distribution = defaultDistribution))
+    }
+
+    val jsonSizeAnalyzer = JsonSizeAnalyzer(distributionGenerator = mockDistributionGenerator)
 
     @Test
     fun `it cannot sum JsonSizeNodes that are different non-empty types`() {
@@ -28,21 +46,26 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum JsonSizeLeafNodes and JsonSizeEmpty`() {
 
+        val expectedDistribution = defaultDistribution
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(pValue = 0.0, distribution = expectedDistribution)))
+
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeEmpty(name = "A")
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
+            argumentCaptor<List<Double>>().apply {
+
+                verify(mockDistributionGenerator).profile(capture())
+
+                assertThat(firstValue).containsExactlyInAnyOrder(0.0, 10.0)
+            }
+
             assertThat(it).isEqualTo(JsonSizeLeafOverview(
                     name = "A",
-                    size = NormalIntDistribution(
-                            average = 5,
-                            minimum = 0,
-                            maximum = 10,
-                            mode = 10,
-                            median = 5,
-                            standardDeviation = 5.0
-                    )
+                    size = WrappedIntDistribution(defaultDistribution)
             ))
         }
     }
@@ -200,24 +223,38 @@ class JsonSizeAnalyzerTest {
     @Test
     fun `it can sum a list of simple JsonSizeLeafNodes`() {
 
+        val expectedDistribution = defaultDistribution
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(pValue = 0.0, distribution = expectedDistribution)))
+
         val node1 = JsonSizeLeafNode(name = "A", size = 10)
         val node2 = JsonSizeLeafNode(name = "A", size = 15)
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
-            assertThat(it).isEqualTo(JsonSizeLeafOverview(name = "A", size = NormalIntDistribution(
-                    average = 13,
-                    minimum = 10,
-                    maximum = 15,
-                    mode = 15,
-                    median = 12,
-                    standardDeviation = 2.5495097567963922
-            )))
+            argumentCaptor<List<Double>>().apply {
+
+                verify(mockDistributionGenerator).profile(capture())
+
+                assertThat(firstValue).containsExactlyInAnyOrder(15.0, 10.0)
+            }
+
+            assertThat(it).isEqualTo(JsonSizeLeafOverview(
+                    name = "A",
+                    size = WrappedIntDistribution(defaultDistribution)
+            ))
         }
     }
 
     @Test
     fun `it can sum a list of JsonSizeObjects`() {
+
+
+        val expectedDistribution = defaultDistribution
+
+        whenever(mockDistributionGenerator.profile(any()))
+                .thenReturn(Success(DistributionProfile(pValue = 0.0, distribution = expectedDistribution)))
 
         val node1 = JsonSizeObject(
                 name = "A",
@@ -232,33 +269,23 @@ class JsonSizeAnalyzerTest {
 
         jsonSizeAnalyzer.generateJsonSizeOverview(node1, node2) succeedsAnd {
 
+            argumentCaptor<List<Double>>().apply {
+
+                verify(mockDistributionGenerator, times(3)).profile(capture())
+
+                assertThat(allValues).containsExactlyInAnyOrder(
+                        listOf(1.0, 1.0),
+                        listOf(15.0, 24.0),
+                        listOf(10.0, 19.0)
+                )
+            }
+
             assertThat(it).isEqualToComparingFieldByFieldRecursively(JsonSizeObjectOverview(
                     name = "A",
-                    size = NormalIntDistribution(
-                            average = 19,
-                            minimum = 15,
-                            maximum = 24,
-                            mode = 24,
-                            median = 19,
-                            standardDeviation = 4.527692569068709
-                    ),
+                    size = WrappedIntDistribution(expectedDistribution),
                     children = listOf(JsonSizeObjectChild(
-                            overview = JsonSizeLeafOverview(name = "B", size = NormalIntDistribution(
-                                    average = 15,
-                                    minimum = 10,
-                                    maximum = 19,
-                                    mode = 19,
-                                    median = 14,
-                                    standardDeviation = 4.527692569068709
-                            )),
-                            presence = NormalDoubleDistribution(
-                                    average = 1.0,
-                                    minimum = 1.0,
-                                    maximum = 1.0,
-                                    mode = 1.0,
-                                    median = 1.0,
-                                    standardDeviation = 0.0
-                            )
+                            overview = JsonSizeLeafOverview(name = "B", size = WrappedIntDistribution(expectedDistribution)),
+                            presence = expectedDistribution
                     ))
             ))
         }

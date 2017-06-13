@@ -23,6 +23,8 @@ object Montreal : ParametricFitter {
 
             val dist = WeibullDist.getInstanceFromMLE(shiftedList.toDoubleArray(), list.size)
 
+            dist.variance
+
             WeibullParameters(shape = dist.alpha, scale = 1 / dist.lambda, location = shift)
         }
     }

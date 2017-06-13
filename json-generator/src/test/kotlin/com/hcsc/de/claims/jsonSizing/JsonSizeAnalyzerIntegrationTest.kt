@@ -9,6 +9,7 @@ import com.hcsc.de.claims.distributions.RealDistributionGenerator
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
 import com.hcsc.de.claims.helpers.*
 import com.hcsc.de.claims.distributionFitting.FitDistrPlus
+import com.hcsc.de.claims.distributionFitting.Montreal
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import net.sourceforge.jdistlib.generic.GenericDistribution
@@ -53,7 +54,7 @@ class JsonSizeAnalyzerIntegrationTest {
             }
         }
 
-        val jsonSizeAnalyzer = JsonSizeAnalyzer()
+        val jsonSizeAnalyzer = JsonSizeAnalyzer(distributionGenerator = RealDistributionGenerator(Montreal))
 
         val result = jsonSizeAnalyzer.generateJsonSizeOverview(listOfJsonSizes).blockingGet()
 

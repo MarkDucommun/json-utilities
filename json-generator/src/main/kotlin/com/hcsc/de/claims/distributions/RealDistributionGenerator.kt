@@ -3,6 +3,8 @@ package com.hcsc.de.claims.distributions
 import com.hcsc.de.claims.helpers.*
 import com.hcsc.de.claims.distributionFitting.ParametricFitter
 import net.sourceforge.jdistlib.disttest.DistributionTest
+import umontreal.ssj.gof.GofStat
+import umontreal.ssj.probdist.WeibullDist
 import java.util.*
 
 class RealDistributionGenerator(

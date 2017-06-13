@@ -1,14 +1,16 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributions.NormalDoubleDistribution
-import com.hcsc.de.claims.distributions.NormalIntDistribution
+import com.hcsc.de.claims.distributions.*
 import com.hcsc.de.claims.helpers.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlin.reflect.KClass
 
-class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline()) {
+class JsonSizeAnalyzer(
+        private val scheduler: Scheduler = Schedulers.trampoline(),
+        private val distributionGenerator: DistributionGenerator<Double>
+) {
 
     fun generateJsonSizeOverview(nodes: List<JsonSizeNode>): SingleResult<String, JsonSizeOverview<Int>> {
 
@@ -49,10 +51,12 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
 
         return doOnComputationThread {
 
-            Success<String, JsonSizeOverview<Int>>(JsonSizeLeafOverview<Int>(
-                    name = first().name,
-                    size = sizeDistribution
-            ))
+            distributionGenerator.profile(map(JsonSizeLeafNode::size).map(Int::toDouble)).flatMap { sizeDistribution ->
+                Success<String, JsonSizeOverview<Int>>(JsonSizeLeafOverview<Int>(
+                        name = first().name,
+                        size = sizeDistribution.distribution.asIntDistribution
+                ))
+            }
         }
     }
 
@@ -71,23 +75,44 @@ class JsonSizeAnalyzer(private val scheduler: Scheduler = Schedulers.trampoline(
 
                             val difference = size - findAllChildrenByName.size
 
-                            val presence = List(difference) { 0.0 }.plus(List(findAllChildrenByName.size) { 1.0 }).distribution
+                            val childrenPresence = List(difference) { 0.0 }.plus(List(findAllChildrenByName.size) { 1.0 })
 
-                            findAllChildrenByName.generateOverview().flatMapSuccess { it ->
-                                val child: JsonSizeObjectChild<Int> = JsonSizeObjectChild(overview = it, presence = presence)
-                                Single.just(Success<String, JsonSizeObjectChild<Int>>(child)) as SingleResult<String, JsonSizeObjectChild<Int>> // TODO send this to Intellij
+                            val result: Result<String, DistributionProfile<Double>> = distributionGenerator.profile(childrenPresence)
+
+                            when (result) {
+                                is Success -> {
+
+                                    result.content.distribution
+
+                                    val childResult: SingleResult<String, JsonSizeOverview<Int>> = findAllChildrenByName.generateOverview()
+
+                                    childResult.flatMap {  }
+
+//                                    Single.just(findAllChildrenByName.generateOverview().flatMapSuccess { it ->
+//
+//                                        val child: JsonSizeObjectChild<Int> = JsonSizeObjectChild(overview = it, presence = result.content.distribution)
+//
+//                                        Success<String, JsonSizeObjectChild<Int>>(child) as Result<String, JsonSizeObjectChild<Int>>
+//                                    })
+                                    TODO()
+                                }
+                                is Failure -> TODO()
                             }
                         }
                     }
                     .concat()
                     .toList()
                     .map { results ->
-                        results.traverse().map {
-                            JsonSizeObjectOverview(
-                                    name = first().name,
-                                    size = this.sizeDistribution,
-                                    children = it
-                            ) as JsonSizeOverview<Int>
+                        results.traverse().flatMap { children ->
+
+                            distributionGenerator.profile(map(JsonSizeObject::size).map(Int::toDouble)).map {
+
+                                JsonSizeObjectOverview(
+                                        name = first().name,
+                                        size = it.distribution.asIntDistribution,
+                                        children = children
+                                ) as JsonSizeOverview<Int>
+                            }
                         }
                     }
         }

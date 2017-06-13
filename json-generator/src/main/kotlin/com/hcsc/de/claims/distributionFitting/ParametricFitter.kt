@@ -7,6 +7,7 @@ import net.sourceforge.jdistlib.LogNormal
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.generic.GenericDistribution
+import umontreal.ssj.gof.GofStat
 import umontreal.ssj.randvar.RandomVariateGen
 
 interface ParametricFitter {
@@ -78,11 +79,12 @@ data class NormalParameters(
 
 class MontrealDistribution<genType: RandomVariateGen>(
         private val randomVariateGen: genType,
-        private val shift: Double = 0.0
+        private val shift: Double? = null
 ) : Randomable<Double> {
 
     override fun random(): Double {
-        return randomVariateGen.nextDouble()
+
+        return randomVariateGen.nextDouble() + (shift ?: 0.0)
     }
 }
 

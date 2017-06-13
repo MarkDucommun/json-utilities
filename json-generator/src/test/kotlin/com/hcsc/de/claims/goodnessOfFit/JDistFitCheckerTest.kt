@@ -4,6 +4,7 @@ import com.hcsc.de.claims.distributionFitting.GenericDistributionRandomable
 import com.hcsc.de.claims.distributionFitting.Montreal.randomVariateGen
 import com.hcsc.de.claims.distributionFitting.MontrealDistribution
 import com.hcsc.de.claims.get
+import com.hcsc.de.claims.helpers.ceilingOnEven
 import com.hcsc.de.claims.succeedsAnd
 import com.hcsc.de.claims.visualize
 import net.sourceforge.jdistlib.Normal
@@ -12,6 +13,7 @@ import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 import umontreal.ssj.randvar.NormalGen
 import umontreal.ssj.randvar.RandomVariateGen
+import umontreal.ssj.randvar.WeibullGen
 
 class JDistFitCheckerTest {
 
@@ -44,7 +46,7 @@ class JDistFitCheckerTest {
     @Test
     fun `it returns low pValue for values from different distributions`() {
 
-        listOf(1000, 10000, 100000).forEach { listSize ->
+        listOf(100, 300, 500, 1000, 2000).forEach { listSize ->
 
             val randomableOne = GenericDistributionRandomable(Normal(100.0, 20.0))
 
@@ -56,12 +58,17 @@ class JDistFitCheckerTest {
 
             visualize(firstList, secondList, 2)
 
-            subject.check(firstList, firstList.dropLast(firstList.size / 2)) succeedsAnd {
+            println("list size: $listSize - ")
 
-                println("$listSize: $it")
+            listOf(5, 7, 10, 13, 15, 20).forEach { binCount ->
 
-//                assertThat(it).isLessThan(0.05)
+                subject.check(firstList, secondList, binCount) succeedsAnd {
+
+                    println("$binCount: $it")
+                }
+
             }
+            println()
         }
     }
 }

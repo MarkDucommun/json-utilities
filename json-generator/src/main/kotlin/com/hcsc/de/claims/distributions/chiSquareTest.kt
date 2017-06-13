@@ -2,8 +2,12 @@ package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.Result
 import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.helpers.wrapExternalLibraryUsageAsResult
 import org.apache.commons.math.util.FastMath
 import org.apache.commons.math3.distribution.ChiSquaredDistribution
+import umontreal.ssj.gof.GofFormat
+import umontreal.ssj.gof.GofStat
+import umontreal.ssj.probdist.ChiSquareDist
 
 data class ChiSquareValue(
         val statistic: Double,
@@ -38,9 +42,12 @@ fun List<Int>.chiSquaredTestFromList(expected: List<Int>, binCount: Int = 5): Re
 
 }
 
-fun <numberType: Number> DistributionPair<numberType>.chiSquaredTest(binCount: Int = 10): Result<String, ChiSquareValue> {
+fun <numberType : Number> DistributionPair<numberType>.chiSquaredTest(binCount: Int = 10): Result<String, ChiSquareValue> {
 
     val (distOne, distTwo) = this.unknownDualMemberVariableBinWidthDistribution(binCount).asTwoDistributions
+
+    val actualBins = distOne.bins.count()
+    print("actualBins: $actualBins, ")
 
     return distOne.doubleChiSquaredTest(distTwo)
 }
@@ -69,13 +76,18 @@ private fun BinDistribution<Int>.chiSquaredTest(expected: BinDistribution<Int>):
                 }
     }
 
+    val montrealpValue = GofStat.pDisc(ChiSquareDist.cdf(bins.size - 1, 2, chiSquareStatistic),
+            ChiSquareDist.barF(bins.size - 1, 2, chiSquareStatistic))
+
     val chiSquaredDistribution = ChiSquaredDistribution(null, (expected.bins.size - 1).toDouble())
 
     val pValue = 1.0 - chiSquaredDistribution.cumulativeProbability(chiSquareStatistic)
 
+    println("Chi-Square: $chiSquareStatistic, Montreal: $montrealpValue, JDistLib: $pValue")
+
     return Success(ChiSquareValue(
             statistic = chiSquareStatistic,
-            pValue = pValue
+            pValue = montrealpValue
     ))
 }
 
@@ -119,31 +131,47 @@ private fun BinDistribution<Double>.doubleChiSquaredTest(expected: BinDistributi
     val sumExpected = expected.bins.fold(0) { acc, bin -> acc + bin.count }
     val sumObserved = this.bins.fold(0) { acc, bin -> acc + bin.count }
 
+    val sortedFirstBins = this.bins
+    val sortedSecondBins = expected.bins
+
+    val zip = sortedFirstBins.map { bin ->
+        bin.count to (sortedSecondBins.find { it.identifyingCharacteristic == bin.identifyingCharacteristic }?.count ?: throw RuntimeException())
+    }
+
     val chiSquareStatistic = if (FastMath.abs(sumExpected - sumObserved) > 10E-6) {
 
         val ratio = sumObserved.toDouble() / sumExpected
 
-        this.bins.map(Bin::count)
-                .zip(expected.bins.map(Bin::count))
+        zip
                 .fold(0.0) { acc, (observed, expected) ->
                     val deviance = observed - ratio * expected
                     acc + deviance * deviance / (ratio * expected)
                 }
     } else {
-        this.bins.map(Bin::count)
-                .zip(expected.bins.map(Bin::count))
+        zip
                 .fold(0.0) { acc, (observed, expected) ->
                     val deviance = (observed - expected).toDouble()
-                    acc + deviance * deviance / expected
+                    acc + (deviance * deviance) / expected
                 }
     }
 
-    val chiSquaredDistribution = ChiSquaredDistribution(null, (expected.bins.size - 1).toDouble())
+    val observedInts = zip.map { it.first }
+    val expectedDoubles = zip.map { it.second.toDouble() }
 
-    val pValue = 1.0 - chiSquaredDistribution.cumulativeProbability(chiSquareStatistic)
 
-    return Success(ChiSquareValue(
-            statistic = chiSquareStatistic,
-            pValue = pValue
-    ))
+    return wrapExternalLibraryUsageAsResult {
+
+        val montrealChiSquareStatistic = GofStat.chi2(expectedDoubles.toDoubleArray(), observedInts.toIntArray(), 0, zip.size - 1)
+
+        val montrealpValue = GofStat.pDisc(ChiSquareDist.cdf(bins.size - 1, 2, montrealChiSquareStatistic),
+                ChiSquareDist.barF(bins.size - 1, 2, montrealChiSquareStatistic))
+
+        val chiSquaredDistribution = ChiSquaredDistribution(null, (expected.bins.size - 1).toDouble())
+
+        val pValue = 1.0 - chiSquaredDistribution.cumulativeProbability(chiSquareStatistic)
+
+        println("Chi-Square: $chiSquareStatistic, Montreal: $montrealpValue, JDistLib: $pValue")
+
+        ChiSquareValue(statistic = chiSquareStatistic, pValue = montrealpValue)
+    }
 }

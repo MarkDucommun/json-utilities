@@ -31,6 +31,8 @@ data class VariableWidthBin<out numberType : Number>(
         val members: List<numberType>
 ) : Bin {
 
+    override val identifyingCharacteristic: numberType = startValue
+
     override val count: Int = members.size
 
     val width: Int = endValue.toInt() - startValue.toInt()
@@ -42,6 +44,8 @@ class DistributedBin<out numberType : Number>(
         private val distribution: Distribution<numberType>,
         val pValue: Double
 ) : Bin, Randomable<numberType> {
+
+    override val identifyingCharacteristic: numberType = startValue
 
     override fun random(): numberType {
         return distribution.random()

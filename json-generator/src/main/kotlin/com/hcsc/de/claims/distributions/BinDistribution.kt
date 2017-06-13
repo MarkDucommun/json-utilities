@@ -6,5 +6,6 @@ interface BinDistribution<out numberType: Number> : Distribution<numberType> {
 }
 
 interface Bin {
+    val identifyingCharacteristic: Any
     val count: Int
 }

@@ -161,7 +161,7 @@ class HistogrammerTest {
 
         val list = listOfClaimSizes().map { it / 1000.0 }
 
-        val result = RealDistributionGenerator(FitDistrPlus).profile(list)
+        val result = RealDistributionGenerator(Montreal).profile(list)
 
         val distribution = when (result) {
             is Success -> result.content.distribution
