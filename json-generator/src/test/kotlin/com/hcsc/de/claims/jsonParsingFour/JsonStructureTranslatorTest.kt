@@ -153,29 +153,62 @@ class JsonStructureTranslatorTest {
     @Test
     fun `it parses a simple integer number`() {
 
-        0.rangeTo(9).forEach {
+        '0'.rangeTo('9').forEach {
 
             LiteralStructureElement(
                     id = 1,
                     children = listOf(
-                            LiteralValue(id = 1, value = it.toChar())
+                            LiteralValue(id = 1, value = it)
                     )
-            ).asNode succeedsAndShouldReturn IntegerNode(value = it.toLong())
+            ).asNode succeedsAndShouldReturn IntegerNode(value = it.toString().toLong())
         }
     }
 
     @Test
     fun `it parses a slightly longer integer number`() {
 
-        0.rangeTo(9).forEach {
+        '0'.rangeTo('9').forEach {
 
             LiteralStructureElement(
                     id = 1,
                     children = listOf(
                             LiteralValue(id = 1, value = '1'),
-                            LiteralValue(id = 1, value = (it + 10).toChar())
+                            LiteralValue(id = 1, value = it)
                     )
-            ).asNode succeedsAndShouldReturn IntegerNode(value = it.toLong() + 10)
+            ).asNode succeedsAndShouldReturn IntegerNode(value = it.toString().toLong() + 10)
+        }
+    }
+
+    @Test
+    fun `it parses a simple double number`() {
+
+        '0'.rangeTo('9').forEach {
+
+            LiteralStructureElement(
+                    id = 1,
+                    children = listOf(
+                            LiteralValue(id = 1, value = it),
+                            LiteralValue(id = 1, value = '.'),
+                            LiteralValue(id = 1, value = it)
+                    )
+            ).asNode succeedsAndShouldReturn DoubleNode(value = "$it.$it".toDouble())
+        }
+    }
+
+    @Test
+    fun `it parses a longer double number`() {
+
+        '0'.rangeTo('9').forEach {
+
+            LiteralStructureElement(
+                    id = 1,
+                    children = listOf(
+                            LiteralValue(id = 1, value = '0'),
+                            LiteralValue(id = 1, value = '.'),
+                            LiteralValue(id = 1, value = '0'),
+                            LiteralValue(id = 1, value = it)
+                    )
+            ).asNode succeedsAndShouldReturn DoubleNode(value = "0.0$it".toDouble())
         }
     }
 

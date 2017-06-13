@@ -42,16 +42,7 @@ class JsonStructureTranslator {
                 'n' -> Success(NullAccumulator(previousChar = 'n'))
                 't' -> Success(TrueAccumulator(previousChar = 't'))
                 'f' -> Success(FalseAccumulator(previousChar = 'f'))
-                '0' -> Success(IntegerAccumulator(value = "0"))
-                '1' -> Success(IntegerAccumulator(value = "1"))
-                '2' -> Success(IntegerAccumulator(value = "2"))
-                '3' -> Success(IntegerAccumulator(value = "3"))
-                '4' -> Success(IntegerAccumulator(value = "4"))
-                '5' -> Success(IntegerAccumulator(value = "5"))
-                '6' -> Success(IntegerAccumulator(value = "6"))
-                '7' -> Success(IntegerAccumulator(value = "7"))
-                '8' -> Success(IntegerAccumulator(value = "8"))
-                '9' -> Success(IntegerAccumulator(value = "9"))
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> Success(IntegerAccumulator(value = char.toString()))
                 else -> TODO()
             }
         }
@@ -62,13 +53,43 @@ class JsonStructureTranslator {
     ) : CompleteAccumulator {
 
         override fun addChar(char: Char): Result<String, LiteralAccumulator> {
-            return Success(copy(value = value + char))
+
+            return when (char) {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> Success(copy(value = value + char))
+                '.' -> Success(DoublePointAccumulator(value = value + char))
+                else -> TODO()
+            }
         }
 
-        override val node: JsonNode get() {
-            println(value)
-            return IntegerNode(value = value.toLong())
+        override val node: JsonNode get() = IntegerNode(value = value.toLong())
+    }
+
+    data class DoublePointAccumulator(
+            val value: String
+    ) : LiteralAccumulator {
+
+        override fun addChar(char: Char): Result<String, LiteralAccumulator> {
+
+            return when (char) {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> Success(DoubleAccumulator(value = value + char))
+                else -> TODO()
+            }
         }
+    }
+
+    data class DoubleAccumulator(
+            val value: String
+    ) : CompleteAccumulator {
+
+        override fun addChar(char: Char): Result<String, LiteralAccumulator> {
+
+            return when (char) {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> Success(copy(value = value + char))
+                else -> TODO()
+            }
+        }
+
+        override val node: JsonNode get() = DoubleNode(value = value.toDouble())
     }
 
     class NullAccumulator(
