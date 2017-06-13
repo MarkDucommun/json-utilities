@@ -1,0 +1,15 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.1.2'
+        springBootVersion = '1.5.3.RELEASE'
+        renjinVersion = '0.8.2365'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+    }
+}

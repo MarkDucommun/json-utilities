@@ -1,6 +1,5 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.Result
 
 interface Distribution<out numberType: Number> : Randomable<numberType> {
     val average: numberType

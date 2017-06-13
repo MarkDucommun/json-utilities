@@ -2,7 +2,7 @@ package com.hcsc.de.claims.jsonSchemaConversion
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import com.hcsc.de.claims.*
+import com.hcsc.de.claims.kotlinJacksonHelpers.fieldNames
 
 
 class NodeConverter {

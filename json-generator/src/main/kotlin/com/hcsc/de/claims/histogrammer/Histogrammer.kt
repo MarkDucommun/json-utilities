@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.histogrammer
 
-import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.results.Result
 
 interface Histogrammer<in numberType: Number> {
 

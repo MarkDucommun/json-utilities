@@ -1,4 +1,4 @@
-package com.hcsc.de.claims
+package com.hcsc.de.claims.kotlinJacksonHelpers
 
 import com.fasterxml.jackson.databind.JsonNode
 

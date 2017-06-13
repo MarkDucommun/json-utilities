@@ -1,13 +1,8 @@
 package com.hcsc.de.claims.jsonSizing
 
 import com.hcsc.de.claims.distributions.*
-import com.hcsc.de.claims.helpers.*
+import com.hcsc.de.claims.results.*
 import kotlin.reflect.KClass
-
-interface JsonSizeAnalyzer {
-
-    fun generateJsonSizeOverview(nodes: List<JsonSizeNode>): Result<String, JsonSizeOverview<Int>>
-}
 
 class SingleThreadJsonSizeAnalyzer(
         analyzer: JsonSizeAnalyzer? = null,
@@ -139,6 +134,7 @@ class SingleThreadJsonSizeAnalyzer(
     private fun List<JsonSizeArray>.generateJsonSizeArrayOverview(
             averageChild: JsonSizeOverview<Int>
     ): Result<String, JsonSizeOverview<Int>> =
+    // TODO this should be optional maybe?
 //            sizeDistributionFromNode.flatMap { sizeDistribution ->
 
                 map { it.numberOfChildren }.sizeDistributionInt.map { it ->

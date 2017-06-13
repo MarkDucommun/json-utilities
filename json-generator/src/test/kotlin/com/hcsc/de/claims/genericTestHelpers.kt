@@ -1,9 +1,10 @@
 package com.hcsc.de.claims
 
 import com.hcsc.de.claims.distributions.DoubleDataBinner
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.histogrammer.ChartHistogrammer
 import com.hcsc.de.claims.histogrammer.JFreeChartCreator
+import com.hcsc.de.claims.histogrammer.ListHistogrammer
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.get
 
 data class TimeAndResult<failureType, successType>(
         val result: Result<failureType, successType>,
@@ -22,7 +23,7 @@ fun <failureType, successType> time(fn: () -> Result<failureType, successType>):
     )
 }
 
-private val histogrammer = ChartHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
+private val histogrammer = ListHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
 
 fun <numberType: Number> List<numberType>.visualize(seconds: Int = 60) {
 

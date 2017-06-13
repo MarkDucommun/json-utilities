@@ -1,13 +1,7 @@
 package com.hcsc.de.claims.jsonSizing
 
 import com.hcsc.de.claims.distributions.*
-import com.hcsc.de.claims.failsAnd
-import com.hcsc.de.claims.failsWithMessage
-import com.hcsc.de.claims.get
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
-import com.hcsc.de.claims.succeedsAnd
+import com.hcsc.de.claims.results.*
 import com.nhaarman.mockito_kotlin.*
 import junit.framework.Assert.fail
 import org.assertj.core.api.KotlinAssertions.assertThat

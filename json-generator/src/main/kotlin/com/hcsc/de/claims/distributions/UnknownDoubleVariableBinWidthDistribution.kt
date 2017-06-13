@@ -2,7 +2,6 @@ package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.median
 import com.hcsc.de.claims.helpers.mode
-import java.util.*
 
 
 fun List<Double>.unknownVariableBinWidthDistribution(

@@ -1,7 +1,7 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.map
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.map
 
 data class RatioProbability(val ratio: DoubleWithinZeroAndOne): Probability {
 

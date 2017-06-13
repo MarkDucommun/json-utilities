@@ -1,8 +1,8 @@
 package com.hcsc.de.claims.histogrammer
 
-import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.results.Result
 
-interface BarChart {
+interface BarChart : Renderable {
 
     val name: String
 
@@ -11,6 +11,9 @@ interface BarChart {
     val yLabel: String
 
     val dataSets: List<DataSet>
+}
+
+interface Renderable {
 
     fun render()
 

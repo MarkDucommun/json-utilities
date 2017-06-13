@@ -1,7 +1,9 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.*
 import com.hcsc.de.claims.distributionFitting.FitDistrPlus
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.map
+import com.hcsc.de.claims.results.traverse
 import java.util.*
 
 data class DistributedBinDistribution<out numberType : Number>(
@@ -28,19 +30,25 @@ fun UnknownVariableBinWidthDistribution<Double>.toDistributedBinDistribution(): 
     return bins
             .map { bin ->
                 generator
-                        .profileWith(bin.members, listOf(
-                                generator.normalDistributionGenerator,
-                                generator.gammaDistributionGenerator,
-                                generator.weibullDistributionGenerator
-//                                generator.lognormalDistributionGenerator
-                        ))
+                        .profileWith(
+                                list = bin.members,
+                                distributionCreators = listOf(
+                                        generator.normalDistributionGenerator,
+                                        generator.gammaDistributionGenerator,
+                                        generator.weibullDistributionGenerator,
+                                        generator.lognormalDistributionGenerator
+                                ))
                         .map {
-                            DistributedBin(count = bin.count, startValue = bin.startValue, distribution = it.distribution, pValue = it.pValue)
+                            DistributedBin(
+                                    count = bin.count,
+                                    startValue = bin.startValue,
+                                    distribution = it.distribution,
+                                    pValue = it.pValue
+                            )
                         }
             }
             .traverse()
-            .map { it ->
-
+            .map {
                 DistributedBinDistribution(
                         average = average,
                         minimum = minimum,

@@ -1,9 +1,9 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.failsWithMessage
-import com.hcsc.de.claims.get
-import com.hcsc.de.claims.helpers.map
-import com.hcsc.de.claims.succeedsAndShouldReturn
+import com.hcsc.de.claims.results.failsWithMessage
+import com.hcsc.de.claims.results.get
+import com.hcsc.de.claims.results.map
+import com.hcsc.de.claims.results.succeedsAndShouldReturn
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.Test

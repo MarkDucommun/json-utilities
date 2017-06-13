@@ -2,14 +2,9 @@ package com.hcsc.de.claims.jsonSizing
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
-import com.hcsc.de.claims.succeedsAnd
-import junit.framework.Assert.fail
+import com.hcsc.de.claims.results.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
-import java.io.Serializable
 
 class JsonSizerTest {
 

@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.succeedsAnd
+import com.hcsc.de.claims.results.succeedsAnd
 import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import net.sourceforge.jdistlib.generic.GenericDistribution

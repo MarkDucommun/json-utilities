@@ -1,9 +1,9 @@
 package com.hcsc.de.claims.jsonReduction.cinqFieldCsv
 
 import com.hcsc.de.claims.Translator
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.results.Failure
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
 
 class CinqFieldCsvStringToFieldList : Translator<String, ListOfFieldList> {
 

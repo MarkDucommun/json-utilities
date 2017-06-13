@@ -3,7 +3,7 @@ package com.hcsc.de.claims.jsonDeIdentifier
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.hcsc.de.claims.*
+import com.hcsc.de.claims.kotlinJacksonHelpers.fieldNames
 
 class JsonDeIdentifier(private val objectMapper: ObjectMapper) {
 

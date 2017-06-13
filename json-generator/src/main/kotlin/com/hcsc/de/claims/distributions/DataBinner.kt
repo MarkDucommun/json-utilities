@@ -1,7 +1,7 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
 
 interface DataBinner<numberType: Number> {
 

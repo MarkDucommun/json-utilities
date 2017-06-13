@@ -1,10 +1,10 @@
 package com.hcsc.de.claims.distributionFitting
 
 import com.hcsc.de.claims.distributions.Randomable
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
-import com.hcsc.de.claims.helpers.map
+import com.hcsc.de.claims.results.Failure
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.map
 import org.renjin.script.RenjinScriptEngineFactory
 import org.renjin.sexp.DoubleArrayVector
 import org.renjin.sexp.ListVector

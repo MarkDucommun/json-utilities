@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.hcsc.de.claims.*
 import com.hcsc.de.claims.helpers.*
+import com.hcsc.de.claims.kotlinJacksonHelpers.fieldNames
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
 
 class JsonSizer {
 

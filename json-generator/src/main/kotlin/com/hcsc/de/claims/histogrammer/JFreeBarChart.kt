@@ -52,7 +52,7 @@ class JFreeBarChart(
 
     private val frame = ApplicationFrame("frame").apply {
 
-        contentPane = ChartPanel(chart).apply { preferredSize = Dimension(1000, 500) }
+        contentPane = ChartPanel(chart).apply { preferredSize = Dimension(2000, 1000) }
     }
 
     override fun render() {

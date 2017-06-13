@@ -1,13 +1,9 @@
 package com.hcsc.de.claims.goodnessOfFit
 
 import com.hcsc.de.claims.distributions.DistributionPair
-import com.hcsc.de.claims.distributions.asTwoDistributions
 import com.hcsc.de.claims.distributions.chiSquaredTest
-import com.hcsc.de.claims.distributions.unknownDualMemberVariableBinWidthDistribution
-import com.hcsc.de.claims.helpers.*
-import net.sourceforge.jdistlib.disttest.DistributionTest
-import umontreal.ssj.gof.GofFormat
-import umontreal.ssj.gof.GofStat
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.map
 
 class JDistFitChecker<in numberType : Number> : FitChecker<numberType> {
 

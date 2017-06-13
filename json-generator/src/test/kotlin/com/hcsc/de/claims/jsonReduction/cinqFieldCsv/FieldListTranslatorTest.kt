@@ -1,8 +1,8 @@
 package com.hcsc.de.claims.jsonReduction.cinqFieldCsv
 
-import com.hcsc.de.claims.helpers.Success
 import com.hcsc.de.claims.jsonReduction.FieldObject
-import com.hcsc.de.claims.succeedsAnd
+import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 

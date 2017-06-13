@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.results.Failure
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
 import java.io.File
 import java.io.FileNotFoundException
 

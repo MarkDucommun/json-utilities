@@ -1,18 +1,15 @@
 package com.hcsc.de.claims.distributionFitting
 
-import com.hcsc.de.claims.*
-import com.hcsc.de.claims.distributions.DoubleDataBinner
-import com.hcsc.de.claims.helpers.*
-import com.hcsc.de.claims.histogrammer.ChartHistogrammer
-import com.hcsc.de.claims.histogrammer.JFreeChartCreator
-import net.sourceforge.jdistlib.*
+import com.hcsc.de.claims.helpers.ceilingOnEven
+import com.hcsc.de.claims.results.succeedsAnd
+import com.hcsc.de.claims.visualize
+import net.sourceforge.jdistlib.Gamma
+import net.sourceforge.jdistlib.LogNormal
+import net.sourceforge.jdistlib.Normal
+import net.sourceforge.jdistlib.Weibull
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.assertj.core.data.Percentage
 import org.junit.Test
-import umontreal.ssj.probdist.WeibullDist
-import umontreal.ssj.randvar.WeibullGen
-import umontreal.ssj.rng.BasicRandomStreamFactory
-import umontreal.ssj.rng.F2NL607
 
 abstract class ParametricFitterTest {
 
@@ -25,13 +22,7 @@ abstract class ParametricFitterTest {
 
         val list = List(10000) { weibullDistributionCurve.random() }
 
-        list.visualize(10)
-
         subject.weibullParameters(list) succeedsAnd { (shape, scale) ->
-
-            val generatedDist = Weibull(shape, scale)
-
-            List(10000) { generatedDist.random() }.visualize(10)
 
             assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(5.0))
             assertThat(scale).isCloseTo(100.0, Percentage.withPercentage(5.0))

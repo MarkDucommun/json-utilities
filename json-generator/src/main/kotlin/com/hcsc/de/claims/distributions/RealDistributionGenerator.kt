@@ -1,10 +1,12 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.*
 import com.hcsc.de.claims.distributionFitting.ParametricFitter
+import com.hcsc.de.claims.helpers.ceiling
+import com.hcsc.de.claims.helpers.median
+import com.hcsc.de.claims.helpers.mode
+import com.hcsc.de.claims.helpers.sqrt
+import com.hcsc.de.claims.results.*
 import net.sourceforge.jdistlib.disttest.DistributionTest
-import umontreal.ssj.gof.GofStat
-import umontreal.ssj.probdist.WeibullDist
 import java.util.*
 
 class RealDistributionGenerator(
@@ -18,8 +20,8 @@ class RealDistributionGenerator(
         println("Generating distribution!")
 
         return profileWith(list, listOf(
-                normalDistributionGenerator
-//                deepNonParametricDistributionGenerator
+//                normalDistributionGenerator
+                deepNonParametricDistributionGenerator
         ))
     }
 

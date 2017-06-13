@@ -1,10 +1,10 @@
 package com.hcsc.de.claims.distributionFitting
 
 import com.hcsc.de.claims.distributions.Randomable
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.flatMap
-import com.hcsc.de.claims.helpers.wrapExternalLibraryUsageAsResult
+import com.hcsc.de.claims.results.Failure
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.flatMap
+import com.hcsc.de.claims.results.wrapExternalLibraryUsageAsResult
 import umontreal.ssj.probdist.GammaDist
 import umontreal.ssj.probdist.LognormalDist
 import umontreal.ssj.probdist.NormalDist

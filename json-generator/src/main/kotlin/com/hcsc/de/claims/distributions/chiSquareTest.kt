@@ -1,11 +1,10 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
-import com.hcsc.de.claims.helpers.wrapExternalLibraryUsageAsResult
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.wrapExternalLibraryUsageAsResult
 import org.apache.commons.math.util.FastMath
 import org.apache.commons.math3.distribution.ChiSquaredDistribution
-import umontreal.ssj.gof.GofFormat
 import umontreal.ssj.gof.GofStat
 import umontreal.ssj.probdist.ChiSquareDist
 

@@ -1,9 +1,7 @@
 package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.distributionFitting.FitDistrPlus
-import com.hcsc.de.claims.helpers.ceiling
-import com.hcsc.de.claims.succeedsAnd
-import com.hcsc.de.claims.visualize
+import com.hcsc.de.claims.results.succeedsAnd
 import net.sourceforge.jdistlib.Gamma
 import net.sourceforge.jdistlib.LogNormal
 import net.sourceforge.jdistlib.Weibull

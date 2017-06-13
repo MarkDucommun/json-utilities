@@ -1,19 +1,14 @@
 package com.hcsc.de.claims.distributionFitting
 
 import com.hcsc.de.claims.distributions.Randomable
-import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.results.Result
 import net.sourceforge.jdistlib.LogNormal
 import net.sourceforge.jdistlib.Normal
 import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.generic.GenericDistribution
-import umontreal.ssj.gof.GofStat
 import umontreal.ssj.randvar.RandomVariateGen
 
 interface ParametricFitter {
-
-    //Distributions "beta", "cauchy", "chi-squared", "exponential", "f", "gamma", "geometric",
-    // "log-normal", "lognormal", "logistic", "negative binomial", "normal",
-    // "Poisson", "t" and "weibull" are recognised, case being ignored.
 
     fun weibullParameters(list: List<Double>): Result<String, WeibullParameters>
 

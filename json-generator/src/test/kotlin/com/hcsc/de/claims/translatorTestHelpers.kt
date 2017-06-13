@@ -1,6 +1,6 @@
 package com.hcsc.de.claims
 
-import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.results.Result
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock

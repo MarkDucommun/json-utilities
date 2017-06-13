@@ -1,7 +1,7 @@
 package com.hcsc.de.claims.jsonSchemaConversion
 
 import com.hcsc.de.claims.fileReaders.JsonFileReader
-import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.results.Success
 
 
 class JsonSchemaFileConverter(

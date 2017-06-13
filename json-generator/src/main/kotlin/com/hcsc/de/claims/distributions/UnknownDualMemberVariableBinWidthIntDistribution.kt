@@ -3,7 +3,6 @@
 package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.*
-import com.hcsc.de.claims.histogrammer.*
 
 data class DistributionPair<out numberType : Number>(
         val one: List<numberType>,
@@ -39,7 +38,7 @@ fun <numberType : Number> DistributionPair<numberType>.unknownDualMemberVariable
 
     val idealBinCount = Math.floor(Math.pow(1.88 * (listOne.size), (2.0 / 5.0))).toInt()
 
-    val binHolder = List(idealBinCount - 1) { it }.fold(BinHolder(bins = listOf(sortedAndFilteredByMinimumAndMaximum.asDoubleBin))) { binHolder, _ ->
+    val bins = List(idealBinCount - 1) { it }.fold(BinHolder(bins = listOf(sortedAndFilteredByMinimumAndMaximum.asDoubleBin))) { binHolder, _ ->
 
         if (binHolder.isComplete) {
             binHolder
@@ -77,33 +76,7 @@ fun <numberType : Number> DistributionPair<numberType>.unknownDualMemberVariable
                 binHolder.copy(isComplete = true)
             }
         }
-    }
-
-    val bins = binHolder.bins
-
-    val charter = JFreeChartCreator()
-
-    charter.createBarChart(ChartRequest(
-            name = "Blah",
-            xLabel = "startValue",
-            yLabel = "Count",
-            dataSets = listOf(
-//                    DataSet("Combined", bins.map { Datapoint(xValue = (it.startValue * 3), count = it.count) }),
-                    DataSet("One", bins.map { Datapoint(xValue = (it.startValue * 3) + 1, count = it.memberOneCount) }),
-                    DataSet("Two", bins.map { Datapoint(xValue = (it.startValue * 3) + 2, count = it.memberTwoCount) })
-            )
-    )).flatMap {
-
-        it.render()
-
-        Thread.sleep(5000)
-
-        it.stop()
-
-        Failure<String, String>("")
-    }
-
-    print("ideal bin count: $idealBinCount, ")
+    }.bins
 
     return UnknownDualMemberVariableBinWidthDistribution(
             average = sortedAndFilteredByMinimumAndMaximum.map { it.value }.average(),
@@ -215,7 +188,7 @@ private fun VariableDualMemberWidthBin<Double>.splitBin(binCount: Int): List<Var
 
         val rangeHolder = RangeHolder(low = low, middle = (low + high) / 2, high = high)
 
-        val finalRangeHolder = List(Math.log(high - low).ceiling().toInt()) { it }.fold(rangeHolder) { rangeHolder, _ ->
+        val finalRangeHolder = List(Math.log(low + high).ceiling().toInt()) { it }.fold(rangeHolder) { rangeHolder, _ ->
 
             if (rangeHolder.isIncomplete) {
 

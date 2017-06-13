@@ -1,8 +1,8 @@
 package com.hcsc.de.claims.fileReaders
 
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.results.Failure
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
 import java.io.File
 
 class RawByteStringFileReader : StringFileReader {

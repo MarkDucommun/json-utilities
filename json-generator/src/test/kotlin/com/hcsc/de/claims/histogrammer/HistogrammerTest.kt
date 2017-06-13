@@ -1,16 +1,15 @@
 package com.hcsc.de.claims.histogrammer
 
+import com.hcsc.de.claims.distributionFitting.Montreal
 import com.hcsc.de.claims.distributions.DataBinner
 import com.hcsc.de.claims.distributions.DoubleDataBinner
 import com.hcsc.de.claims.distributions.FixedWidthBin
 import com.hcsc.de.claims.distributions.RealDistributionGenerator
-import com.hcsc.de.claims.failsWithMessage
 import com.hcsc.de.claims.fileReaders.RawByteStringFileReader
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Success
-import com.hcsc.de.claims.distributionFitting.FitDistrPlus
-import com.hcsc.de.claims.distributionFitting.Montreal
-import com.hcsc.de.claims.succeedsAndShouldReturn
+import com.hcsc.de.claims.results.Failure
+import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.failsWithMessage
+import com.hcsc.de.claims.results.succeedsAndShouldReturn
 import com.nhaarman.mockito_kotlin.*
 import net.sourceforge.jdistlib.Weibull
 import org.junit.Ignore
@@ -31,7 +30,7 @@ class HistogrammerTest {
         on { createBarChart(any()) } doReturn Success(mockBarChart)
     }
 
-    val subject = ChartHistogrammer<Double>(
+    val subject = ListHistogrammer<Double>(
             dataBinner = mockDataBinner,
             chartCreator = mockChartCreator
     )
@@ -170,7 +169,7 @@ class HistogrammerTest {
 
         val generatedList = List(list.size) { distribution.random() }
 
-        val histogrammer = ChartHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
+        val histogrammer = ListHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
 
         val histogramResult = histogrammer.create(list, generatedList)
 
@@ -203,7 +202,7 @@ class HistogrammerTest {
 
         val generatedList = List(list.size) { distribution.random() }
 
-        val histogrammer = ChartHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
+        val histogrammer = ListHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
 
         val histogramResult = histogrammer.create(list, generatedList)
 

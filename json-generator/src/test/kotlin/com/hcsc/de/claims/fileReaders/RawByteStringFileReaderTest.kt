@@ -1,7 +1,7 @@
 package com.hcsc.de.claims.fileReaders
 
-import com.hcsc.de.claims.failsAnd
-import com.hcsc.de.claims.succeedsAnd
+import com.hcsc.de.claims.results.failsAnd
+import com.hcsc.de.claims.results.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 

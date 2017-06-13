@@ -1,11 +1,10 @@
 package com.hcsc.de.claims.jsonReduction.cinqFieldCsv
 
-import com.hcsc.de.claims.*
-import com.hcsc.de.claims.helpers.Failure
-import com.hcsc.de.claims.helpers.Result
-import com.hcsc.de.claims.helpers.Success
+import com.hcsc.de.claims.Translator
 import com.hcsc.de.claims.jsonReduction.FieldObject
-import com.nhaarman.mockito_kotlin.*
+import com.hcsc.de.claims.mockTranslator
+import com.hcsc.de.claims.results.*
+import com.nhaarman.mockito_kotlin.verify
 import org.junit.Test
 
 class CinqFieldCsvStringToFieldObjectTest {

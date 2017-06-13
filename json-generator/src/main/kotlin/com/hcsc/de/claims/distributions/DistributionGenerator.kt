@@ -1,6 +1,7 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.results.Result
+
 
 interface DistributionGenerator<numberType: Number> {
 

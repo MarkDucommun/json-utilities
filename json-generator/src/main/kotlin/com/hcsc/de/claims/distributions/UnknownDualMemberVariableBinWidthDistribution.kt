@@ -1,7 +1,6 @@
 package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.helpers.median
-import umontreal.ssj.util.Num
 
 
 data class UnknownDualMemberVariableBinWidthDistribution<out numberType : Number>(

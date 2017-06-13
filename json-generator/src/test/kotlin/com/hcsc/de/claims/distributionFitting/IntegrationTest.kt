@@ -1,12 +1,13 @@
 package com.hcsc.de.claims.distributionFitting
 
 import com.hcsc.de.claims.distributions.DoubleDataBinner
-import com.hcsc.de.claims.get
-import com.hcsc.de.claims.helpers.traverse
-import com.hcsc.de.claims.histogrammer.ChartHistogrammer
 import com.hcsc.de.claims.histogrammer.JFreeChartCreator
+import com.hcsc.de.claims.histogrammer.ListHistogrammer
+import com.hcsc.de.claims.results.get
+import com.hcsc.de.claims.results.traverse
 import com.hcsc.de.claims.time
 import net.sourceforge.jdistlib.Weibull
+import org.junit.Ignore
 import org.junit.Test
 import umontreal.ssj.probdist.WeibullDist
 import umontreal.ssj.randvar.WeibullGen
@@ -16,6 +17,7 @@ import umontreal.ssj.rng.F2NL607
 class IntegrationTest {
 
     @Test
+    @Ignore
     fun `it can test the speed and accuracy of Java vs R`() {
 
         val stream = BasicRandomStreamFactory(F2NL607::class.java).newInstance()
@@ -34,7 +36,7 @@ class IntegrationTest {
 
         val montrealResult = time { Montreal.weibullParameters(startingList) }
 
-        val histogrammer = ChartHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
+        val histogrammer = ListHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())
 
         val generatedMontreal = Montreal.weibullDistribution(startingList).get
 

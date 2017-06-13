@@ -1,10 +1,10 @@
-package com.hcsc.de.claims.helpers
+package com.hcsc.de.claims.results
 
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 
 
-class ResultTest {
+class TraverseTest {
 
     @Test
     fun `traverse list of successes returns result of that list of successes`() {

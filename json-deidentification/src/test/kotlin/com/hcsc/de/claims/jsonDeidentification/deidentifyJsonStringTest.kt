@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 
-class deidentifyJsonString {
+class DeidentifyJsonString {
 
     @Test
     fun `it can de-identify a very simple JSON object`() {
@@ -93,9 +93,9 @@ class deidentifyJsonString {
 
     val objectMapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
 
-    val deidentifier = JsonDeIdentifier(objectMapper = objectMapper)
+    val subject = JsonDeIdentifier(objectMapper = objectMapper)
 
-    private fun JsonString.deidentify() = deidentifier.deidentifyJson(this)
+    private fun JsonString.deidentify() = subject.deidentifyJson(this)
 
     private fun Any.writeAsString() = objectMapper.writeValueAsString(this)
 }

@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.fileReaders
 
-import com.hcsc.de.claims.helpers.Result
+import com.hcsc.de.claims.results.Result
 
 interface StringFileReader {
 

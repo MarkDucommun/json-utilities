@@ -1,0 +1,38 @@
+apply plugin: 'kotlin'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+repositories {
+    maven { url "https://jcenter.bintray.com" }
+    mavenCentral()
+}
+
+bootRepackage {
+    enabled = false
+}
+
+dependencies {
+
+    compile project(':kotlin-jackson-helpers')
+
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.8.7")
+    compile("com.github.javafaker:javafaker:0.13")
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}"
+    compile "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:0.14'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.14'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-rx2:0.14'
+
+    testCompile 'net.wuerl.kotlin:assertj-core-kotlin:0.1.3'
+    testCompile 'junit:junit:4.12'
+}

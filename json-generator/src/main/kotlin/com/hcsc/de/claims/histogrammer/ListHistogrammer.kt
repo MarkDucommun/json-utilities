@@ -3,8 +3,12 @@ package com.hcsc.de.claims.histogrammer
 import com.hcsc.de.claims.distributions.DataBinner
 import com.hcsc.de.claims.distributions.FixedWidthBin
 import com.hcsc.de.claims.helpers.*
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.flatMap
+import com.hcsc.de.claims.results.map
+import com.hcsc.de.claims.results.traverse
 
-class ChartHistogrammer<in numberType : Number>(
+class ListHistogrammer<in numberType : Number>(
         private val dataBinner: DataBinner<Double>,
         private val chartCreator: ChartCreator
 ) : Histogrammer<numberType> {
