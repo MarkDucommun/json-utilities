@@ -109,6 +109,16 @@ class JsonStructureNesterTest {
     }
 
     @Test
+    fun `a LiteralClose by itself is a valid LiteralStructureElement`() {
+
+        listOf(
+                LiteralClose(id = 1, value = 'b')
+        ).nested succeedsAndShouldReturn LiteralStructureElement(id = 1, children = listOf(
+                LiteralClose(id = 1, value = 'b')
+        ))
+    }
+
+    @Test
     fun `it returns a LiteralStructureElement even if there is no close at the end of the literal value`() {
 
         listOf(

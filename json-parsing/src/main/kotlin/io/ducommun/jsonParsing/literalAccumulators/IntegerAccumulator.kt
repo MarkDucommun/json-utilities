@@ -3,6 +3,7 @@ package io.ducommun.jsonParsing.literalAccumulators
 import com.hcsc.de.claims.results.Failure
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.wrapExternalLibraryUsageAsResult
 import io.ducommun.jsonParsing.IntegerNode
 import io.ducommun.jsonParsing.JsonNode
 
@@ -19,5 +20,6 @@ data class IntegerAccumulator(
         }
     }
 
-    override val node: JsonNode get() = IntegerNode(value = value.toLong())
+    override val node: Result<String, JsonNode>
+        get() = wrapExternalLibraryUsageAsResult { IntegerNode(value = value.toLong()) }
 }

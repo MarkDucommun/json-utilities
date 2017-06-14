@@ -1,15 +1,15 @@
 package io.ducommun.jsonParsing
 
-interface Open<out structureType : io.ducommun.jsonParsing.MainStructure<childType>, childType : io.ducommun.jsonParsing.JsonStructure> : io.ducommun.jsonParsing.JsonStructure {
+interface Open<out structureType : MainStructure<childType>, childType : JsonStructure> : JsonStructure {
 
     val structureConstructor: (Long, List<childType>) -> structureType
 }
 
-interface Close : io.ducommun.jsonParsing.JsonStructure
+interface Close : JsonStructure
 
-interface Comma : io.ducommun.jsonParsing.JsonStructure
+interface Comma : JsonStructure
 
-interface WithValue : io.ducommun.jsonParsing.JsonStructure {
+interface WithValue : JsonStructure {
     val value: Char
 }
 
@@ -17,109 +17,112 @@ interface JsonStructure {
     val id: Long
 }
 
-sealed class MainStructure<out childType : io.ducommun.jsonParsing.JsonStructure> : io.ducommun.jsonParsing.JsonStructure {
+sealed class MainStructure<out childType : JsonStructure> : JsonStructure {
 
     abstract val children: List<childType>
 }
 
-object EmptyStructureElement : io.ducommun.jsonParsing.MainStructure<EmptyStructureElement>() {
+object EmptyStructureElement : MainStructure<EmptyStructureElement>() {
 
     override val id: Long = 0
-    override val children: List<io.ducommun.jsonParsing.EmptyStructureElement> = emptyList()
+    override val children: List<EmptyStructureElement> = emptyList()
 }
 
 data class LiteralStructureElement(
         override val id: Long,
-        override val children: List<io.ducommun.jsonParsing.LiteralElement> = emptyList()
-) : io.ducommun.jsonParsing.MainStructure<LiteralElement>()
+        override val children: List<LiteralElement> = emptyList()
+) : MainStructure<LiteralElement>()
 
-sealed class LiteralElement : io.ducommun.jsonParsing.JsonStructure, io.ducommun.jsonParsing.WithValue
+sealed class LiteralElement : JsonStructure, WithValue
 
 data class LiteralValue(
         override val id: Long,
         override val value: Char
-) : io.ducommun.jsonParsing.LiteralElement(), io.ducommun.jsonParsing.Open<LiteralStructureElement, LiteralElement>, io.ducommun.jsonParsing.Close {
+) : LiteralElement(), Open<LiteralStructureElement, LiteralElement>, Close {
 
-    override val structureConstructor: (Long, List<io.ducommun.jsonParsing.LiteralElement>) -> io.ducommun.jsonParsing.LiteralStructureElement = ::LiteralStructureElement
+    override val structureConstructor: (Long, List<LiteralElement>) -> LiteralStructureElement = ::LiteralStructureElement
 }
 
 data class LiteralClose(
         override val id: Long,
         override val value: Char
-) : io.ducommun.jsonParsing.LiteralElement(), io.ducommun.jsonParsing.Close
+) : LiteralElement(), Close, Open<LiteralStructureElement, LiteralElement> {
+
+    override val structureConstructor: (Long, List<LiteralElement>) -> LiteralStructureElement = ::LiteralStructureElement
+}
 
 data class StringStructureElement(
         override val id: Long,
-        override val children: List<io.ducommun.jsonParsing.StringValue>
-) : io.ducommun.jsonParsing.MainStructure<StringValue>()
+        override val children: List<StringValue>
+) : MainStructure<StringValue>()
 
-sealed class StringElement : io.ducommun.jsonParsing.JsonStructure
+sealed class StringElement : JsonStructure
 
 data class StringOpen(
         override val id: Long
-) : io.ducommun.jsonParsing.StringElement(), io.ducommun.jsonParsing.Open<StringStructureElement, StringValue> {
+) : StringElement(), Open<StringStructureElement, StringValue> {
 
-    override val structureConstructor: (Long, List<io.ducommun.jsonParsing.StringValue>) -> io.ducommun.jsonParsing.StringStructureElement
+    override val structureConstructor: (Long, List<StringValue>) -> StringStructureElement
         get() = ::StringStructureElement
 }
 
 data class StringValue(
         override val id: Long,
         override val value: Char
-) : io.ducommun.jsonParsing.StringElement(), io.ducommun.jsonParsing.WithValue
+) : StringElement(), WithValue
 
-object StringEscape : io.ducommun.jsonParsing.StringElement() {
+object StringEscape : StringElement() {
     override val id: Long = 0
 }
 
 data class StringClose(
         override val id: Long
-) : io.ducommun.jsonParsing.StringElement(), io.ducommun.jsonParsing.Close
+) : StringElement(), Close
 
 data class ArrayStructureElement(
         override val id: Long,
-        override val children: List<io.ducommun.jsonParsing.MainStructure<*>>
-) : io.ducommun.jsonParsing.MainStructure<MainStructure<*>>()
+        override val children: List<MainStructure<*>>
+) : MainStructure<MainStructure<*>>()
 
-sealed class ArrayElement : io.ducommun.jsonParsing.JsonStructure
+sealed class ArrayElement : JsonStructure
 
-data class ArrayOpen(override val id: Long) : io.ducommun.jsonParsing.ArrayElement(), io.ducommun.jsonParsing.Open<ArrayStructureElement, MainStructure<*>> {
-    override val structureConstructor: (Long, List<io.ducommun.jsonParsing.MainStructure<*>>) -> io.ducommun.jsonParsing.ArrayStructureElement
+data class ArrayOpen(override val id: Long) : ArrayElement(), Open<ArrayStructureElement, MainStructure<*>> {
+    override val structureConstructor: (Long, List<MainStructure<*>>) -> ArrayStructureElement
         get() = ::ArrayStructureElement
 }
 
-data class ArrayComma(override val id: Long) : io.ducommun.jsonParsing.ArrayElement(), io.ducommun.jsonParsing.Comma
+data class ArrayComma(override val id: Long) : ArrayElement(), Comma
 
-data class ArrayClose(override val id: Long) : io.ducommun.jsonParsing.ArrayElement(), io.ducommun.jsonParsing.Close
+data class ArrayClose(override val id: Long) : ArrayElement(), Close
 
-sealed class ObjectStructureElement : io.ducommun.jsonParsing.MainStructure<ObjectChildElement<*>>()
+sealed class ObjectStructureElement : MainStructure<ObjectChildElement<*>>()
 
-data class ObjectChildElement<out childType : io.ducommun.jsonParsing.MainStructure<*>>(
+data class ObjectChildElement<out childType : MainStructure<*>>(
         override val id: Long,
-        val key: io.ducommun.jsonParsing.StringStructureElement,
+        val key: StringStructureElement,
         val value: childType
-) : io.ducommun.jsonParsing.JsonStructure
+) : JsonStructure
 
 data class OpenObjectStructure(
         override val id: Long,
-        override val children: List<io.ducommun.jsonParsing.ObjectChildElement<*>>
+        override val children: List<ObjectChildElement<*>>
 ) : io.ducommun.jsonParsing.ObjectStructureElement()
 
 data class ObjectWithKeyStructure(
         override val id: Long,
-        override val children: List<io.ducommun.jsonParsing.ObjectChildElement<*>>
+        override val children: List<ObjectChildElement<*>>
 ) : io.ducommun.jsonParsing.ObjectStructureElement()
 
-sealed class ObjectElement : io.ducommun.jsonParsing.JsonStructure
+sealed class ObjectElement : JsonStructure
 
-data class ObjectOpen(override val id: Long) : io.ducommun.jsonParsing.ObjectElement(), io.ducommun.jsonParsing.Open<OpenObjectStructure, ObjectChildElement<*>> {
+data class ObjectOpen(override val id: Long) : io.ducommun.jsonParsing.ObjectElement(), Open<OpenObjectStructure, ObjectChildElement<*>> {
 
-    override val structureConstructor: (Long, List<io.ducommun.jsonParsing.ObjectChildElement<*>>) -> io.ducommun.jsonParsing.OpenObjectStructure
+    override val structureConstructor: (Long, List<ObjectChildElement<*>>) -> OpenObjectStructure
         get() = ::OpenObjectStructure
 }
 
 data class ObjectColon(override val id: Long) : io.ducommun.jsonParsing.ObjectElement()
 
-data class ObjectComma(override val id: Long) : io.ducommun.jsonParsing.ObjectElement(), io.ducommun.jsonParsing.Comma
+data class ObjectComma(override val id: Long) : io.ducommun.jsonParsing.ObjectElement(), Comma
 
-data class ObjectClose(override val id: Long) : io.ducommun.jsonParsing.ObjectElement(), io.ducommun.jsonParsing.Close
+data class ObjectClose(override val id: Long) : io.ducommun.jsonParsing.ObjectElement(), Close

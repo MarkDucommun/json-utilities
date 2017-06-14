@@ -8,7 +8,7 @@ import io.ducommun.jsonParsing.JsonNode
 
 object ZeroAccumulator : CompleteAccumulator {
 
-    override val node: JsonNode = IntegerNode(value = 0)
+    override val node: Result<String, JsonNode> = Success(IntegerNode(value = 0))
 
     override fun addChar(char: Char): Result<String, Accumulator> {
 

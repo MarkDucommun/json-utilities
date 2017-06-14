@@ -3,6 +3,7 @@ package io.ducommun.jsonParsing.literalAccumulators
 import com.hcsc.de.claims.results.Failure
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.wrapExternalLibraryUsageAsResult
 import io.ducommun.jsonParsing.DoubleNode
 import io.ducommun.jsonParsing.JsonNode
 
@@ -18,5 +19,6 @@ data class DoubleAccumulator(
         }
     }
 
-    override val node: JsonNode get() = DoubleNode(value = value.toDouble())
+    override val node: Result<String, JsonNode>
+        get() = wrapExternalLibraryUsageAsResult { DoubleNode(value = value.toDouble()) }
 }

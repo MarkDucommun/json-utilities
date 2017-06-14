@@ -1,5 +1,6 @@
 package io.ducommun.jsonParsing.structureAccumulators
 
+import com.hcsc.de.claims.results.Failure
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.flatMap
 import io.ducommun.jsonParsing.*

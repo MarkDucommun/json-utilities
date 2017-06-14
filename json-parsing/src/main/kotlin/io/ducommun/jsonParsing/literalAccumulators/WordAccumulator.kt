@@ -29,7 +29,7 @@ abstract class WordAccumulator(
                 val matches = previousCharCandidate == previousChar && charCandidate == char
 
                 if (pair == lastPair && matches) {
-                    Success<String, Accumulator>(LiteralCompleteAccumulator(node = node))
+                    Success<String, Accumulator>(LiteralCompleteAccumulator(rawNode = node))
                 } else if (matches) {
                     Success<String, Accumulator>(copy(previousChar = char))
                 } else {

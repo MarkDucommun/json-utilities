@@ -19,6 +19,7 @@ abstract class StringAccumulator<out previousElementType : StringElement>
                 is StringStructureElement -> fail("How do I get rid of you as a possibility")
             }
             '\\' -> addStringEscape()
+            '\n', '\t', '\r', '\b', 12.toChar(), 0.toChar() -> fail("unescaped control character")
             else -> addStringValue(char)
         }
     }

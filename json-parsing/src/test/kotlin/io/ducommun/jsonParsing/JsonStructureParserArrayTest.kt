@@ -478,4 +478,13 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
                 ArrayClose(id = 1)
         )
     }
+
+    @Test
+    fun `it fails when any structure is nested more than n deep`() {
+
+        val n = 10000
+
+        List(n) { '[' }.plus(List(n) { ']' }).joinToString("")
+                .jsonStructure failsWithMessage "Invalid JSON - nested too deep"
+    }
 }

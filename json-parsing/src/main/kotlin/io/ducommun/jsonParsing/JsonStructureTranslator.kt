@@ -35,11 +35,7 @@ class JsonStructureTranslator {
 
     private val Accumulator.isComplete: Result<String, JsonNode> get() {
 
-        return if (this is CompleteAccumulator) {
-            Success<String, JsonNode>(node)
-        } else {
-            Failure<String, JsonNode>("Invalid JSON - incomplete literal")
-        }
+        return if (this is CompleteAccumulator) node else Failure<String, JsonNode>("Invalid JSON - incomplete literal")
     }
 
     private val StringStructureElement.asNode: StringNode get() = StringNode(value = value)
