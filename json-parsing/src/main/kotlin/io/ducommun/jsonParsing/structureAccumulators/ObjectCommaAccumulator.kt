@@ -1,5 +1,6 @@
 package io.ducommun.jsonParsing.structureAccumulators
 
+import com.hcsc.de.claims.results.Failure
 import io.ducommun.jsonParsing.*
 import com.hcsc.de.claims.results.Result
 
@@ -15,7 +16,7 @@ data class ObjectCommaAccumulator(
         return when (char) {
             ' ', '\n', '\r', '\t' -> skip
             '"' -> openString()
-            else -> TODO()
+            else -> fail("object close cannot immediately follow object comma")
         }
     }
 }

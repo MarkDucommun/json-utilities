@@ -18,7 +18,7 @@ abstract class CloseArrayAccumulator<out closeType: Close> :  BaseAccumulator<cl
                 is StringStructureElement -> TODO("SHOULD NOT HAPPEN")
                 is OpenObjectStructure -> TODO("SHOULD NOT HAPPEN")
             }
-            else -> TODO()
+            else -> fail("improperly formatted array")
         }
     }
 }

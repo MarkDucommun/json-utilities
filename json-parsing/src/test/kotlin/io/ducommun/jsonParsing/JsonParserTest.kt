@@ -39,15 +39,36 @@ class JsonParserTest {
     }
 
     @Test
+    fun `it fails a literal separated by a whitespace`() {
+
+        subject.parse("[1 000.0]") failsWithMessage "Invalid JSON - improperly formatted array"
+    }
+
+    @Test
+    fun `it fails a comma trailing an object element followed by an object close`() {
+
+        subject.parse("{\"id\":0,}") failsWithMessage "Invalid JSON - object close cannot immediately follow object comma"
+    }
+
+    @Test
+    fun `it fails blah`() {
+
+        subject.parse("1]") failsWithMessage "?"
+    }
+
+    @Test
     fun `it runs all of the JSON test suite files`() {
 
         val results = File("src/test/resources/test_files").listFiles().map { testFile(it) }
 
         val notMatching = results.filterNot { it.matched }
 
-        assertThat(notMatching.size).isLessThanOrEqualTo(25)
+        val throwingErrors = results.filter { it.errorThrown }
 
-        if (false) {
+        assertThat(notMatching.size).isLessThanOrEqualTo(25)
+        assertThat(throwingErrors.size).isLessThanOrEqualTo(5)
+
+        if (true) {
 
             val jacksonNotMatching = results.filterNot { it.jacksonMatchedExpected }
 
@@ -55,17 +76,28 @@ class JsonParserTest {
 
             println("Currently not matching - ${notMatching.size}")
 
+            println("Currently throwing errors - ${throwingErrors.size}")
+
             println("Jackson currently not matching - ${jacksonNotMatching.size}")
 
             println("Currently not matching Jackson - ${notMatchingJackson.size}")
 
             println("Average time difference with Jackson: ${results.filter { it.matched && it.jacksonMatchedExpected }.map { it.timeDiff }.average()}ms")
 
-            notMatching.forEach { outcome ->
+            println("\nFiles Not Matching")
+            notMatching.forEach { (_, fileName, jsonString) ->
 
-                val jsonString = if (outcome.jsonString.length < 120) outcome.jsonString else "String too long"
+                val jsonString = if (jsonString.length < 120) jsonString else "String too long"
 
-                println("${outcome.fileName} -- $jsonString")
+                println("$fileName -- $jsonString")
+            }
+
+            println("\nFiles Throwing Error")
+            throwingErrors.forEach { (_, fileName, jsonString) ->
+
+                val jsonString = if (jsonString.length < 120) jsonString else "String too long"
+
+                println("$fileName -- $jsonString")
             }
         }
     }
@@ -74,12 +106,16 @@ class JsonParserTest {
 
         val jsonString = fileReader.read(file).get
 
+        var errorThrown = false
+
         val result = time {
             try {
 
                 subject.parse(jsonString)
 
             } catch (e: Error) {
+
+                errorThrown = true
 
                 Failure<String, JsonNode>(e.message ?: "")
             }
@@ -102,7 +138,8 @@ class JsonParserTest {
                 fileName = file.name,
                 jsonString = jsonString,
                 result = result,
-                jacksonResult = jacksonResult
+                jacksonResult = jacksonResult,
+                errorThrown = errorThrown
         )
     }
 
@@ -111,7 +148,8 @@ class JsonParserTest {
             val fileName: String,
             val jsonString: String,
             val result: TimeAndResult<String, JsonNode>,
-            val jacksonResult: TimeAndResult<String, com.fasterxml.jackson.databind.JsonNode>
+            val jacksonResult: TimeAndResult<String, com.fasterxml.jackson.databind.JsonNode>,
+            val errorThrown: Boolean
     ) {
 
         val matched: Boolean = result.matched
