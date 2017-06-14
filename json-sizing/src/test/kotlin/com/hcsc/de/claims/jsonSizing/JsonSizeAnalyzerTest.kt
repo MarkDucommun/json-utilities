@@ -1,8 +1,9 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributionFitting.DistributionGenerator
-import com.hcsc.de.claims.distributionFitting.DistributionProfile
+import com.hcsc.de.claims.distributions.generation.DistributionGenerator
+import com.hcsc.de.claims.distributions.generation.DistributionProfile
 import com.hcsc.de.claims.distributions.*
+import com.hcsc.de.claims.distributions.generation.asIntDistribution
 import com.hcsc.de.claims.results.*
 import com.nhaarman.mockito_kotlin.*
 import junit.framework.Assert.fail

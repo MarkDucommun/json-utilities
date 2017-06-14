@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.histogrammer
 
-import com.hcsc.de.claims.distributions.DoubleDataBinner
+import com.hcsc.de.claims.distributions.generation.DoubleDataBinner
 import com.hcsc.de.claims.results.map
 
 private val histogrammer = ListHistogrammer<Double>(DoubleDataBinner(), JFreeChartCreator())

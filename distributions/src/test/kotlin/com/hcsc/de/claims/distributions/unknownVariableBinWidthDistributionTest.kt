@@ -9,7 +9,7 @@ class unknownVariableBinWidthDistributionTest {
     @Test
     fun `it makes some buckets`() {
 
-        val listOfOnes = List(5) { 1 }.unknownVariableBinWidthDistribution()
+        val listOfOnes = List(5) { 1 }.variableBinWidthDistribution()
 
         assertThat(listOfOnes.numberOfBins).isEqualTo(1)
     }
@@ -18,7 +18,7 @@ class unknownVariableBinWidthDistributionTest {
     @Ignore("FIX THIS!")
     fun `two buckets`() {
 
-        val dist = List(5) { 2 }.plus(List(5) { 3 }).unknownVariableBinWidthDistribution()
+        val dist = List(5) { 2 }.plus(List(5) { 3 }).variableBinWidthDistribution()
 
         assertThat(dist.numberOfBins).isEqualTo(2)
         assertThat(dist.bins.first().members).isEqualTo(List(5) { 2 })
@@ -29,7 +29,7 @@ class unknownVariableBinWidthDistributionTest {
     @Ignore("FIX THIS!")
     fun `three buckets`() {
 
-        val dist = List(5) { 2 }.plus(List(5) { 3 }).plus(List(5) { 4 }).unknownVariableBinWidthDistribution()
+        val dist = List(5) { 2 }.plus(List(5) { 3 }).plus(List(5) { 4 }).variableBinWidthDistribution()
 
         assertThat(dist.numberOfBins).isEqualTo(3)
         assertThat(dist.bins.first().members).isEqualTo(List(5) { 2 })

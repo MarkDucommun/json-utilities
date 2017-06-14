@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributions.NormalIntDistribution
+import com.hcsc.de.claims.distributions.parametric.NormalIntDistribution
 import com.hcsc.de.claims.distributions.RatioProbability
 import com.hcsc.de.claims.results.get
 import com.hcsc.de.claims.results.succeedsAndShouldReturn

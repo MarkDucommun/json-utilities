@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.distributionFitting
 
-import com.hcsc.de.claims.distributions.DoubleDataBinner
+import com.hcsc.de.claims.distributions.generation.DoubleDataBinner
 import com.hcsc.de.claims.histogrammer.JFreeChartCreator
 import com.hcsc.de.claims.histogrammer.ListHistogrammer
 import com.hcsc.de.claims.results.get
@@ -26,7 +26,7 @@ class IntegrationTest {
 
         val gen = WeibullGen(stream, weibull)
 
-        val montrealDistribution = MontrealDistribution(gen)
+        val montrealDistribution = MontrealRandomable(gen)
 
         val startingDistribution = GenericDistributionRandomable(Weibull(1.3, 50.0))
 

@@ -9,9 +9,9 @@ import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
 
-class RealDistributionGeneratorTest {
+class BestFitDistributionGeneratorTest {
 
-    val subject = RealDistributionGenerator(parametricFitter = FitDistrPlus)
+    val subject = BestFitDistributionGenerator(parametricFitter = FitDistrPlus)
 
     val size = 10000
 

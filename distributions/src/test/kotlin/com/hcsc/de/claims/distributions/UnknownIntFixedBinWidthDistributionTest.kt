@@ -1,5 +1,8 @@
 package com.hcsc.de.claims.distributions
 
+import com.hcsc.de.claims.distributions.binDistributions.IntFixedBinWidthDistribution
+import com.hcsc.de.claims.distributions.bins.SimpleBin
+import com.hcsc.de.claims.distributions.generation.unknownDistribution
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 
@@ -10,7 +13,7 @@ class UnknownIntFixedBinWidthDistributionTest {
 
         val distribution = listOf(1, 1, 1, 0, 0).unknownDistribution(numberOfBins = 1000)
 
-        assertThat(distribution).isEqualTo(UnknownIntFixedBinWidthDistribution(
+        assertThat(distribution).isEqualTo(IntFixedBinWidthDistribution(
                 average = 1,
                 minimum = 0,
                 maximum = 1,
@@ -19,8 +22,8 @@ class UnknownIntFixedBinWidthDistributionTest {
                 numberOfBins = 2,
                 sizeOfBin = 1,
                 bins = listOf(
-                        FixedWidthBin(startValue = 0, count = 2),
-                        FixedWidthBin(startValue = 1, count = 3)
+                        SimpleBin(identifyingCharacteristic = 0, size = 2),
+                        SimpleBin(identifyingCharacteristic = 1, size = 3)
                 )
         ))
     }
@@ -30,7 +33,7 @@ class UnknownIntFixedBinWidthDistributionTest {
 
         val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5).unknownDistribution(numberOfBins = 5)
 
-        assertThat(distribution).isEqualTo(UnknownIntFixedBinWidthDistribution(
+        assertThat(distribution).isEqualTo(IntFixedBinWidthDistribution(
                 average = 3,
                 minimum = 1,
                 maximum = 5,
@@ -39,11 +42,11 @@ class UnknownIntFixedBinWidthDistributionTest {
                 numberOfBins = 5,
                 sizeOfBin = 1,
                 bins = listOf(
-                        FixedWidthBin(startValue = 1, count = 3),
-                        FixedWidthBin(startValue = 2, count = 2),
-                        FixedWidthBin(startValue = 3, count = 1),
-                        FixedWidthBin(startValue = 4, count = 1),
-                        FixedWidthBin(startValue = 5, count = 2)
+                        SimpleBin(identifyingCharacteristic = 1, size = 3),
+                        SimpleBin(identifyingCharacteristic = 2, size = 2),
+                        SimpleBin(identifyingCharacteristic = 3, size = 1),
+                        SimpleBin(identifyingCharacteristic = 4, size = 1),
+                        SimpleBin(identifyingCharacteristic = 5, size = 2)
                 )
         ))
     }
@@ -53,7 +56,7 @@ class UnknownIntFixedBinWidthDistributionTest {
 
         val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).unknownDistribution(numberOfBins = 3)
 
-        assertThat(distribution).isEqualTo(UnknownIntFixedBinWidthDistribution(
+        assertThat(distribution).isEqualTo(IntFixedBinWidthDistribution(
                 average = 3,
                 minimum = 1,
                 maximum = 6,
@@ -62,9 +65,9 @@ class UnknownIntFixedBinWidthDistributionTest {
                 numberOfBins = 3,
                 sizeOfBin = 2,
                 bins = listOf(
-                        FixedWidthBin(startValue = 1, count = 5),
-                        FixedWidthBin(startValue = 3, count = 2),
-                        FixedWidthBin(startValue = 5, count = 3)
+                        SimpleBin(identifyingCharacteristic = 1, size = 5),
+                        SimpleBin(identifyingCharacteristic = 3, size = 2),
+                        SimpleBin(identifyingCharacteristic = 5, size = 3)
                 )
         ))
     }
@@ -74,7 +77,7 @@ class UnknownIntFixedBinWidthDistributionTest {
 
         val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).unknownDistribution(numberOfBins = 2)
 
-        assertThat(distribution).isEqualTo(UnknownIntFixedBinWidthDistribution(
+        assertThat(distribution).isEqualTo(IntFixedBinWidthDistribution(
                 average = 3,
                 minimum = 1,
                 maximum = 6,
@@ -83,8 +86,8 @@ class UnknownIntFixedBinWidthDistributionTest {
                 numberOfBins = 2,
                 sizeOfBin = 3,
                 bins = listOf(
-                        FixedWidthBin(startValue = 1, count = 6),
-                        FixedWidthBin(startValue = 4, count = 4)
+                        SimpleBin(identifyingCharacteristic = 1, size = 6),
+                        SimpleBin(identifyingCharacteristic = 4, size = 4)
                 )
         ))
     }
@@ -98,7 +101,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 rangeMaximum = 8
         )
 
-        assertThat(distribution).isEqualTo(UnknownIntFixedBinWidthDistribution(
+        assertThat(distribution).isEqualTo(IntFixedBinWidthDistribution(
                 average = 3,
                 minimum = 1,
                 maximum = 6,
@@ -107,9 +110,9 @@ class UnknownIntFixedBinWidthDistributionTest {
                 numberOfBins = 3,
                 sizeOfBin = 3,
                 bins = listOf(
-                        FixedWidthBin(startValue = 0, count = 5),
-                        FixedWidthBin(startValue = 3, count = 4),
-                        FixedWidthBin(startValue = 6, count = 1)
+                        SimpleBin(identifyingCharacteristic = 0, size = 5),
+                        SimpleBin(identifyingCharacteristic = 3, size = 4),
+                        SimpleBin(identifyingCharacteristic = 6, size = 1)
                 )
         ))
     }
@@ -123,7 +126,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 rangeMaximum = 5
         )
 
-        assertThat(distribution).isEqualTo(UnknownIntFixedBinWidthDistribution(
+        assertThat(distribution).isEqualTo(IntFixedBinWidthDistribution(
                 average = 3,
                 minimum = 2,
                 maximum = 5,
@@ -132,8 +135,8 @@ class UnknownIntFixedBinWidthDistributionTest {
                 numberOfBins = 2,
                 sizeOfBin = 2,
                 bins = listOf(
-                        FixedWidthBin(startValue = 2, count = 3),
-                        FixedWidthBin(startValue = 4, count = 3)
+                        SimpleBin(identifyingCharacteristic = 2, size = 3),
+                        SimpleBin(identifyingCharacteristic = 4, size = 3)
                 )
         ))
     }

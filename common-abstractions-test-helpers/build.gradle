@@ -1,6 +1,7 @@
 apply from: "../gradle/scripts/kotlin.gradle"
 
 dependencies {
+
     compile project(':common-abstractions')
     compile project(':results')
 

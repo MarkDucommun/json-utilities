@@ -3,6 +3,7 @@ apply from: "../gradle/scripts/jackson.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
 
 dependencies {
+
     compile project(':kotlin-jackson-helpers')
 
     compile 'com.github.javafaker:javafaker:0.13'

@@ -1,5 +1,7 @@
-package com.hcsc.de.claims.distributions
+package com.hcsc.de.claims.distributions.binDistributions
 
+import com.hcsc.de.claims.distributions.binDistributions.BinDistribution
+import com.hcsc.de.claims.distributions.bins.DistributedBin
 import java.util.*
 
 data class DistributedBinDistribution<out numberType : Number>(
@@ -9,7 +11,7 @@ data class DistributedBinDistribution<out numberType : Number>(
         override val mode: numberType,
         override val median: numberType,
         override val bins: List<DistributedBin<numberType>>
-) : BinDistribution<numberType> {
+) : BinDistribution<numberType, DistributedBin<numberType>> {
 
     private val random = Random()
 

@@ -1,19 +1,5 @@
 package com.hcsc.de.claims.distributions
 
-
-interface Distribution<out numberType: Number> : Randomable<numberType> {
-    val average: numberType
-    val minimum: numberType
-    val maximum: numberType
-    val mode: numberType
-    val median: numberType
-}
-
-val List<Int>.distribution: Distribution<Int> get() {
-
-    return this.normalIntdistribution
-}
-
 data class WrappedDoubleDistribution(
         private val doubleDistribution: Distribution<Double>
 ): Distribution<Int> {
@@ -26,5 +12,3 @@ data class WrappedDoubleDistribution(
     override val mode: Int get() = doubleDistribution.mode.toInt()
     override val median: Int get() = doubleDistribution.median.toInt()
 }
-
-val Distribution<Double>.asIntDistribution: Distribution<Int> get() = WrappedDoubleDistribution(this)

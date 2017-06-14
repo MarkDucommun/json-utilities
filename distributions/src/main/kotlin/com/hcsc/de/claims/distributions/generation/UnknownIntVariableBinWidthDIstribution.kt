@@ -1,14 +1,15 @@
-package com.hcsc.de.claims.distributions
+package com.hcsc.de.claims.distributions.generation
 
+import com.hcsc.de.claims.distributions.binDistributions.BinsWithMembersDistribution
 import com.hcsc.de.claims.math.helpers.averageInt
 import com.hcsc.de.claims.math.helpers.medianInt
 import com.hcsc.de.claims.math.helpers.modeInt
 
-fun List<Int>.unknownVariableBinWidthDistribution(
+fun List<Int>.variableBinWidthDistribution(
         binCount: Int = 5,
         rangeMinimum: Int? = null,
         rangeMaximum: Int? = null
-): UnknownVariableBinWidthDistribution<Int> {
+): BinsWithMembersDistribution<Int> {
 
     val sorted: List<Int> = this.sorted()
 
@@ -23,7 +24,7 @@ fun List<Int>.unknownVariableBinWidthDistribution(
     val observedMinimum = sortedAndFilteredByMinimumAndMaximum.min() ?: 0
     val observedMaximum = sortedAndFilteredByMinimumAndMaximum.max() ?: 0
 
-    return UnknownVariableBinWidthDistribution(
+    return BinsWithMembersDistribution(
             average = sortedAndFilteredByMinimumAndMaximum.averageInt(),
             minimum = observedMinimum,
             maximum = observedMaximum,
@@ -33,7 +34,7 @@ fun List<Int>.unknownVariableBinWidthDistribution(
     )
 }
 
-private fun VariableWidthBin<Int>.maximizeBins(binCount: Int): List<VariableWidthBin<Int>> {
+private fun com.hcsc.de.claims.distributions.bins.BinWithMembers<Int>.maximizeBins(binCount: Int): List<com.hcsc.de.claims.distributions.bins.BinWithMembers<Int>> {
 
     val median = members.averageInt()
 
@@ -49,9 +50,5 @@ private fun VariableWidthBin<Int>.maximizeBins(binCount: Int): List<VariableWidt
     }
 }
 
-private val List<Int>.asBin: VariableWidthBin<Int>
-    get() = VariableWidthBin(
-            startValue = this.min() ?: 0,
-            endValue = this.max() ?: 0,
-            members = this.sorted()
-    )
+private val List<Int>.asBin: com.hcsc.de.claims.distributions.bins.BinWithMembers<Int>
+    get() = com.hcsc.de.claims.distributions.bins.IntBinWithMembers(members = this.sorted())

@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.histogrammer
 
-import com.hcsc.de.claims.distributions.UnknownDualMemberVariableBinWidthDistribution
+import com.hcsc.de.claims.distributions.binDistributions.UnknownDualMemberVariableBinWidthDistribution
 import com.hcsc.de.claims.results.Result
 
 class DistributionHistogrammer<in numberType : Number>(

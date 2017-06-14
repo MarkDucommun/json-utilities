@@ -1,7 +1,6 @@
 package com.hcsc.de.claims.histogrammer
 
-import com.hcsc.de.claims.distributions.DataBinner
-import com.hcsc.de.claims.distributions.FixedWidthBin
+import com.hcsc.de.claims.distributions.generation.DataBinner
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.flatMap
 import com.hcsc.de.claims.results.map
@@ -48,10 +47,10 @@ class ListHistogrammer<in numberType : Number>(
             DataSet(name = name, datapoints = map { it.asInvertedDatapoint })
 
     private val FixedWidthBin<Double>.asDatapoint: Datapoint
-        get() = Datapoint(xValue = startValue, count = count)
+        get() = Datapoint(xValue = startValue, count = size)
 
     private val FixedWidthBin<Double>.asInvertedDatapoint: Datapoint
-        get() = Datapoint(xValue = startValue, count = count * -1)
+        get() = Datapoint(xValue = startValue, count = size * -1)
 }
 
 

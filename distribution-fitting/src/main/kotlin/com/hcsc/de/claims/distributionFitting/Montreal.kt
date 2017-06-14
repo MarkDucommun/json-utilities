@@ -90,7 +90,7 @@ object Montreal : ParametricFitter {
 
                 val stream = BasicRandomStreamFactory(F2NL607::class.java).newInstance()
 
-                MontrealDistribution(constructor.call(stream, *args))
+                MontrealRandomable(constructor.call(stream, *args))
             }
         } ?: Failure<String, Randomable<Double>>("Could not find constructor for Montreal RandomVariateGen type for args: RandomableStream, ${args.joinToString(", ")}")
     }

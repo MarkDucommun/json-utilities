@@ -1,10 +1,9 @@
 package com.hcsc.de.claims.histogrammer
 
 import com.hcsc.de.claims.distributionFitting.Montreal
-import com.hcsc.de.claims.distributionFitting.RealDistributionGenerator
-import com.hcsc.de.claims.distributions.DataBinner
-import com.hcsc.de.claims.distributions.DoubleDataBinner
-import com.hcsc.de.claims.distributions.FixedWidthBin
+import com.hcsc.de.claims.distributionFitting.BestFitDistributionGenerator
+import com.hcsc.de.claims.distributions.generation.DataBinner
+import com.hcsc.de.claims.distributions.generation.DoubleDataBinner
 import com.hcsc.de.claims.fileReading.RawByteStringFileReader
 import com.hcsc.de.claims.results.Failure
 import com.hcsc.de.claims.results.Success
@@ -163,7 +162,7 @@ class HistogrammerTest {
 
         val list = listOfClaimSizes().map { it / 1000.0 }
 
-        val result = RealDistributionGenerator(Montreal).profile(list)
+        val result = BestFitDistributionGenerator(Montreal).profile(list)
 
         val distribution = when (result) {
             is Success -> result.content.distribution
@@ -196,7 +195,7 @@ class HistogrammerTest {
 
         val list = List(100000) { startingDistribution.random() }
 
-        val result = RealDistributionGenerator(Montreal).profile(list)
+        val result = BestFitDistributionGenerator(Montreal).profile(list)
 
         val distribution = when (result) {
             is Success -> result.content.distribution

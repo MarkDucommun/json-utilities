@@ -1,10 +1,10 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributionFitting.DistributionGenerator
+import com.hcsc.de.claims.distributions.generation.DistributionGenerator
 import com.hcsc.de.claims.distributions.Distribution
-import com.hcsc.de.claims.distributions.NormalIntDistribution
+import com.hcsc.de.claims.distributions.parametric.NormalIntDistribution
 import com.hcsc.de.claims.distributions.RatioProbability
-import com.hcsc.de.claims.distributions.asIntDistribution
+import com.hcsc.de.claims.distributions.generation.asIntDistribution
 import com.hcsc.de.claims.results.*
 import kotlin.reflect.KClass
 

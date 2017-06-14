@@ -1,5 +1,6 @@
 package com.hcsc.de.claims.distributions
 
+import com.hcsc.de.claims.distributions.generation.unknownDualMemberVariableBinWidthDistribution
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
@@ -13,9 +14,9 @@ class UnknownDualMemberVariableBinWidthIntDistributionTest {
 
         val dist = DistributionPair(one = listOfOnes, two = listOfOnes).unknownDualMemberVariableBinWidthDistribution()
 
-        assertThat(dist.numberOfBins).isEqualTo(1)
-        assertThat(dist.bins.first().memberOneCount).isEqualTo(5)
-        assertThat(dist.bins.first().memberTwoCount).isEqualTo(5)
+        assertThat(dist.bins.size).isEqualTo(1)
+        assertThat(dist.bins.first().binOne.size).isEqualTo(5)
+        assertThat(dist.bins.first().binTwo.size).isEqualTo(5)
     }
 
     @Test
@@ -26,9 +27,9 @@ class UnknownDualMemberVariableBinWidthIntDistributionTest {
 
         val dist = DistributionPair(one = listOfOnes, two = listOfTwos).unknownDualMemberVariableBinWidthDistribution()
 
-        assertThat(dist.numberOfBins).isEqualTo(1)
-        assertThat(dist.bins.first().memberOneCount).isEqualTo(5)
-        assertThat(dist.bins.first().memberTwoCount).isEqualTo(5)
+        assertThat(dist.bins.size).isEqualTo(1)
+        assertThat(dist.bins.first().binOne.size).isEqualTo(5)
+        assertThat(dist.bins.first().binTwo.size).isEqualTo(5)
     }
 
     @Test
@@ -40,11 +41,11 @@ class UnknownDualMemberVariableBinWidthIntDistributionTest {
 
         val dist = DistributionPair(one = listOfOnes, two = listOfTwos).unknownDualMemberVariableBinWidthDistribution()
 
-        assertThat(dist.numberOfBins).isEqualTo(2)
-        assertThat(dist.bins.first().memberOneCount).isEqualTo(5)
-        assertThat(dist.bins.first().memberTwoCount).isEqualTo(10)
-        assertThat(dist.bins.last().memberOneCount).isEqualTo(5)
-        assertThat(dist.bins.last().memberTwoCount).isEqualTo(5)
+        assertThat(dist.bins.size).isEqualTo(2)
+        assertThat(dist.bins.first().binOne.size).isEqualTo(5)
+        assertThat(dist.bins.first().binTwo.size).isEqualTo(10)
+        assertThat(dist.bins.last().binOne.size).isEqualTo(5)
+        assertThat(dist.bins.last().binTwo.size).isEqualTo(5)
     }
 
     @Test
@@ -58,11 +59,11 @@ class UnknownDualMemberVariableBinWidthIntDistributionTest {
 
         val (distOne, distTwo) = dist.asTwoDistributions
 
-        assertThat(distOne.numberOfBins).isEqualTo(2)
-        assertThat(distTwo.numberOfBins).isEqualTo(2)
-        assertThat(distOne.bins.first().count).isEqualTo(5)
-        assertThat(distTwo.bins.first().count).isEqualTo(10)
-        assertThat(distOne.bins.last().count).isEqualTo(5)
-        assertThat(distTwo.bins.last().count).isEqualTo(5)
+        assertThat(distOne.bins.size).isEqualTo(2)
+        assertThat(distTwo.bins.size).isEqualTo(2)
+        assertThat(distOne.bins.first().size).isEqualTo(5)
+        assertThat(distTwo.bins.first().size).isEqualTo(10)
+        assertThat(distOne.bins.last().size).isEqualTo(5)
+        assertThat(distTwo.bins.last().size).isEqualTo(5)
     }
 }

@@ -6,8 +6,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hcsc.de.claims.distributionFitting.FitDistrPlus
 import com.hcsc.de.claims.distributionFitting.Montreal
-import com.hcsc.de.claims.distributionFitting.RealDistributionGenerator
-import com.hcsc.de.claims.distributions.NormalDoubleDistribution
+import com.hcsc.de.claims.distributionFitting.BestFitDistributionGenerator
+import com.hcsc.de.claims.distributions.parametric.NormalDoubleDistribution
 import com.hcsc.de.claims.fileReading.RawByteStringFileReader
 import com.hcsc.de.claims.math.helpers.ceilingOnEven
 import com.hcsc.de.claims.math.helpers.sqrt
@@ -45,7 +45,7 @@ class JsonSizeAnalyzerIntegrationTest {
 
         val listOfJsonSizes = rawClaims.filterNot { it.isBlank() }.map { jsonSizer.calculateSize(it).get }
 
-        val jsonSizeAnalyzer = SingleThreadJsonSizeAnalyzer(distributionGenerator = RealDistributionGenerator(Montreal))
+        val jsonSizeAnalyzer = SingleThreadJsonSizeAnalyzer(distributionGenerator = BestFitDistributionGenerator(Montreal))
 
         val result = jsonSizeAnalyzer.generateJsonSizeOverview(listOfJsonSizes).get
 
@@ -198,7 +198,7 @@ class JsonSizeAnalyzerIntegrationTest {
 
         val claimSizes = listOfClaimSizes().map(Int::toDouble)
 
-        val results = RealDistributionGenerator(FitDistrPlus).profile(claimSizes)
+        val results = BestFitDistributionGenerator(FitDistrPlus).profile(claimSizes)
 
         if (results is Success) {
 
