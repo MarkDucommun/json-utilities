@@ -79,7 +79,8 @@ class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
     @Test
     fun `it fails if an escape is not followed by `() {
 
-        "\"\\a\"".jsonStructure failsWithMessage "Invalid JSON - only quotes and slashes may follow escape characters"
+        "\"\\a\"".jsonStructure failsWithMessage
+                "Invalid JSON - only quotes and slashes and control characters may follow escape characters"
     }
 
     @Test
