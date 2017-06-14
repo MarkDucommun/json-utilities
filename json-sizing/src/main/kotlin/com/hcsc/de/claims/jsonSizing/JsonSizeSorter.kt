@@ -1,8 +1,9 @@
 package com.hcsc.de.claims.jsonSizing
 
 import com.hcsc.de.claims.distributions.NormalIntDistribution
-import com.hcsc.de.claims.helpers.*
-import com.hcsc.de.claims.results.*
+import com.hcsc.de.claims.results.flatMap
+import com.hcsc.de.claims.results.map
+import com.hcsc.de.claims.results.traverse
 
 class JsonSizeSorter {
 

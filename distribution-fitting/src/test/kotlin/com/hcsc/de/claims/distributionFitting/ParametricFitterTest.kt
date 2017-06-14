@@ -17,14 +17,14 @@ abstract class ParametricFitterTest {
     @Test
     fun `it can return the Weibull parameters for a group of doubles`() {
 
-        val weibullDistributionCurve = Weibull(1.7, 20.0)
+        val weibullDistributionCurve = Weibull(2.0, 20.0)
 
         val list = List(10000) { weibullDistributionCurve.random() }
 
         subject.weibullParameters(list) succeedsAnd { (shape, scale) ->
 
-            assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(5.0))
-            assertThat(scale).isCloseTo(100.0, Percentage.withPercentage(5.0))
+            assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(10.0))
+            assertThat(scale).isCloseTo(20.0, Percentage.withPercentage(10.0))
         }
     }
 
@@ -51,8 +51,8 @@ abstract class ParametricFitterTest {
 
         subject.lognormalParameters(list) succeedsAnd { (a, b) ->
 
-            assertThat(a).isCloseTo(1.0, Percentage.withPercentage(5.0))
-            assertThat(b).isCloseTo(1.0, Percentage.withPercentage(5.0))
+            assertThat(a).isCloseTo(1.0, Percentage.withPercentage(20.0))
+            assertThat(b).isCloseTo(1.0, Percentage.withPercentage(20.0))
         }
     }
 

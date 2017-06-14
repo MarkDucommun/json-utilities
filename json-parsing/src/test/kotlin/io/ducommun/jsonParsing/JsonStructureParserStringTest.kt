@@ -2,10 +2,11 @@ package io.ducommun.jsonParsing
 
 import com.hcsc.de.claims.results.failsWithMessage
 import com.hcsc.de.claims.results.succeedsAndShouldReturn
+import org.junit.Test
 
 class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
 
-    @org.junit.Test
+    @Test
     fun `it can parse an empty string`() {
 
         "\"\"".jsonStructure succeedsAndShouldReturn listOf(
@@ -14,7 +15,7 @@ class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can parse a simple string with one letter`() {
 
         "\"a\"".jsonStructure succeedsAndShouldReturn listOf(
@@ -24,7 +25,7 @@ class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can parse a simple string with more than one letter`() {
 
         "\"ab\"".jsonStructure succeedsAndShouldReturn listOf(
@@ -35,7 +36,7 @@ class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can parse a simple strings with whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -48,14 +49,14 @@ class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails when anything other than whitespace follows a top level closed string`() {
 
         "\"a\" a".jsonStructure failsWithMessage "Invalid JSON - nothing can follow a closed root string"
     }
 
 
-    @org.junit.Test
+    @Test
     fun `it can escape quotes and slashes`() {
 
         listOf('\\', '"', '/').forEach { escapableChar ->
@@ -75,13 +76,13 @@ class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails if an escape is not followed by `() {
 
         "\"\\a\"".jsonStructure failsWithMessage "Invalid JSON - only quotes and slashes may follow escape characters"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails if a string is not closed with quotes`() {
 
         "\"a".jsonStructure failsWithMessage "Invalid JSON - must close all open elements"

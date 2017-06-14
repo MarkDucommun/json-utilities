@@ -12,6 +12,5 @@ class JsonParserTest {
         val result = ObjectMapper().registerKotlinModule().readValue("{\"a\":[\"a/*b*/c/*d//e\"]}", com.fasterxml.jackson.databind.JsonNode::class.java)
 
         val other = JsonParser().parse("{\"a\":[\"a/*b*/c/*d//e\"]}")
-
     }
 }

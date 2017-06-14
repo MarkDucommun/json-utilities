@@ -2,7 +2,6 @@ apply from: "../gradle/scripts/kotlin.gradle"
 
 dependencies {
     compile project(':results')
-
     compile 'net.wuerl.kotlin:assertj-core-kotlin:0.1.3'
     compile 'junit:junit:4.12'
 }

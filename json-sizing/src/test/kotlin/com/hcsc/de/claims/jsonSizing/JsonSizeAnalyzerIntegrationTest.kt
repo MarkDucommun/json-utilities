@@ -24,7 +24,7 @@ import org.junit.Ignore
 import org.junit.Test
 import java.io.FileWriter
 
-@Ignore
+@Ignore("Not really a part of this repo")
 class JsonSizeAnalyzerIntegrationTest {
 
     @Test
@@ -110,6 +110,7 @@ class JsonSizeAnalyzerIntegrationTest {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
+    @Ignore("Not a part of this repo")
     fun `it cleans up legacyClaimPriorStatuses by max claimPriorWorkStatusEffectiveDate`() {
 
         val files = listOf(

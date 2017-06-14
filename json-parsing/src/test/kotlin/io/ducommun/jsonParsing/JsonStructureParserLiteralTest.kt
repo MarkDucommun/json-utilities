@@ -6,13 +6,13 @@ import org.junit.Test
 
 class JsonStructureParserLiteralTest : JsonStructureParserBaseTest() {
 
-    @org.junit.Test
+    @Test
     fun `simple literal element`() {
 
         "a".jsonStructure succeedsAndShouldReturn listOf(LiteralValue(id = 1, value = 'a'))
     }
 
-    @org.junit.Test
+    @Test
     fun `simple literal element with two chars`() {
 
         "ab".jsonStructure succeedsAndShouldReturn listOf(
@@ -21,7 +21,7 @@ class JsonStructureParserLiteralTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `simple literal element with whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -30,7 +30,7 @@ class JsonStructureParserLiteralTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails when there is a literal following a closed literal`() {
 
         "a a".jsonStructure failsWithMessage "Invalid JSON - nothing can follow a closed root literal"

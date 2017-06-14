@@ -2,10 +2,11 @@ package io.ducommun.jsonParsing
 
 import com.hcsc.de.claims.results.failsWithMessage
 import com.hcsc.de.claims.results.succeedsAndShouldReturn
+import org.junit.Test
 
 class JsonStructureTranslatorTest {
 
-    @org.junit.Test
+    @Test
     fun `it translates a simple string structure`() {
 
         StringStructureElement(id = 1, children = listOf(
@@ -13,14 +14,14 @@ class JsonStructureTranslatorTest {
         )).asNode succeedsAndShouldReturn StringNode(value = "a")
     }
 
-    @org.junit.Test
+    @Test
     fun `it translates an empty array`() {
 
         ArrayStructureElement(id = 1, children = emptyList())
                 .asNode succeedsAndShouldReturn ArrayNode(elements = emptyList())
     }
 
-    @org.junit.Test
+    @Test
     fun `it translates an array with a string child`() {
 
         ArrayStructureElement(id = 1, children = listOf(
@@ -28,7 +29,7 @@ class JsonStructureTranslatorTest {
         )).asNode succeedsAndShouldReturn ArrayNode(elements = listOf(StringNode(value = "a")))
     }
 
-    @org.junit.Test
+    @Test
     fun `it translates an array with several string children`() {
 
         ArrayStructureElement(id = 1, children = listOf(
@@ -42,7 +43,7 @@ class JsonStructureTranslatorTest {
         ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it translates an object with children`() {
 
         OpenObjectStructure(id = 1, children = listOf(
@@ -60,7 +61,7 @@ class JsonStructureTranslatorTest {
         ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it translates a null`() {
 
         LiteralStructureElement(
@@ -74,7 +75,7 @@ class JsonStructureTranslatorTest {
         ).asNode succeedsAndShouldReturn NullNode
     }
 
-    @org.junit.Test
+    @Test
     fun `it translates a true`() {
 
         LiteralStructureElement(
@@ -88,7 +89,7 @@ class JsonStructureTranslatorTest {
         ).asNode succeedsAndShouldReturn TrueNode
     }
 
-    @org.junit.Test
+    @Test
     fun `it translates a false`() {
 
         LiteralStructureElement(
@@ -103,7 +104,7 @@ class JsonStructureTranslatorTest {
         ).asNode succeedsAndShouldReturn FalseNode
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails when proceeding past a successful null`() {
 
         LiteralStructureElement(
@@ -118,7 +119,7 @@ class JsonStructureTranslatorTest {
         ).asNode failsWithMessage "Invalid JSON - nulll"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails when proceeding past a successful true`() {
 
         LiteralStructureElement(
@@ -133,7 +134,7 @@ class JsonStructureTranslatorTest {
         ).asNode failsWithMessage "Invalid JSON - truee"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails when proceeding past a successful literal`() {
 
         LiteralStructureElement(
@@ -149,7 +150,7 @@ class JsonStructureTranslatorTest {
         ).asNode failsWithMessage "Invalid JSON - falsef"
     }
 
-    @org.junit.Test
+    @Test
     fun `it parses a simple integer number`() {
 
         '0'.rangeTo('9').forEach {
@@ -163,7 +164,7 @@ class JsonStructureTranslatorTest {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it parses a slightly longer integer number`() {
 
         '0'.rangeTo('9').forEach {
@@ -178,7 +179,7 @@ class JsonStructureTranslatorTest {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it parses a simple double number`() {
 
         '0'.rangeTo('9').forEach {
@@ -194,7 +195,7 @@ class JsonStructureTranslatorTest {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it parses a longer double number`() {
 
         '0'.rangeTo('9').forEach {

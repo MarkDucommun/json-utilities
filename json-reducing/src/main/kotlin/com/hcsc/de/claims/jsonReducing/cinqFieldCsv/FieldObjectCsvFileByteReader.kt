@@ -1,8 +1,9 @@
 package com.hcsc.de.claims.jsonReducing.cinqFieldCsv
 
-import com.hcsc.de.claims.Translator
-import com.hcsc.de.claims.fileReaders.StringFileReader
-import com.hcsc.de.claims.jsonReduction.FieldObject
+import com.hcsc.de.claims.commonAbstractions.Translator
+import com.hcsc.de.claims.fileReading.StringFileReader
+import com.hcsc.de.claims.jsonReducing.FieldObject
+import com.hcsc.de.claims.results.flatMap
 
 class FieldObjectCsvFileByteReader(
         private val fileReader: StringFileReader,

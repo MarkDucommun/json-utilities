@@ -1,7 +1,10 @@
 package com.hcsc.de.claims.jsonSizing
 
 import com.hcsc.de.claims.distributionFitting.DistributionGenerator
-import com.hcsc.de.claims.distributions.*
+import com.hcsc.de.claims.distributions.Distribution
+import com.hcsc.de.claims.distributions.NormalIntDistribution
+import com.hcsc.de.claims.distributions.RatioProbability
+import com.hcsc.de.claims.distributions.asIntDistribution
 import com.hcsc.de.claims.results.*
 import kotlin.reflect.KClass
 
@@ -28,8 +31,6 @@ class SingleThreadJsonSizeAnalyzer(
 
     fun List<JsonSizeNode>.generateOverview(): Result<String, JsonSizeOverview<Int>> {
 
-        println("Generating overview for new level")
-
         return analyzer.generateJsonSizeOverview(this)
     }
 
@@ -51,8 +52,6 @@ class SingleThreadJsonSizeAnalyzer(
 
     private fun List<JsonSizeLeafNode>.generateAveragedLeafNode(): Result<String, JsonSizeOverview<Int>> {
 
-        println("Generating leaf node")
-
         return sizeDistributionFromNode.map { sizeDistribution ->
             JsonSizeLeafOverview(
                     name = first().name,
@@ -63,8 +62,6 @@ class SingleThreadJsonSizeAnalyzer(
 
     private fun List<JsonSizeObject>.generateAveragedObjectNode(): Result<String, JsonSizeOverview<Int>> {
 
-        println("Generating object")
-
         return collectAllChildrenNames()
                 .map { generateJsonSizeObjectChild(name = it) }
                 .traverse()
@@ -72,8 +69,6 @@ class SingleThreadJsonSizeAnalyzer(
     }
 
     private fun List<JsonSizeArray>.generateAveragedArrayNode(): Result<String, JsonSizeOverview<Int>> {
-
-        println("Generating array")
 
         return flatMap { array -> array.childrenWithNormalizedNames }
                 .generateOverview()
@@ -110,13 +105,13 @@ class SingleThreadJsonSizeAnalyzer(
     private fun List<JsonSizeObject>.createObjectOverview(
             children: List<JsonSizeObjectChild<Int>>
     ): Result<String, JsonSizeOverview<Int>> =
-//            sizeDistributionFromNode.map { sizeDistribution ->
-                Success(JsonSizeObjectOverview(
+            sizeDistributionFromNode.map { sizeDistribution ->
+                JsonSizeObjectOverview(
                         name = first().name,
-                        size = EMPTY_DISTRIBUTION,
+                        size = sizeDistribution,
                         children = children
-                ))
-//            }
+                )
+            }
 
     private fun List<JsonSizeObject>.generateJsonSizeObjectChild(
             name: String
@@ -135,19 +130,18 @@ class SingleThreadJsonSizeAnalyzer(
     private fun List<JsonSizeArray>.generateJsonSizeArrayOverview(
             averageChild: JsonSizeOverview<Int>
     ): Result<String, JsonSizeOverview<Int>> =
-    // TODO this should be optional maybe?
-//            sizeDistributionFromNode.flatMap { sizeDistribution ->
+            sizeDistributionFromNode.flatMap { sizeDistribution ->
 
                 map { it.numberOfChildren }.sizeDistributionInt.map { it ->
 
                     JsonSizeArrayOverview(
                             name = first().name,
-                            size = EMPTY_DISTRIBUTION,
+                            size = sizeDistribution,
                             averageChild = averageChild,
                             numberOfChildren = it
-                    ) as JsonSizeOverview<Int>
+                    )
                 }
-//            }
+            }.map { it }
 
     private val EMPTY_DISTRIBUTION = NormalIntDistribution(average = 0, minimum = 0, maximum = 0, mode = 0, median = 0, standardDeviation = 0.0)
 

@@ -6,13 +6,13 @@ import org.junit.Test
 
 class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
 
-    @org.junit.Test
+    @Test
     fun `it can create an empty array`() {
 
         "[]".jsonStructure succeedsAndShouldReturn listOf(ArrayOpen(id = 1), ArrayClose(id = 1))
     }
 
-    @org.junit.Test
+    @Test
     fun `it handles whitespace around arrays`() {
 
         forEachWhitespaceChar { char ->
@@ -24,7 +24,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with a single literal child`() {
 
         "[a]".jsonStructure succeedsAndShouldReturn listOf(
@@ -34,7 +34,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with a single literal child with whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -47,7 +47,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with a single literal child with more than one whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -60,7 +60,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with a two literal children`() {
 
         "[a,b]".jsonStructure succeedsAndShouldReturn listOf(
@@ -72,7 +72,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with a two literal children and some whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -87,7 +87,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an empty string child`() {
 
         "[\"\"]".jsonStructure succeedsAndShouldReturn listOf(
@@ -98,7 +98,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with a string child`() {
 
         "[\"a\"]".jsonStructure succeedsAndShouldReturn listOf(
@@ -110,7 +110,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with two string children `() {
 
         "[\"\",\"b\"]".jsonStructure succeedsAndShouldReturn listOf(
@@ -125,7 +125,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with a string child and a literal child `() {
 
         "[a,\"\"]".jsonStructure succeedsAndShouldReturn listOf(
@@ -147,7 +147,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an empty array child`() {
 
         "[[]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -158,7 +158,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an empty object child`() {
 
         "[{}]".jsonStructure succeedsAndShouldReturn listOf(
@@ -169,7 +169,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an object child with a literal child`() {
 
         "[{\"a\":a}]".jsonStructure succeedsAndShouldReturn listOf(
@@ -186,7 +186,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
     }
 
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an object child with a string child`() {
 
         "[{\"\":\"\"}]".jsonStructure succeedsAndShouldReturn listOf(
@@ -202,7 +202,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an object child with an array child`() {
 
         "[{\"\":[]}]".jsonStructure succeedsAndShouldReturn listOf(
@@ -218,13 +218,13 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails when anything other than a curly brace closes an object`() {
 
         "[{\"\":[]]".jsonStructure failsWithMessage "Invalid JSON - must close an object with a curly brace"
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an object child with an object child`() {
 
         "[{\"\":{}}]".jsonStructure succeedsAndShouldReturn listOf(
@@ -240,7 +240,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an object child with a literal child with whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -259,7 +259,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an empty object child and whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -274,7 +274,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
     }
 
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an array child with an empty object child`() {
 
         "[[{}]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -287,7 +287,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an array child with an emtpy array child`() {
 
         "[[[]]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -300,7 +300,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an array child with an array child an empty array child`() {
 
         "[[[[]]]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -315,7 +315,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an array child with a literal`() {
 
         "[[a]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -327,7 +327,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with an array child with a longer literal child`() {
 
         "[[ab]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -341,7 +341,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
     }
 
 
-    @org.junit.Test
+    @Test
     fun `it can create an array with multiple children including an array with a longer literal child`() {
 
         "[[ab], a]".jsonStructure succeedsAndShouldReturn listOf(
@@ -356,7 +356,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create a triply nest array with a literal`() {
 
         "[[[ab]]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -371,7 +371,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create a triply nest array with a literal and whitespace`() {
 
         forEachWhitespaceChar { char ->
@@ -389,7 +389,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         }
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create a doubly nested array with a string`() {
 
         "[[[\"ab\"]]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -406,7 +406,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create a doubly nested array with multiple string children`() {
 
         "[[[\"ab\", \"ab\"]]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -428,7 +428,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create a doubly nested array with multiple empty array children`() {
 
         "[[[], []], [[], []]]".jsonStructure succeedsAndShouldReturn listOf(
@@ -452,7 +452,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array where the second child is an empty object`() {
 
         "[a,{}]".jsonStructure succeedsAndShouldReturn listOf(
@@ -465,7 +465,7 @@ class JsonStructureParserArrayTest : JsonStructureParserBaseTest() {
         )
     }
 
-    @org.junit.Test
+    @Test
     fun `it can create an array where the children are is empty objects`() {
 
         "[{},{}]".jsonStructure succeedsAndShouldReturn listOf(

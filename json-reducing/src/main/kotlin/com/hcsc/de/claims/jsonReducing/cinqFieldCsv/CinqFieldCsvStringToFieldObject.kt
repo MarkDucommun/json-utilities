@@ -1,7 +1,8 @@
 package com.hcsc.de.claims.jsonReducing.cinqFieldCsv
 
-import com.hcsc.de.claims.Translator
-import com.hcsc.de.claims.jsonReduction.FieldObject
+import com.hcsc.de.claims.commonAbstractions.Translator
+import com.hcsc.de.claims.jsonReducing.FieldObject
+import com.hcsc.de.claims.results.flatMap
 
 internal class CinqFieldCsvStringToFieldObject(
         private val cinqFieldCsvStringToFieldList: Translator<String, ListOfFieldList>,

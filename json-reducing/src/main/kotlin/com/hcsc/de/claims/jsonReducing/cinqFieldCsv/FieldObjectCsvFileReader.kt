@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.jsonReducing.cinqFieldCsv
 
-import com.hcsc.de.claims.jsonReduction.FieldObject
+import com.hcsc.de.claims.jsonReducing.FieldObject
 
 interface FieldObjectCsvFileReader {
 

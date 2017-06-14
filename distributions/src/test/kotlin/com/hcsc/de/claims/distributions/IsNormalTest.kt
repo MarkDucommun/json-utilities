@@ -5,12 +5,14 @@ import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.disttest.DistributionTest
 import net.sourceforge.jdistlib.generic.GenericDistribution
 import org.apache.commons.math3.distribution.WeibullDistribution
+import org.junit.Ignore
 import org.junit.Test
 import org.renjin.script.RenjinScriptEngineFactory
 
 class IsNormalTest {
 
     @Test
+    @Ignore("There are no assertions, this is scripting")
     fun `it returns a high level of confidence for a simple data set`() {
 
         val normal = Weibull(3.0, 5.0)
@@ -30,6 +32,7 @@ class IsNormalTest {
     }
 
     @Test
+    @Ignore("There are no assertions, this is scripting")
     fun `it generates values that match the distribution it is created from`() {
 
         val initialDistribution = Weibull(2.0, 10000.0)
@@ -72,6 +75,7 @@ class IsNormalTest {
     }
 
     @Test
+    @Ignore("No assertions, this is scripting")
     fun `screw around`() {
 
         val one: GenericDistribution = Weibull(3.0, 5.0)
@@ -101,18 +105,7 @@ class IsNormalTest {
     }
 
     @Test
-    fun `test renjin`() {
-
-        val factory = RenjinScriptEngineFactory()
-
-        val engine = factory.scriptEngine
-
-        engine.put("df", 123)
-
-        engine.eval("print(df)")
-    }
-
-    @Test
+    @Ignore("No assertions, this is scripting")
     fun `generate normal data in kotlin, move it into R, find the mean and std deviation in R, move those back to java and test the fit`() {
 
         val initialDistribution = Weibull(2.0, 100.0)

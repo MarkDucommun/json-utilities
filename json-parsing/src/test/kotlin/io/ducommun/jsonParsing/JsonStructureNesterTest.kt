@@ -6,19 +6,19 @@ import org.junit.Test
 
 class JsonStructureNesterTest {
 
-    @org.junit.Test
+    @Test
     fun `it fails if no elements are passed in`() {
 
         emptyList<JsonStructure>().nested failsWithMessage "Invalid JSON - no elements passed in"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails if only one element is passed in`() {
 
         listOf(StringOpen(id = 1)).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns an empty StringStructureElement`() {
 
         listOf(
@@ -28,7 +28,7 @@ class JsonStructureNesterTest {
                 StringStructureElement(id = 1, children = emptyList())
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns a StringStructureElement with some values`() {
 
         listOf(
@@ -39,7 +39,7 @@ class JsonStructureNesterTest {
                 StringStructureElement(id = 1, children = listOf(StringValue(id = 1, value = 'a')))
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails appropriately when other than a string value is in a string open and close`() {
 
         listOf(
@@ -49,7 +49,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - something went wrong"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails appropriately when a string is not opened with a string open`() {
 
         listOf(
@@ -58,7 +58,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails appropriately when a string is not closed with a string closed`() {
 
         listOf(
@@ -67,7 +67,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails appropriately when a strings open and close does not have matching ids`() {
 
         listOf(
@@ -77,7 +77,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails appropriately when a string does not have matching ids`() {
 
         listOf(
@@ -87,7 +87,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - something went wrong"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails when a open and closing types don't match`() {
 
         listOf(
@@ -96,7 +96,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - start and end of structure don't match"
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns a LiteralStructureElement`() {
 
         listOf(
@@ -108,7 +108,7 @@ class JsonStructureNesterTest {
         ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns a LiteralStructureElement even if there is no close at the end of the literal value`() {
 
         listOf(
@@ -120,7 +120,7 @@ class JsonStructureNesterTest {
         ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails if literals have anything other than literals in them`() {
 
         listOf(
@@ -130,7 +130,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - something went wrong"
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails if literals do not have matching ids`() {
 
         listOf(
@@ -140,7 +140,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - something went wrong"
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns an empty ArrayStructureElement`() {
 
         listOf(
@@ -150,7 +150,7 @@ class JsonStructureNesterTest {
                 ArrayStructureElement(id = 1, children = emptyList())
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns an array element with one string ArrayStructureElement`() {
 
         listOf(
@@ -164,7 +164,7 @@ class JsonStructureNesterTest {
                 ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns an array element with two children ArrayStructureElement`() {
 
         listOf(
@@ -182,7 +182,7 @@ class JsonStructureNesterTest {
                 ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns array elements array element children`() {
 
         listOf(
@@ -216,7 +216,7 @@ class JsonStructureNesterTest {
                 ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it fails if nothing comes before a comma`() {
 
         listOf(
@@ -228,7 +228,7 @@ class JsonStructureNesterTest {
         ).nested failsWithMessage "Invalid JSON - array child can't be empty"
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns an empty ObjectStructureElement`() {
 
         listOf(
@@ -238,7 +238,7 @@ class JsonStructureNesterTest {
                 OpenObjectStructure(id = 1, children = emptyList())
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns an ObjectStructureElement with a single child`() {
 
         listOf(
@@ -263,7 +263,7 @@ class JsonStructureNesterTest {
                 ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns an ObjectStructureElement with two children`() {
 
         // {"a":1,"b":2}
@@ -304,7 +304,7 @@ class JsonStructureNesterTest {
                 ))
     }
 
-    @org.junit.Test
+    @Test
     fun `it returns objects with object children`() {
 
         listOf(

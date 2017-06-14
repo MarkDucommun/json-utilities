@@ -2,9 +2,9 @@ package com.hcsc.de.claims.fitChecking
 
 import com.hcsc.de.claims.distributionFitting.GenericDistributionRandomable
 import com.hcsc.de.claims.distributionFitting.Montreal.randomVariateGen
+import com.hcsc.de.claims.histogrammer.visualize
 import com.hcsc.de.claims.results.get
 import com.hcsc.de.claims.results.succeedsAnd
-import com.hcsc.de.claims.visualize
 import net.sourceforge.jdistlib.Normal
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Ignore
@@ -16,7 +16,7 @@ class ChiSquareFitCheckerTest {
     val subject = ChiSquareFitChecker<Double>()
 
     @Test
-    @Ignore
+    @Ignore("No assertions, do better")
     fun `it returns a high pValue for values from the same distribution`() {
 
         listOf(1000, 10000, 100000).forEach { listSize ->
@@ -41,7 +41,7 @@ class ChiSquareFitCheckerTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("No assertions, do better")
     fun `it returns low pValue for values from different distributions`() {
 
         listOf(100000).forEach { listSize ->
