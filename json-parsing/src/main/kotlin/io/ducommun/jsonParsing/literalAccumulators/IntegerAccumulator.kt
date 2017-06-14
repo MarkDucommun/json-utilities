@@ -16,6 +16,7 @@ data class IntegerAccumulator(
         return when (char) {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> Success(copy(value = value + char))
             '.' -> Success(DoublePointAccumulator(value = value + char))
+            'E', 'e' -> Success(DoubleExponentAccumulator(value = value + char))
             else -> Failure("Invalid JSON - '$char' may not be part of a number")
         }
     }

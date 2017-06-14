@@ -164,15 +164,53 @@ class JsonStructureTranslatorTest {
     }
 
     @Test
-    fun `it fails to parse negative integer zero`() {
+    fun `it parses negative integer zero`() {
 
-        literalStructure("-0").asNode failsWithMessage "Invalid JSON - incomplete literal"
+        literalStructure("-0").asNode succeedsAndShouldReturn IntegerNode(value = -0)
+    }
+
+    @Test
+    fun `it parses negative double zero`() {
+
+        literalStructure("-0.0").asNode succeedsAndShouldReturn DoubleNode(value = -0.0)
     }
 
     @Test
     fun `it parses negative doubles starting with zero`() {
 
         literalStructure("-0.1").asNode succeedsAndShouldReturn DoubleNode(value = -0.1)
+    }
+
+    @Test
+    fun `it parses simple exponents as doubles`() {
+
+        literalStructure("1E1").asNode succeedsAndShouldReturn DoubleNode(value = 1E1)
+        literalStructure("1e1").asNode succeedsAndShouldReturn DoubleNode(value = 1E1)
+        literalStructure("0e1").asNode succeedsAndShouldReturn DoubleNode(value = 0E1)
+    }
+
+    @Test
+    fun `it parses positive exponents as doubles`() {
+
+        literalStructure("1E+1").asNode succeedsAndShouldReturn DoubleNode(value = 1E+1)
+        literalStructure("1e+1").asNode succeedsAndShouldReturn DoubleNode(value = 1E+1)
+        literalStructure("0e+1").asNode succeedsAndShouldReturn DoubleNode(value = 0E+1)
+    }
+
+    @Test
+    fun `it parses negative exponents as doubles`() {
+
+        literalStructure("1E-1").asNode succeedsAndShouldReturn DoubleNode(value = 1E-1)
+        literalStructure("1e-1").asNode succeedsAndShouldReturn DoubleNode(value = 1E-1)
+        literalStructure("0e-1").asNode succeedsAndShouldReturn DoubleNode(value = 0E-1)
+    }
+
+    @Test
+    fun `it parses extreme exponents`() {
+
+        literalStructure("1.0E-1").asNode succeedsAndShouldReturn DoubleNode(value = 1.0E-1)
+        literalStructure("1.0e-1").asNode succeedsAndShouldReturn DoubleNode(value = 1.0E-1)
+        literalStructure("0.0e-1").asNode succeedsAndShouldReturn DoubleNode(value = 0.0E-1)
     }
 
     @Test

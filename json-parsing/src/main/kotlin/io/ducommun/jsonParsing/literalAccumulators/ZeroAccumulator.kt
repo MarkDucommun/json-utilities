@@ -14,6 +14,7 @@ object ZeroAccumulator : CompleteAccumulator {
 
         return when (char) {
             '.' -> Success(DoublePointAccumulator(value = "0."))
+            'E', 'e' -> Success(DoubleExponentAccumulator(value = "0E"))
             else -> Failure("Invalid JSON - leading zeros are not permitted")
         }
     }

@@ -18,7 +18,12 @@ data class StringEscapeAccumulator(
 
         return when (char) {
             '"', '\\', '/' -> addStringValue(char)
-            else -> fail("only quotes and slashes may follow escape characters")
+            'b' -> addStringValue('\b')
+            'n' -> addStringValue('\n')
+            'f' -> addStringValue(12.toChar())
+            'r' -> addStringValue('\r')
+            't' -> addStringValue('\t')
+            else -> fail("only quotes and slashes and control characters may follow escape characters")
         }
     }
 }

@@ -43,19 +43,30 @@ class JsonParserTest {
 
         val results = File("src/test/resources/test_files").listFiles().map { testFile(it) }
 
-        val notMatching = results.filterNot { it.matched || it.unclearFailure }
+        val notMatching = results.filterNot { it.matched }
 
-        assertThat(notMatching.size).isLessThanOrEqualTo(40)
+        assertThat(notMatching.size).isLessThanOrEqualTo(25)
 
-        println("Currently not matching - ${notMatching.size}")
+        if (false) {
 
-        println("Average time difference with Jackson: ${results.filter { it.matched && it.jacksonMatched }.map { it.timeDiff }.average()}ms")
+            val jacksonNotMatching = results.filterNot { it.jacksonMatchedExpected }
 
-        notMatching.forEach { outcome ->
+            val notMatchingJackson = results.filterNot { it.matchesJackson }
 
-            val jsonString = if (outcome.jsonString.length < 120) outcome.jsonString else "String too long"
+            println("Currently not matching - ${notMatching.size}")
 
-            println("${outcome.fileName} -- $jsonString")
+            println("Jackson currently not matching - ${jacksonNotMatching.size}")
+
+            println("Currently not matching Jackson - ${notMatchingJackson.size}")
+
+            println("Average time difference with Jackson: ${results.filter { it.matched && it.jacksonMatchedExpected }.map { it.timeDiff }.average()}ms")
+
+            notMatching.forEach { outcome ->
+
+                val jsonString = if (outcome.jsonString.length < 120) outcome.jsonString else "String too long"
+
+                println("${outcome.fileName} -- $jsonString")
+            }
         }
     }
 
@@ -105,7 +116,7 @@ class JsonParserTest {
 
         val matched: Boolean = result.matched
 
-        val jacksonMatched: Boolean = jacksonResult.matched
+        val jacksonMatchedExpected: Boolean = jacksonResult.matched
 
         val TimeAndResult<*, *>.matched: Boolean get() {
 
@@ -116,6 +127,10 @@ class JsonParserTest {
                 JsonParserTest.Outcome.FAILURE -> this.result is Failure
             }
         }
+
+        val matchesJackson: Boolean =
+                result.result is Success && jacksonResult.result is Success ||
+                        result.result is Failure && jacksonResult.result is Failure
 
         val unclearFailure: Boolean = expected == Outcome.UNCLEAR && result.result is Failure
 
