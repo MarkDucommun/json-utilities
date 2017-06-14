@@ -18,7 +18,7 @@ abstract class WordAccumulator(
 
     override fun addChar(char: Char): Result<String, Accumulator> {
 
-        val initial: Result<String, Accumulator> = Failure("")
+        val initial: Result<String, Accumulator> = Failure("Invalid JSON - incorrect literal")
 
         return zippedWord.fold(initial) { accumulator, pair ->
 

@@ -4,15 +4,13 @@ import com.hcsc.de.claims.results.Failure
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.Success
 
-data class DoublePointAccumulator(
-        val value: String
-) : Accumulator {
+object NegativeZeroAccumulator : Accumulator {
 
     override fun addChar(char: Char): Result<String, Accumulator> {
 
         return when (char) {
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> Success(DoubleAccumulator(value = value + char))
-            else -> Failure("Invalid JSON - '$char' may not be part of a number")
+            '.' -> Success(DoublePointAccumulator(value = "-0."))
+            else -> Failure("Invalid JSON - leading zeros are not permitted")
         }
     }
 }

@@ -29,8 +29,17 @@ class JsonStructureTranslator {
         val initialAccumulator: Result<String, Accumulator> = Success(StartAccumulator)
 
         return children
-                .fold(initialAccumulator) { accumulator, element -> accumulator.flatMap { it.addChar(char = element.value) } }
-                .flatMap { if (it is CompleteAccumulator) Success<String, JsonNode>(it.node) else Failure<String, JsonNode>("") }
+                .fold(initialAccumulator) { result, element -> result.flatMap { it.addChar(char = element.value) } }
+                .flatMap { it.isComplete }
+    }
+
+    private val Accumulator.isComplete: Result<String, JsonNode> get() {
+
+        return if (this is CompleteAccumulator) {
+            Success<String, JsonNode>(node)
+        } else {
+            Failure<String, JsonNode>("Invalid JSON - incomplete literal")
+        }
     }
 
     private val StringStructureElement.asNode: StringNode get() = StringNode(value = value)

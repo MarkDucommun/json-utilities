@@ -64,155 +64,165 @@ class JsonStructureTranslatorTest {
     @Test
     fun `it translates a null`() {
 
-        LiteralStructureElement(
-                id = 1,
-                children = listOf(
-                        LiteralValue(id = 1, value = 'n'),
-                        LiteralValue(id = 1, value = 'u'),
-                        LiteralValue(id = 1, value = 'l'),
-                        LiteralValue(id = 1, value = 'l')
-                )
-        ).asNode succeedsAndShouldReturn NullNode
+        literalStructure("null").asNode succeedsAndShouldReturn NullNode
     }
 
     @Test
     fun `it translates a true`() {
 
-        LiteralStructureElement(
-                id = 1,
-                children = listOf(
-                        LiteralValue(id = 1, value = 't'),
-                        LiteralValue(id = 1, value = 'r'),
-                        LiteralValue(id = 1, value = 'u'),
-                        LiteralValue(id = 1, value = 'e')
-                )
-        ).asNode succeedsAndShouldReturn TrueNode
+        literalStructure("true").asNode succeedsAndShouldReturn TrueNode
     }
 
     @Test
     fun `it translates a false`() {
 
-        LiteralStructureElement(
-                id = 1,
-                children = listOf(
-                        LiteralValue(id = 1, value = 'f'),
-                        LiteralValue(id = 1, value = 'a'),
-                        LiteralValue(id = 1, value = 'l'),
-                        LiteralValue(id = 1, value = 's'),
-                        LiteralValue(id = 1, value = 'e')
-                )
-        ).asNode succeedsAndShouldReturn FalseNode
+        literalStructure("false").asNode succeedsAndShouldReturn FalseNode
     }
 
     @Test
     fun `it fails when proceeding past a successful null`() {
 
-        LiteralStructureElement(
-                id = 1,
-                children = listOf(
-                        LiteralValue(id = 1, value = 'n'),
-                        LiteralValue(id = 1, value = 'u'),
-                        LiteralValue(id = 1, value = 'l'),
-                        LiteralValue(id = 1, value = 'l'),
-                        LiteralValue(id = 1, value = 'l')
-                )
-        ).asNode failsWithMessage "Invalid JSON - nulll"
+        literalStructure("nulll").asNode failsWithMessage "Invalid JSON - nulll"
     }
 
     @Test
     fun `it fails when proceeding past a successful true`() {
 
-        LiteralStructureElement(
-                id = 1,
-                children = listOf(
-                        LiteralValue(id = 1, value = 't'),
-                        LiteralValue(id = 1, value = 'r'),
-                        LiteralValue(id = 1, value = 'u'),
-                        LiteralValue(id = 1, value = 'e'),
-                        LiteralValue(id = 1, value = 'e')
-                )
-        ).asNode failsWithMessage "Invalid JSON - truee"
+        literalStructure("truee").asNode failsWithMessage "Invalid JSON - truee"
     }
 
     @Test
     fun `it fails when proceeding past a successful literal`() {
 
-        LiteralStructureElement(
-                id = 1,
-                children = listOf(
-                        LiteralValue(id = 1, value = 'f'),
-                        LiteralValue(id = 1, value = 'a'),
-                        LiteralValue(id = 1, value = 'l'),
-                        LiteralValue(id = 1, value = 's'),
-                        LiteralValue(id = 1, value = 'e'),
-                        LiteralValue(id = 1, value = 'f')
-                )
-        ).asNode failsWithMessage "Invalid JSON - falsef"
+        literalStructure("falsef").asNode failsWithMessage "Invalid JSON - falsef"
+    }
+
+    @Test
+    fun `it fails to parse invalid characters following valid literal beginnings`() {
+
+        literalStructure("falsa").asNode failsWithMessage "Invalid JSON - incorrect literal"
+    }
+
+    @Test
+    fun `it fails to parse incomplete literals`() {
+
+        literalStructure("fals").asNode failsWithMessage "Invalid JSON - incomplete literal"
     }
 
     @Test
     fun `it parses a simple integer number`() {
 
-        '0'.rangeTo('9').forEach {
+        forAllDigits {
 
-            LiteralStructureElement(
-                    id = 1,
-                    children = listOf(
-                            LiteralValue(id = 1, value = it)
-                    )
-            ).asNode succeedsAndShouldReturn IntegerNode(value = it.toString().toLong())
+            literalStructure("$it").asNode succeedsAndShouldReturn IntegerNode(value = it.toString().toLong())
         }
     }
 
     @Test
     fun `it parses a slightly longer integer number`() {
 
-        '0'.rangeTo('9').forEach {
+        forAllDigits {
 
-            LiteralStructureElement(
-                    id = 1,
-                    children = listOf(
-                            LiteralValue(id = 1, value = '1'),
-                            LiteralValue(id = 1, value = it)
-                    )
-            ).asNode succeedsAndShouldReturn IntegerNode(value = it.toString().toLong() + 10)
+            literalStructure("1$it").asNode succeedsAndShouldReturn IntegerNode(value = it.toString().toLong() + 10)
         }
     }
 
     @Test
     fun `it parses a simple double number`() {
 
-        '0'.rangeTo('9').forEach {
+        forAllDigits {
 
-            LiteralStructureElement(
-                    id = 1,
-                    children = listOf(
-                            LiteralValue(id = 1, value = it),
-                            LiteralValue(id = 1, value = '.'),
-                            LiteralValue(id = 1, value = it)
-                    )
-            ).asNode succeedsAndShouldReturn DoubleNode(value = "$it.$it".toDouble())
+            literalStructure("$it.$it").asNode succeedsAndShouldReturn DoubleNode(value = "$it.$it".toDouble())
         }
     }
 
     @Test
     fun `it parses a longer double number`() {
 
-        '0'.rangeTo('9').forEach {
+        forAllDigits {
 
-            LiteralStructureElement(
-                    id = 1,
-                    children = listOf(
-                            LiteralValue(id = 1, value = '0'),
-                            LiteralValue(id = 1, value = '.'),
-                            LiteralValue(id = 1, value = '0'),
-                            LiteralValue(id = 1, value = it)
-                    )
-            ).asNode succeedsAndShouldReturn DoubleNode(value = "0.0$it".toDouble())
+            literalStructure("0.0$it").asNode succeedsAndShouldReturn DoubleNode(value = "0.0$it".toDouble())
         }
+    }
+
+    @Test
+    fun `it fails to parse an unfinished double number`() {
+
+            literalStructure("0.").asNode failsWithMessage "Invalid JSON - incomplete literal"
+    }
+
+    @Test
+    fun `it fails to an improperly started double`() {
+
+        literalStructure(".0").asNode failsWithMessage "Invalid JSON - float literals must start with a digit"
+    }
+
+    @Test
+    fun `it parses negative integers`() {
+
+        literalStructure("-1").asNode succeedsAndShouldReturn IntegerNode(value = -1)
+    }
+
+    @Test
+    fun `it fails to parse negative integer zero`() {
+
+        literalStructure("-0").asNode failsWithMessage "Invalid JSON - incomplete literal"
+    }
+
+    @Test
+    fun `it parses negative doubles starting with zero`() {
+
+        literalStructure("-0.1").asNode succeedsAndShouldReturn DoubleNode(value = -0.1)
+    }
+
+    @Test
+    fun `it fails to parse leading zeros`() {
+
+        literalStructure("01.1").asNode failsWithMessage "Invalid JSON - leading zeros are not permitted"
+    }
+
+    @Test
+    fun `it fails to parse negative leading zeros`() {
+
+        literalStructure("-01.1").asNode failsWithMessage "Invalid JSON - leading zeros are not permitted"
+    }
+
+    @Test
+    fun `it fails to parse invalid characters after a decimal point`() {
+
+        literalStructure("1.A").asNode failsWithMessage "Invalid JSON - 'A' may not be part of a number"
+    }
+
+    @Test
+    fun `it fails to parse invalid characters in a double`() {
+
+        literalStructure("1.0A").asNode failsWithMessage "Invalid JSON - 'A' may not be part of a number"
+    }
+
+    @Test
+    fun `it fails to parse invalid characters in an integer`() {
+
+        literalStructure("1A").asNode failsWithMessage "Invalid JSON - 'A' may not be part of a number"
+    }
+
+    @Test
+    fun `it fails to parse invalid characters after a negative`() {
+
+        literalStructure("-A").asNode failsWithMessage "Invalid JSON - 'A' may not be part of a number"
+    }
+
+    @Test
+    fun `it fails to parse invalid characters starting a literal`() {
+
+        literalStructure("A").asNode failsWithMessage "Invalid JSON - 'A' is not a valid literal"
     }
 
     private val subject = JsonStructureTranslator()
 
     private val MainStructure<*>.asNode get() = subject.translate(this)
+
+    private fun literalStructure(value: String): LiteralStructureElement =
+            LiteralStructureElement(id = 1, children = value.toCharArray().map { LiteralValue(id = 1, value = it) })
+
+    private fun forAllDigits(fn: (Char) -> Unit) = '0'.rangeTo('9').forEach(fn)
 }
