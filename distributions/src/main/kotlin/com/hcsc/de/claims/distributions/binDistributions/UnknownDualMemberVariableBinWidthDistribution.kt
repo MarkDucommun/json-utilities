@@ -13,7 +13,7 @@ data class UnknownDualMemberVariableBinWidthDistribution<numberType : Number>(
         override val median: numberType
 ) : BinDistribution<numberType, DualMemberBin<numberType, BinWithMembers<numberType>>> {
 
-    val numberOfBins: Int = bins.size
+    override val binCount: Int = bins.size
 
     override fun random(): numberType {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

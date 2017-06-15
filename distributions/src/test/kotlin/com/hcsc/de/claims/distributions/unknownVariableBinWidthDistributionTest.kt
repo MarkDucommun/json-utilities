@@ -1,5 +1,6 @@
 package com.hcsc.de.claims.distributions
 
+import com.hcsc.de.claims.distributions.generation.variableBinWidthDistribution
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
@@ -11,7 +12,7 @@ class unknownVariableBinWidthDistributionTest {
 
         val listOfOnes = List(5) { 1 }.variableBinWidthDistribution()
 
-        assertThat(listOfOnes.numberOfBins).isEqualTo(1)
+        assertThat(listOfOnes.binCount).isEqualTo(1)
     }
 
     @Test
@@ -20,7 +21,7 @@ class unknownVariableBinWidthDistributionTest {
 
         val dist = List(5) { 2 }.plus(List(5) { 3 }).variableBinWidthDistribution()
 
-        assertThat(dist.numberOfBins).isEqualTo(2)
+        assertThat(dist.binCount).isEqualTo(2)
         assertThat(dist.bins.first().members).isEqualTo(List(5) { 2 })
         assertThat(dist.bins.last().members).isEqualTo(List(5) { 3 })
     }
@@ -31,7 +32,7 @@ class unknownVariableBinWidthDistributionTest {
 
         val dist = List(5) { 2 }.plus(List(5) { 3 }).plus(List(5) { 4 }).variableBinWidthDistribution()
 
-        assertThat(dist.numberOfBins).isEqualTo(3)
+        assertThat(dist.binCount).isEqualTo(3)
         assertThat(dist.bins.first().members).isEqualTo(List(5) { 2 })
         assertThat(dist.bins[1].members).isEqualTo(List(5) { 3 })
         assertThat(dist.bins.last().members).isEqualTo(List(5) { 4 })

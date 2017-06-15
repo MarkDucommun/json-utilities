@@ -13,6 +13,8 @@ data class DistributedBinDistribution<out numberType : Number>(
         override val bins: List<DistributedBin<numberType>>
 ) : BinDistribution<numberType, DistributedBin<numberType>> {
 
+    override val binCount: Int = bins.size
+
     private val random = Random()
 
     override fun random(): numberType {
