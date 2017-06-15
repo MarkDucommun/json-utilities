@@ -1,7 +1,7 @@
 package com.hcsc.de.claims.fitChecking
 
 import com.hcsc.de.claims.distributions.DistributionPair
-import com.hcsc.de.claims.distributions.generation.variableBinWidthDistribution
+import com.hcsc.de.claims.distributions.generation.minimizedBinSizeBinDistribution
 import com.hcsc.de.claims.results.succeedsAnd
 import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.disttest.DistributionTest
@@ -41,7 +41,7 @@ class IsNormalTest {
 
         val initialList = List(10000) { (initialDistribution.random()).toInt() }
 
-        val unknownDistribution = initialList.variableBinWidthDistribution(1000)
+        val unknownDistribution = initialList.minimizedBinSizeBinDistribution(1000)
 
         val generatedList = List(500000) { unknownDistribution.random() }
 
@@ -114,7 +114,7 @@ class IsNormalTest {
 
         val initialList = List(10) { (initialDistribution.random()).toInt() }
 
-        val unknownDistribution = initialList.variableBinWidthDistribution(binCount = 5)
+        val unknownDistribution = initialList.minimizedBinSizeBinDistribution(minimumBinSize = 5)
 
         val generatedList: List<Int> = List(500) { unknownDistribution.random() }
 

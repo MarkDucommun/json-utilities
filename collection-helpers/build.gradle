@@ -1,1 +1,2 @@
 apply from: "../gradle/scripts/kotlin.gradle"
+apply from: "../gradle/scripts/unitTest.gradle"

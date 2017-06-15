@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hcsc.de.claims.distributionFitting.FitDistrPlus
 import com.hcsc.de.claims.distributionFitting.Montreal
 import com.hcsc.de.claims.distributionFitting.BestFitDistributionGenerator
-import com.hcsc.de.claims.distributions.parametric.NormalDoubleDistribution
+import com.hcsc.de.claims.distributions.parametric.DoubleNormalDistribution
 import com.hcsc.de.claims.fileReading.RawByteStringFileReader
 import com.hcsc.de.claims.math.helpers.ceilingOnEven
 import com.hcsc.de.claims.math.helpers.sqrt
@@ -52,7 +52,7 @@ class JsonSizeAnalyzerIntegrationTest {
         println()
 //        val listOfTopLevelSizes = listOfJsonSizes.map { it.size.toDouble() }
 //
-//        val topLevelSizeDistribution = listOfTopLevelSizes.distribution
+//        val topLevelSizeDistribution = listOfTopLevelSizes.normalDistribution
 //
 //        val normal = Normal(topLevelSizeDistribution.average, topLevelSizeDistribution.standardDeviation)
 //
@@ -64,7 +64,7 @@ class JsonSizeAnalyzerIntegrationTest {
 
 //        val results = DistributionTest.kolmogorov_smirnov_test(listOfTopLevelSizes, normal).toList()
 
-//        val varianceFromNormality = results.distribution
+//        val varianceFromNormality = results.normalDistribution
 
         println()
 //        when (result) {
@@ -101,8 +101,8 @@ class JsonSizeAnalyzerIntegrationTest {
 //
 //        val results = List(20) { List(10000) { normal.random() }.kolmogorovSmirnovTest(normal) }
 //
-//        val testStatisticsDistribution = results.map { it.testStatistic }.distribution
-//        val pValueDistribution = results.map { it.pValue }.distribution
+//        val testStatisticsDistribution = results.map { it.testStatistic }.normalDistribution
+//        val pValueDistribution = results.map { it.pValue }.normalDistribution
 //
 //        println()
 //    }
@@ -219,7 +219,7 @@ class JsonSizeAnalyzerIntegrationTest {
 
         val claimSizes = listOfClaimSizes().map(Int::toDouble)
 
-        val claimSizesDistribution = claimSizes.distribution
+        val claimSizesDistribution = claimSizes.normalDistribution
 
         var claimsGroupedByKilobytes = claimSizes.groupBy { (it / 1000).toInt() }
 
@@ -266,11 +266,11 @@ class JsonSizeAnalyzerIntegrationTest {
             val count: Long
     )
 
-    private val List<Double>.distribution: NormalDoubleDistribution get() {
+    private val List<Double>.normalDistribution: DoubleNormalDistribution get() {
 
         val average = this.average()
 
-        return NormalDoubleDistribution(
+        return DoubleNormalDistribution(
                 average = average,
                 minimum = min() ?: 0.0,
                 maximum = max() ?: 0.0,

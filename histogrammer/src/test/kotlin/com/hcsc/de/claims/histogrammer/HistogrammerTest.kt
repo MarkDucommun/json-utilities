@@ -2,6 +2,8 @@ package com.hcsc.de.claims.histogrammer
 
 import com.hcsc.de.claims.distributionFitting.Montreal
 import com.hcsc.de.claims.distributionFitting.BestFitDistributionGenerator
+import com.hcsc.de.claims.distributions.bins.Bin
+import com.hcsc.de.claims.distributions.bins.SimpleBin
 import com.hcsc.de.claims.distributions.generation.DataBinner
 import com.hcsc.de.claims.distributions.generation.DoubleDataBinner
 import com.hcsc.de.claims.fileReading.RawByteStringFileReader
@@ -18,12 +20,12 @@ import java.util.Collections.emptyList
 
 class HistogrammerTest {
 
-    val defaultBins = emptyList<FixedWidthBin<Double>>()
+    val defaultBins = emptyList<Bin<Double>>()
 
     val mockBarChart: BarChart = mock()
 
     val mockDataBinner: DataBinner<Double> = mock {
-        on { bin(any()) } doReturn Success<String, List<FixedWidthBin<Double>>>(defaultBins)
+        on { bin(any()) } doReturn Success<String, List<Bin<Double>>>(defaultBins)
     }
 
     val mockChartCreator: ChartCreator = mock {
@@ -57,7 +59,7 @@ class HistogrammerTest {
     @Ignore("Fix me!")
     fun `one list - it passes the binned data to our chart`() {
 
-        val expectedBins = listOf(FixedWidthBin(1.0, 1))
+        val expectedBins = listOf(SimpleBin(1.0, 1))
 
         whenever(mockDataBinner.bin(any())).thenReturn(Success(expectedBins))
 
@@ -116,8 +118,8 @@ class HistogrammerTest {
     @Ignore("Fix me!")
     fun `two lists - it passes the binned data to our chart`() {
 
-        val firstExpectedBins = listOf(FixedWidthBin(1.0, 1))
-        val secondExpectedBins = listOf(FixedWidthBin(2.0, 1))
+        val firstExpectedBins = listOf(SimpleBin(1.0, 1))
+        val secondExpectedBins = listOf(SimpleBin(2.0, 1))
 
         val firstList = listOf(1.0)
         val secondList = listOf(2.0)

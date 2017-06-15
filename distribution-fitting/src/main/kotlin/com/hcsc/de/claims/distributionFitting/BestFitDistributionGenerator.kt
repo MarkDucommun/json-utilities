@@ -1,11 +1,13 @@
 package com.hcsc.de.claims.distributionFitting
 
 import com.hcsc.de.claims.distributions.*
+import com.hcsc.de.claims.distributions.binDistributions.BinDistribution
+import com.hcsc.de.claims.distributions.bins.BinWithMembers
 import com.hcsc.de.claims.distributions.generation.DistributionGenerator
 import com.hcsc.de.claims.distributions.generation.DistributionProfile
-import com.hcsc.de.claims.distributions.generation.normalDoubleDistribution
-import com.hcsc.de.claims.distributions.generation.variableBinWidthDistribution
-import com.hcsc.de.claims.distributions.parametric.ParametricDistribution
+import com.hcsc.de.claims.distributions.generation.doubleNormalDistribution
+import com.hcsc.de.claims.distributions.generation.minimizedBinSizeBinDistribution
+import com.hcsc.de.claims.distributions.parametric.DoubleParametricDistribution
 import com.hcsc.de.claims.math.helpers.ceiling
 import com.hcsc.de.claims.math.helpers.median
 import com.hcsc.de.claims.math.helpers.mode
@@ -65,7 +67,7 @@ class BestFitDistributionGenerator(
 
             DistributionProfile(
                     pValue = pValue,
-                    distribution = ParametricDistribution(
+                    distribution = DoubleParametricDistribution(
                             average = doubleList.average(),
                             maximum = doubleList.max() ?: 0.0,
                             minimum = doubleList.min() ?: 0.0,
@@ -83,24 +85,26 @@ class BestFitDistributionGenerator(
 
     val weibullDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { parametricFitter.weibullDistribution(it) }
 
-    val normalDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { Success(it.normalDoubleDistribution) }
+    val normalDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = { Success(it.doubleNormalDistribution) }
 
     val deepNonParametricDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = {
 
 
-        val unknownVariableBinWidthDistribution = it.variableBinWidthDistribution(it.size.toDouble().sqrt().ceiling().toInt())
+        val unknownVariableBinWidthDistribution: BinDistribution<Double, BinWithMembers<Double>> = it.minimizedBinSizeBinDistribution(it.size.toDouble().sqrt().ceiling().toInt())
 
-        val result = unknownVariableBinWidthDistribution.toDistributedBinDistribution()
+//        val result = unknownVariableBinWidthDistribution.toDistributedBinDistribution()
+//
+//        when (result) {
+//            is Success -> Success<String, Randomable<Double>>(result.content)
+//            is Failure -> Failure(result.content)
+//        }
 
-        when (result) {
-            is Success -> Success<String, Randomable<Double>>(result.content)
-            is Failure -> Failure(result.content)
-        }
+        TODO()
     }
 
     val shallowNonParametricDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = {
 
-        Success(it.variableBinWidthDistribution(it.size.toDouble().sqrt().ceiling().toInt()))
+        Success(it.minimizedBinSizeBinDistribution(it.size.toDouble().sqrt().ceiling().toInt()))
     }
 
     data class DistributionGeneratorAndPValue(

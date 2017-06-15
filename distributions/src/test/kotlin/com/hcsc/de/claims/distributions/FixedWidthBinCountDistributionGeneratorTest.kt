@@ -4,20 +4,21 @@ import com.hcsc.de.claims.distributions.binDistributions.IntBinWithMembersDistri
 import com.hcsc.de.claims.distributions.bins.IntBinWithMembers
 import com.hcsc.de.claims.distributions.generation.DistributionProfile
 import com.hcsc.de.claims.distributions.generation.DistributionRequest
+import com.hcsc.de.claims.distributions.generation.FixedWidthBinCountDistributionGenerator
 import com.hcsc.de.claims.distributions.generation.FixedWidthBinDistributionGenerator
 import com.hcsc.de.claims.results.succeedsAndShouldReturn
 import org.junit.Test
 
-class FixedWidthBinDistributionGeneratorTest {
+class FixedWidthBinCountDistributionGeneratorTest {
 
-    val subject = FixedWidthBinDistributionGenerator(toType = Double::toInt)
+    val subject = FixedWidthBinCountDistributionGenerator(toType = Double::toInt)
 
     @Test
     fun `it creates a simple fixed distribution`() {
 
-        subject.create(DistributionRequest.FixedWidthBinDistributionRequest(
+        subject.create(DistributionRequest.FixedWidthBinCountDistributionRequest(
                 listOf(1, 2, 3),
-                binWidth = 1
+                binCount = 3
         )) succeedsAndShouldReturn DistributionProfile(
                 distribution = IntBinWithMembersDistribution(listOf(
                         IntBinWithMembers(listOf(1)),

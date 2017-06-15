@@ -2,8 +2,8 @@ package com.hcsc.de.claims.distributions.binDistributions
 
 import com.hcsc.de.claims.distributions.bins.Bin
 
-open class AutomaticFixedWidthBinDistribution<out numberType : Number>(
-        rawBins: List<Bin<numberType>>,
+data class GenericFixedWidthBinDistribution<out numberType : Number>(
+        override val bins: List<Bin<numberType>>,
         override val average: numberType,
         override val minimum: numberType,
         override val maximum: numberType,
@@ -16,7 +16,5 @@ open class AutomaticFixedWidthBinDistribution<out numberType : Number>(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override val bins: List<Bin<numberType>> = rawBins
-
-    override val binCount: Int = rawBins.size
+    override val binCount: Int = bins.size
 }

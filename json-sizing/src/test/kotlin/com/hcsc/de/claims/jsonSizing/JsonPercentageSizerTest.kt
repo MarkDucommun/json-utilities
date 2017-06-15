@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributions.parametric.NormalIntDistribution
+import com.hcsc.de.claims.distributions.parametric.IntNormalDistribution
 import com.hcsc.de.claims.distributions.RatioProbability
 import com.hcsc.de.claims.results.get
 import com.hcsc.de.claims.results.succeedsAndShouldReturn
@@ -15,7 +15,7 @@ class JsonPercentageSizerTest {
 
         percentageSizer.generatePercentage(JsonSizeLeafOverview(
                 name = "test",
-                size = NormalIntDistribution(
+                size = IntNormalDistribution(
                         average = 1,
                         minimum = 1,
                         maximum = 1,
@@ -43,7 +43,7 @@ class JsonPercentageSizerTest {
 
         val input = JsonSizeObjectOverview(
                 name = "test",
-                size = NormalIntDistribution(
+                size = IntNormalDistribution(
                         average = 100,
                         minimum = 100,
                         maximum = 100,
@@ -55,7 +55,7 @@ class JsonPercentageSizerTest {
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(
                                         name = "A",
-                                        size = NormalIntDistribution(
+                                        size = IntNormalDistribution(
                                                 average = 70,
                                                 minimum = 70,
                                                 maximum = 70,
@@ -69,7 +69,7 @@ class JsonPercentageSizerTest {
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(
                                         name = "B",
-                                        size = NormalIntDistribution(
+                                        size = IntNormalDistribution(
                                                 average = 30,
                                                 minimum = 30,
                                                 maximum = 30,
@@ -130,7 +130,7 @@ class JsonPercentageSizerTest {
 
         val input = JsonSizeObjectOverview(
                 name = "test",
-                size = NormalIntDistribution(
+                size = IntNormalDistribution(
                         average = 100,
                         minimum = 100,
                         maximum = 100,
@@ -142,7 +142,7 @@ class JsonPercentageSizerTest {
                         JsonSizeObjectChild(
                                 overview = JsonSizeObjectOverview(
                                         name = "A",
-                                        size = NormalIntDistribution(
+                                        size = IntNormalDistribution(
                                                 average = 80,
                                                 minimum = 80,
                                                 maximum = 80,
@@ -154,7 +154,7 @@ class JsonPercentageSizerTest {
                                                 JsonSizeObjectChild(
                                                         overview = JsonSizeLeafOverview(
                                                                 name = "C",
-                                                                size = NormalIntDistribution(
+                                                                size = IntNormalDistribution(
                                                                         average = 20,
                                                                         minimum = 20,
                                                                         maximum = 20,
@@ -167,7 +167,7 @@ class JsonPercentageSizerTest {
                                                 JsonSizeObjectChild(
                                                         overview = JsonSizeLeafOverview(
                                                                 name = "D",
-                                                                size = NormalIntDistribution(
+                                                                size = IntNormalDistribution(
                                                                         average = 60,
                                                                         minimum = 60,
                                                                         maximum = 60,
@@ -184,7 +184,7 @@ class JsonPercentageSizerTest {
                         JsonSizeObjectChild(
                                 overview = JsonSizeLeafOverview(
                                         name = "B",
-                                        size = NormalIntDistribution(
+                                        size = IntNormalDistribution(
                                                 average = 20,
                                                 minimum = 20,
                                                 maximum = 20,
@@ -273,7 +273,7 @@ class JsonPercentageSizerTest {
 
         val input = JsonSizeArrayOverview(
                 name = "test",
-                size = NormalIntDistribution(
+                size = IntNormalDistribution(
                         average = 100,
                         minimum = 100,
                         maximum = 100,
@@ -283,7 +283,7 @@ class JsonPercentageSizerTest {
                 ),
                 averageChild = JsonSizeLeafOverview(
                         name = "A",
-                        size = NormalIntDistribution(
+                        size = IntNormalDistribution(
                                 average = 20,
                                 minimum = 20,
                                 maximum = 20,
@@ -292,7 +292,7 @@ class JsonPercentageSizerTest {
                                 standardDeviation = 0.0
                         )
                 ),
-                numberOfChildren = NormalIntDistribution(
+                numberOfChildren = IntNormalDistribution(
                         average = 5,
                         minimum = 5,
                         maximum = 5,
@@ -327,7 +327,7 @@ class JsonPercentageSizerTest {
                                 maximum = 20.0
                         )
                 ),
-                numberOfChildren = NormalIntDistribution(
+                numberOfChildren = IntNormalDistribution(
                         average = 5,
                         minimum = 5,
                         maximum = 5,

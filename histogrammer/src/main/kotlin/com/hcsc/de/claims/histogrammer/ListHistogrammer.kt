@@ -1,5 +1,6 @@
 package com.hcsc.de.claims.histogrammer
 
+import com.hcsc.de.claims.distributions.bins.Bin
 import com.hcsc.de.claims.distributions.generation.DataBinner
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.flatMap
@@ -23,13 +24,13 @@ class ListHistogrammer<in numberType : Number>(
     private fun createBarChart(lists: List<List<numberType>>, title: String = "Chart"): Result<String, BarChart> =
             lists.asBinLists.flatMap { it.asDataSets.asBarChart(title) }
 
-    private val List<List<numberType>>.asBinLists: Result<String, List<List<FixedWidthBin<Double>>>>
+    private val List<List<numberType>>.asBinLists: Result<String, List<List<Bin<Double>>>>
         get() = map { it.asBinList }.traverse()
 
-    private val List<numberType>.asBinList: Result<String, List<FixedWidthBin<Double>>>
+    private val List<numberType>.asBinList: Result<String, List<Bin<Double>>>
         get() = dataBinner.bin(this.map { it.toInt().toDouble() })
 
-    private val List<List<FixedWidthBin<Double>>>.asDataSets: List<DataSet>
+    private val List<List<Bin<Double>>>.asDataSets: List<DataSet>
         get() = mapIndexed { index, bins -> bins.asDataset("${index + 1}") }
 
     private fun List<DataSet>.asBarChart(name: String): Result<String, BarChart>
@@ -40,24 +41,15 @@ class ListHistogrammer<in numberType : Number>(
                 dataSets = this
         ))
 
-    private fun List<FixedWidthBin<Double>>.asDataset(name: String): DataSet =
+    private fun List<Bin<Double>>.asDataset(name: String): DataSet =
             DataSet(name = name, datapoints = map { it.asDatapoint })
 
-    private fun List<FixedWidthBin<Double>>.asInvertedDataset(name: String): DataSet =
+    private fun List<Bin<Double>>.asInvertedDataset(name: String): DataSet =
             DataSet(name = name, datapoints = map { it.asInvertedDatapoint })
 
-    private val FixedWidthBin<Double>.asDatapoint: Datapoint
-        get() = Datapoint(xValue = startValue, count = size)
+    private val Bin<Double>.asDatapoint: Datapoint
+        get() = Datapoint(xValue = identifyingCharacteristic, count = size)
 
-    private val FixedWidthBin<Double>.asInvertedDatapoint: Datapoint
-        get() = Datapoint(xValue = startValue, count = size * -1)
-}
-
-
-class InvertedHistogrammer(
-        private val histogrammer: Histogrammer<Double>
-) {
-
-    fun create(firstList: List<Double>, secondList: List<Double>): Result<String, BarChart> =
-            histogrammer.create(firstList, secondList.map { it * -1 })
+    private val Bin<Double>.asInvertedDatapoint: Datapoint
+        get() = Datapoint(xValue = identifyingCharacteristic, count = size * -1)
 }

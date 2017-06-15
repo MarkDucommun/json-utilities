@@ -19,7 +19,7 @@ fun List<Double>.median(): Double {
     }
 }
 
-fun List<Double>.mode(): Double = StatUtils.mode(toDoubleArray()).max()?.ceilingOnEven() ?: 0.0
+fun List<Double>.mode(): Double = StatUtils.mode(toDoubleArray()).max() ?: 0.0
 
 fun Double.square() = this * this
 

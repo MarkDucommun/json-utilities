@@ -2,7 +2,7 @@ package com.hcsc.de.claims.distributions.parametric
 
 import com.hcsc.de.claims.math.helpers.ceilingOnEven
 
-data class NormalIntDistribution(
+data class IntNormalDistribution(
         override val average: Int,
         override val minimum: Int,
         override val maximum: Int,

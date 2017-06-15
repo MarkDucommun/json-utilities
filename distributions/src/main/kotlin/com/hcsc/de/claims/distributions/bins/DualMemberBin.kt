@@ -12,6 +12,6 @@ interface DualMemberBin<memberType : Number,
     override fun split(value: memberType):
             SplitBinHolder<memberType, DualMemberBin<memberType, BinWithMembers<memberType>>>
 
-    override fun split(value: Double):
+    override fun splitByDouble(value: Double):
             SplitBinHolder<memberType, DualMemberBin<memberType, BinWithMembers<memberType>>>
 }

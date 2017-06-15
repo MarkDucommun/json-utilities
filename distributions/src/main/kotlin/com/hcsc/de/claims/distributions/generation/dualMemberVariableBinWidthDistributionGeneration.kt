@@ -109,7 +109,7 @@ private fun <numberType : Number> DualMemberBin<numberType, BinWithMembers<numbe
 
             if (rangeHolder.isIncomplete) {
 
-                val (upper, lower) = split(rangeHolder.middle)
+                val (upper, lower) = splitByDouble(rangeHolder.middle)
 
                 if (lower.isValid(binCount) && upper.isValid(binCount)) {
                     rangeHolder.copy(isFinalBin = false, isIncomplete = false)
@@ -129,7 +129,7 @@ private fun <numberType : Number> DualMemberBin<numberType, BinWithMembers<numbe
             listOf(this)
         } else {
 
-            val (upperBin, lowerBin) = this.split(rangeHolder.middle)
+            val (upperBin, lowerBin) = this.splitByDouble(rangeHolder.middle)
 
             if (lowerBin.isValid(binCount) && upperBin.isValid(binCount)) {
 

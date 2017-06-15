@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.jsonSizing
 
-import com.hcsc.de.claims.distributions.parametric.NormalIntDistribution
+import com.hcsc.de.claims.distributions.parametric.IntNormalDistribution
 import com.hcsc.de.claims.results.flatMap
 import com.hcsc.de.claims.results.map
 import com.hcsc.de.claims.results.traverse
@@ -13,7 +13,7 @@ class JsonSizeSorter {
             is JsonSizeLeafOverview -> com.hcsc.de.claims.results.Success(input)
             is JsonSizeObjectOverview -> {
 
-                val inputWithSortedChildren = input.copy(children = input.children.sortedByDescending { (it.overview.size as NormalIntDistribution).average })
+                val inputWithSortedChildren = input.copy(children = input.children.sortedByDescending { (it.overview.size as IntNormalDistribution).average })
 
                 inputWithSortedChildren.children
                         .map { (overview, presence) ->

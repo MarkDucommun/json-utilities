@@ -22,13 +22,13 @@ open class AutomaticDualMemberBin<numberType : Number>(
 
     override fun split(value: numberType): SplitBinHolder<numberType, DualMemberBin<numberType, BinWithMembers<numberType>>> {
 
-        return split(value.toDouble())
+        return splitByDouble(value.toDouble())
     }
 
-    override fun split(value: Double): SplitBinHolder<numberType, DualMemberBin<numberType, BinWithMembers<numberType>>> {
+    override fun splitByDouble(value: Double): SplitBinHolder<numberType, DualMemberBin<numberType, BinWithMembers<numberType>>> {
 
-        val binOneSplit = binOne.split(value)
-        val binTwoSplit = binTwo.split(value)
+        val binOneSplit = binOne.splitByDouble(value)
+        val binTwoSplit = binTwo.splitByDouble(value)
 
         return SplitBinHolder(
                 upper = AutomaticDualMemberBin(binOne = binOneSplit.upper, binTwo = binTwoSplit.upper, toType = toType),

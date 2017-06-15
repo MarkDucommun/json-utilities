@@ -1,6 +1,6 @@
 package com.hcsc.de.claims.distributions.parametric
 
-data class NormalDoubleDistribution(
+data class DoubleNormalDistribution(
         override val average: Double,
         override val minimum: Double,
         override val maximum: Double,

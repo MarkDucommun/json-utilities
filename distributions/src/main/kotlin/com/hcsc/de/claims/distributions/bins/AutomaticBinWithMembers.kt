@@ -27,9 +27,9 @@ open class AutomaticBinWithMembers<numberType : Number>(
             AutomaticBinWithMembers(rawMembers = members.plus(other.members), toType = toType)
 
     override fun split(value: numberType): SplitBinHolder<numberType, BinWithMembers<numberType>> =
-            split(value.toDouble())
+            splitByDouble(value.toDouble())
 
-    override fun split(value: Double): SplitBinHolder<numberType, BinWithMembers<numberType>> {
+    override fun splitByDouble(value: Double): SplitBinHolder<numberType, BinWithMembers<numberType>> {
 
         val upperMembers = doubleMembers.filter { it > value }.map(toType)
         val lowerMembers = doubleMembers.filterNot { it > value }.map(toType)

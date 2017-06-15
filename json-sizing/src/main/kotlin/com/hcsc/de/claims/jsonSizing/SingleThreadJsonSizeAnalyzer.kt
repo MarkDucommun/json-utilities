@@ -2,7 +2,7 @@ package com.hcsc.de.claims.jsonSizing
 
 import com.hcsc.de.claims.distributions.generation.DistributionGenerator
 import com.hcsc.de.claims.distributions.Distribution
-import com.hcsc.de.claims.distributions.parametric.NormalIntDistribution
+import com.hcsc.de.claims.distributions.parametric.IntNormalDistribution
 import com.hcsc.de.claims.distributions.RatioProbability
 import com.hcsc.de.claims.distributions.generation.asIntDistribution
 import com.hcsc.de.claims.results.*
@@ -143,7 +143,7 @@ class SingleThreadJsonSizeAnalyzer(
                 }
             }.map { it }
 
-    private val EMPTY_DISTRIBUTION = NormalIntDistribution(average = 0, minimum = 0, maximum = 0, mode = 0, median = 0, standardDeviation = 0.0)
+    private val EMPTY_DISTRIBUTION = IntNormalDistribution(average = 0, minimum = 0, maximum = 0, mode = 0, median = 0, standardDeviation = 0.0)
 
     private fun List<JsonSizeObject>.findAllChildrenByName(name: String): List<JsonSizeNode?> =
             map { it.children.find { it.name == name } }
