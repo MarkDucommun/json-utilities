@@ -20,9 +20,9 @@ class FixedWidthBinDistributionGeneratorTest {
                 binWidth = 1
         )) succeedsAndShouldReturn DistributionProfile(
                 distribution = IntBinWithMembersDistribution(listOf(
-                    IntBinWithMembers(listOf(1)),
-                    IntBinWithMembers(listOf(2)),
-                    IntBinWithMembers(listOf(3))
+                        IntBinWithMembers(listOf(1)),
+                        IntBinWithMembers(listOf(2)),
+                        IntBinWithMembers(listOf(3))
                 )),
                 pValue = 1.0
         )

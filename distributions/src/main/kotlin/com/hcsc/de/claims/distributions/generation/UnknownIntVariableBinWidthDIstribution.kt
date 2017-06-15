@@ -1,6 +1,8 @@
 package com.hcsc.de.claims.distributions.generation
 
 import com.hcsc.de.claims.distributions.binDistributions.BinsWithMembersDistribution
+import com.hcsc.de.claims.distributions.bins.BinWithMembers
+import com.hcsc.de.claims.distributions.bins.IntBinWithMembers
 import com.hcsc.de.claims.math.helpers.averageInt
 import com.hcsc.de.claims.math.helpers.medianInt
 import com.hcsc.de.claims.math.helpers.modeInt
@@ -34,7 +36,7 @@ fun List<Int>.variableBinWidthDistribution(
     )
 }
 
-private fun com.hcsc.de.claims.distributions.bins.BinWithMembers<Int>.maximizeBins(binCount: Int): List<com.hcsc.de.claims.distributions.bins.BinWithMembers<Int>> {
+private fun BinWithMembers<Int>.maximizeBins(binCount: Int): List<BinWithMembers<Int>> {
 
     val median = members.averageInt()
 
@@ -50,5 +52,5 @@ private fun com.hcsc.de.claims.distributions.bins.BinWithMembers<Int>.maximizeBi
     }
 }
 
-private val List<Int>.asBin: com.hcsc.de.claims.distributions.bins.BinWithMembers<Int>
-    get() = com.hcsc.de.claims.distributions.bins.IntBinWithMembers(members = this.sorted())
+private val List<Int>.asBin: BinWithMembers<Int>
+    get() = IntBinWithMembers(members = this.sorted())

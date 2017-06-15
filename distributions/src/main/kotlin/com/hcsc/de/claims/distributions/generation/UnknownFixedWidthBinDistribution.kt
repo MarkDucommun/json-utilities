@@ -1,33 +1,16 @@
 package com.hcsc.de.claims.distributions.generation
 
-import com.hcsc.de.claims.distributions.binDistributions.FixedBinWidthDistribution
-import com.hcsc.de.claims.distributions.binDistributions.IntFixedBinWidthDistribution
-import com.hcsc.de.claims.distributions.bins.Bin
+import com.hcsc.de.claims.distributions.binDistributions.AutomaticFixedWidthBinDistribution
+import com.hcsc.de.claims.distributions.binDistributions.FixedWidthBinDistribution
 import com.hcsc.de.claims.distributions.bins.SimpleBin
 import com.hcsc.de.claims.math.helpers.*
 import org.apache.commons.math3.util.IntegerSequence
-
-data class DoubleFixedBinWidthDistribution(
-        override val numberOfBins: Int,
-        override val sizeOfBin: Double,
-        override val bins: List<Bin<Double>>,
-        override val average: Double,
-        override val minimum: Double,
-        override val maximum: Double,
-        override val mode: Double,
-        override val median: Double
-) : FixedBinWidthDistribution<Double> {
-
-    override fun random(): Double {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-}
 
 fun List<Int>.unknownDistribution(
         numberOfBins: Int = 5,
         rangeMinimum: Int? = null,
         rangeMaximum: Int? = null
-): FixedBinWidthDistribution<Int> {
+): FixedWidthBinDistribution<Int> {
 
     val sorted = this.sorted()
 
@@ -79,15 +62,14 @@ fun List<Int>.unknownDistribution(
         }
     }.sortedBy { it.identifyingCharacteristic }
 
-    return IntFixedBinWidthDistribution(
+    return AutomaticFixedWidthBinDistribution(
             average = sorted.averageInt(),
             minimum = observedMinimum,
             maximum = observedMaximum,
             mode = sorted.modeInt(),
             median = sorted.medianInt(),
-            numberOfBins = bins.count(),
-            sizeOfBin = sizeOfBin,
-            bins = bins
+            binWidth = sizeOfBin,
+            rawBins = bins
     )
 }
 
@@ -95,7 +77,7 @@ fun List<Double>.unknownDistribution(
         numberOfBins: Int = this.size.toDouble().sqrt().ceiling().toInt(),
         rangeMinimum: Double? = null,
         rangeMaximum: Double? = null
-): FixedBinWidthDistribution<Double> {
+): FixedWidthBinDistribution<Double> {
 
     val sorted = this.sorted()
 
@@ -115,20 +97,20 @@ fun List<Double>.unknownDistribution(
 
     val range = actualMaximum - actualMinimum
 
-    val sizeOfBin = range / numberOfBins
+    val binWidth = range / numberOfBins
 
     var initialBins = listOf(SimpleBin(identifyingCharacteristic = actualMinimum, size = 0))
 
-    while (initialBins.last().identifyingCharacteristic + sizeOfBin < actualMaximum) {
+    while (initialBins.last().identifyingCharacteristic + binWidth < actualMaximum) {
 
-        initialBins += SimpleBin(identifyingCharacteristic = initialBins.last().identifyingCharacteristic + sizeOfBin, size = 0)
+        initialBins += SimpleBin(identifyingCharacteristic = initialBins.last().identifyingCharacteristic + binWidth, size = 0)
     }
 
     val bins = sortedAndFilteredByMinimumAndMaximum.fold(initialBins) { bins, int ->
 
-        val binNumber = (int - actualMinimum) / sizeOfBin
+        val binNumber = (int - actualMinimum) / binWidth
 
-        val startValue = binNumber * sizeOfBin + actualMinimum
+        val startValue = binNumber * binWidth + actualMinimum
 
         var binExist = false
 
@@ -148,15 +130,14 @@ fun List<Double>.unknownDistribution(
         }
     }.sortedBy { it.identifyingCharacteristic }
 
-    return DoubleFixedBinWidthDistribution(
+    return AutomaticFixedWidthBinDistribution(
             average = sorted.average(),
             minimum = observedMinimum,
             maximum = observedMaximum,
             mode = sorted.mode(),
             median = sorted.median(),
-            numberOfBins = bins.count(),
-            sizeOfBin = sizeOfBin,
-            bins = bins
+            binWidth = binWidth,
+            rawBins = bins
     )
 }
 
@@ -164,7 +145,7 @@ fun List<Double>.unknownDistribution(
 //        numberOfBins: Int = Math.ceil(Math.sqrt(this.size.toDouble())).toInt(),
 //        rangeMinimum: Double? = null,
 //        rangeMaximum: Double? = null
-//): FixedBinWidthDistribution<Double> {
+//): FixedWidthBinDistribution<Double> {
 //
 //    val sorted = this.sorted()
 //
@@ -186,17 +167,17 @@ fun List<Double>.unknownDistribution(
 //
 //    val preliminarySizeOfBin = (range / numberOfBins).ceiling().toInt()
 //
-//    val sizeOfBin = if (preliminarySizeOfBin == 0) 1 else preliminarySizeOfBin
+//    val binWidth = if (preliminarySizeOfBin == 0) 1 else preliminarySizeOfBin
 //
-//    val initialBins =  IntegerSequence.Range(Math.floor(actualMinimum).toInt(), Math.ceil(actualMaximum).toInt(), sizeOfBin).toList().map {
+//    val initialBins =  IntegerSequence.Range(Math.floor(actualMinimum).toInt(), Math.ceil(actualMaximum).toInt(), binWidth).toList().map {
 //        FixedWidthBin(startValue = it.toDouble(), size = 0)
 //    }
 //
 //    val bins = sortedAndFilteredByMinimumAndMaximum.fold(initialBins) { bins, int ->
 //
-//        val binNumber = (int - actualMinimum) / sizeOfBin
+//        val binNumber = (int - actualMinimum) / binWidth
 //
-//        val startValue = binNumber * sizeOfBin + actualMinimum
+//        val startValue = binNumber * binWidth + actualMinimum
 //
 //        var binExist = false
 //
@@ -223,7 +204,7 @@ fun List<Double>.unknownDistribution(
 //            mode = sorted.mode(),
 //            median = sorted.median(),
 //            numberOfBins = bins.size(),
-//            sizeOfBin = sizeOfBin.toDouble(),
+//            binWidth = binWidth.toDouble(),
 //            bins = bins.map { FixedWidthBin(startValue = it.startValue, size = it.size) }
 //    )
 //}

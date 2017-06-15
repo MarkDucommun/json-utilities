@@ -1,6 +1,5 @@
 package com.hcsc.de.claims.distributions
 
-import com.hcsc.de.claims.distributions.binDistributions.IntFixedBinWidthDistribution
 import com.hcsc.de.claims.distributions.bins.SimpleBin
 import com.hcsc.de.claims.distributions.generation.unknownDistribution
 import org.assertj.core.api.KotlinAssertions.assertThat
@@ -20,7 +19,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 mode = 1,
                 median = 1,
                 numberOfBins = 2,
-                sizeOfBin = 1,
+                binWidth = 1,
                 bins = listOf(
                         SimpleBin(identifyingCharacteristic = 0, size = 2),
                         SimpleBin(identifyingCharacteristic = 1, size = 3)
@@ -40,7 +39,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 mode = 1,
                 median = 2,
                 numberOfBins = 5,
-                sizeOfBin = 1,
+                binWidth = 1,
                 bins = listOf(
                         SimpleBin(identifyingCharacteristic = 1, size = 3),
                         SimpleBin(identifyingCharacteristic = 2, size = 2),
@@ -63,7 +62,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 mode = 1,
                 median = 2,
                 numberOfBins = 3,
-                sizeOfBin = 2,
+                binWidth = 2,
                 bins = listOf(
                         SimpleBin(identifyingCharacteristic = 1, size = 5),
                         SimpleBin(identifyingCharacteristic = 3, size = 2),
@@ -84,7 +83,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 mode = 1,
                 median = 2,
                 numberOfBins = 2,
-                sizeOfBin = 3,
+                binWidth = 3,
                 bins = listOf(
                         SimpleBin(identifyingCharacteristic = 1, size = 6),
                         SimpleBin(identifyingCharacteristic = 4, size = 4)
@@ -108,7 +107,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 mode = 1,
                 median = 2,
                 numberOfBins = 3,
-                sizeOfBin = 3,
+                binWidth = 3,
                 bins = listOf(
                         SimpleBin(identifyingCharacteristic = 0, size = 5),
                         SimpleBin(identifyingCharacteristic = 3, size = 4),
@@ -133,7 +132,7 @@ class UnknownIntFixedBinWidthDistributionTest {
                 mode = 1,
                 median = 2,
                 numberOfBins = 2,
-                sizeOfBin = 2,
+                binWidth = 2,
                 bins = listOf(
                         SimpleBin(identifyingCharacteristic = 2, size = 3),
                         SimpleBin(identifyingCharacteristic = 4, size = 3)

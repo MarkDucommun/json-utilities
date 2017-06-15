@@ -1,6 +1,5 @@
 package com.hcsc.de.claims.distributions.binDistributions
 
-import com.hcsc.de.claims.distributions.binDistributions.BinDistribution
 import com.hcsc.de.claims.distributions.bins.BinWithMembers
 import com.hcsc.de.claims.distributions.bins.DualMemberBin
 

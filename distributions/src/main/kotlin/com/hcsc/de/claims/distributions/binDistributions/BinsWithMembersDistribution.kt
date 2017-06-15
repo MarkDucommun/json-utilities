@@ -12,13 +12,13 @@ data class BinsWithMembersDistribution<numberType : Number>(
         override val bins: List<BinWithMembers<numberType>>
 ) : BinDistribution<numberType, BinWithMembers<numberType>> {
 
-    val numberOfBins: Int = bins.size
-
     private val random = Random()
+
+    override val binCount: Int = bins.size
 
     override fun random(): numberType {
 
-        val index = random.nextInt(bins.size)
+        val index = random.nextInt(binCount)
 
         val bin = bins[index]
 
