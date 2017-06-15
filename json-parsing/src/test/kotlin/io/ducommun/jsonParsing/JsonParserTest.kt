@@ -1,6 +1,7 @@
 package io.ducommun.jsonParsing
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hcsc.de.claims.fileReading.RawByteStringFileReader
@@ -51,9 +52,25 @@ class JsonParserTest {
     }
 
     @Test
-    fun `it fails blah`() {
+    fun `it fails to parse literals with array closes in them`() {
 
-        subject.parse("1]") failsWithMessage "?"
+        subject.parse("1]") failsWithMessage "']' is not a valid literal character"
+    }
+
+    @Test
+    fun `it fails to parse non-acceptable white-space control characters`() {
+
+        val string = fileReader.read("src/test/resources/test_files/i_string_utf16BE_no_BOM.json").get
+
+        subject.parse(string) failsWithMessage "Invalid JSON - ']' is not a valid literal character"
+    }
+
+    @Test
+    fun `it parses unicode escaped characters`() {
+
+        val string = fileReader.read("src/test/resources/test_files/y_object_escaped_null_in_key.json").get
+
+        subject.parse(string)
     }
 
     @Test
@@ -66,7 +83,7 @@ class JsonParserTest {
         val throwingErrors = results.filter { it.errorThrown }
 
         assertThat(notMatching.size).isLessThanOrEqualTo(25)
-        assertThat(throwingErrors.size).isLessThanOrEqualTo(5)
+        assertThat(throwingErrors.size).isLessThanOrEqualTo(0)
 
         if (true) {
 
@@ -176,6 +193,8 @@ class JsonParserTest {
 
         val timeDiff: Double = jacksonResult.elapsedTimeMillis - result.elapsedTimeMillis
     }
+
+    private fun ObjectMapper.readAsNode(string: String): com.fasterxml.jackson.databind.JsonNode = readValue(string)
 
     enum class Outcome { SUCCESS, UNCLEAR, UNKNOWN, FAILURE }
 }
