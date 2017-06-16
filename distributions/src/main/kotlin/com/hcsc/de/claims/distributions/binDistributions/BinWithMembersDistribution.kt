@@ -4,7 +4,7 @@ import com.hcsc.de.claims.distributions.bins.BinWithMembers
 import com.hcsc.de.claims.math.helpers.median
 import com.hcsc.de.claims.math.helpers.mode
 
-open class BinWithMembersDistribution<numberType : Number, out binType: BinWithMembers<numberType>>(
+open class BinWithMembersDistribution<numberType : Number, out binType : BinWithMembers<numberType>>(
 
         rawBins: List<binType>,
         toType: Double.() -> numberType

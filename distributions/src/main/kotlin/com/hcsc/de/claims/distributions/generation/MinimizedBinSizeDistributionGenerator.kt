@@ -9,11 +9,16 @@ import com.hcsc.de.claims.results.Success
 open class MinimizedBinSizeDistributionGenerator<numberType : Number>(
         private val toBinNumberType: BinWithMembers<Double>.() -> BinWithMembers<numberType>,
         private val toBinDistribution: List<BinWithMembers<numberType>>.() -> BinDistribution<numberType, BinWithMembers<numberType>>
-) : BinDistributionGenerator<numberType, MinimizeBinSizeDistributionRequest<numberType>> {
+) : BinDistributionGenerator<
+        numberType,
+        MinimizeBinSizeDistributionRequest<numberType>,
+        DistributionProfile<numberType, BinDistribution<numberType, BinWithMembers<numberType>>>,
+        BinDistribution<numberType, BinWithMembers<numberType>>,
+        BinWithMembers<numberType>> {
 
     override fun create(
             request: MinimizeBinSizeDistributionRequest<numberType>
-    ): Result<String, DistributionProfile<numberType>> =
+    ): Result<String, DistributionProfile<numberType, BinDistribution<numberType, BinWithMembers<numberType>>>> =
             Success(DistributionProfile(
                     pValue = 1.0,
                     distribution = request.list.genericMinimizedBinSizeBinDistribution(

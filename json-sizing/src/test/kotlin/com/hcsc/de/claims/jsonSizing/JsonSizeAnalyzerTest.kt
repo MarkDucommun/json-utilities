@@ -24,7 +24,7 @@ class JsonSizeAnalyzerTest {
 
     val defaultDistribution: Distribution<Double> = mock()
 
-    val mockDistributionGenerator: DistributionGenerator<Double> = mock {
+    val mockDistributionGenerator: DistributionGenerator<Double, DistributionProfile<Double, Distribution<Double>>, Distribution<Double>> = mock {
         on { profile(any()) } doReturn Success(DistributionProfile(0.0, defaultDistribution))
     }
 

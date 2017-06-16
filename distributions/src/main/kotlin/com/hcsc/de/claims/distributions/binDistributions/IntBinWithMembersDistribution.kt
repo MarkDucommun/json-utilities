@@ -8,4 +8,3 @@ data class IntBinWithMembersDistribution(
         rawBins = bins,
         toType = Double::toInt
 )
-

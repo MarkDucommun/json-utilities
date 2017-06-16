@@ -10,7 +10,7 @@ data class GenericFixedWidthBinDistribution<out numberType : Number>(
         override val mode: numberType,
         override val median: numberType,
         override val binWidth: numberType
-) : FixedWidthBinDistribution<numberType> {
+) : FixedWidthBinDistribution<numberType, Bin<numberType>> {
 
     override fun random(): numberType {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

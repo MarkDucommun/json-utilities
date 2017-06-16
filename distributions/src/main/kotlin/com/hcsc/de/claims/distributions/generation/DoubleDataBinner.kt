@@ -8,6 +8,6 @@ class DoubleDataBinner: DataBinner<Double> {
 
     override fun bin(list: List<Double>): Result<String, List<Bin<Double>>> {
 
-        return Success(list.toFixedWidthBinDistribution().bins)
+        return Success(list.toFixedWidthBinCountDistribution().bins)
     }
 }

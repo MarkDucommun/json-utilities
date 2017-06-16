@@ -2,7 +2,7 @@ package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.distributions.binDistributions.GenericFixedWidthBinDistribution
 import com.hcsc.de.claims.distributions.bins.SimpleBin
-import com.hcsc.de.claims.distributions.generation.toFixedWidthBinDistribution
+import com.hcsc.de.claims.distributions.generation.toFixedWidthBinCountDistribution
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
 
@@ -11,7 +11,7 @@ class UnknownIntFixedBinWidthDistributionTest {
     @Test
     fun `it creates a simple UnknownDistribution from a list of binary integers`() {
 
-        val distribution = listOf(1, 1, 1, 0, 0).toFixedWidthBinDistribution(binCount = 1000)
+        val distribution = listOf(1, 1, 1, 0, 0).toFixedWidthBinCountDistribution(binCount = 1000)
 
         assertThat(distribution).isEqualToComparingFieldByFieldRecursively(GenericFixedWidthBinDistribution(
                 average = 1,
@@ -30,7 +30,7 @@ class UnknownIntFixedBinWidthDistributionTest {
     @Test
     fun `it creates a simple UnknownDistribution from a list of integers with nu`() {
 
-        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5).toFixedWidthBinDistribution(binCount = 5)
+        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5).toFixedWidthBinCountDistribution(binCount = 5)
 
         assertThat(distribution).isEqualToComparingFieldByFieldRecursively(GenericFixedWidthBinDistribution(
                 average = 3,
@@ -52,7 +52,7 @@ class UnknownIntFixedBinWidthDistributionTest {
     @Test
     fun `it creates a simple UnknownDistribution from a list of integers`() {
 
-        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinDistribution(binCount = 3)
+        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinCountDistribution(binCount = 3)
 
         assertThat(distribution).isEqualToComparingFieldByFieldRecursively(GenericFixedWidthBinDistribution(
                 average = 3,
@@ -72,7 +72,7 @@ class UnknownIntFixedBinWidthDistributionTest {
     @Test
     fun `it creates a simple UnknownDistribution from a list of integers blah`() {
 
-        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinDistribution(binCount = 2)
+        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinCountDistribution(binCount = 2)
 
         assertThat(distribution).isEqualToComparingFieldByFieldRecursively(GenericFixedWidthBinDistribution(
                 average = 3,
@@ -91,7 +91,7 @@ class UnknownIntFixedBinWidthDistributionTest {
     @Test
     fun `it can create a UnknownDistribution for a specified min and max from a list of integers`() {
 
-        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinDistribution(
+        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinCountDistribution(
                 binCount = 3,
                 rangeMinimum = 0,
                 rangeMaximum = 8
@@ -115,7 +115,7 @@ class UnknownIntFixedBinWidthDistributionTest {
     @Test
     fun `it excludes values from the distribution that are not within the specified range`() {
 
-        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinDistribution(
+        val distribution = listOf(1, 1, 1, 2, 2, 3, 4, 5, 5, 6).toFixedWidthBinCountDistribution(
                 binCount = 2,
                 rangeMinimum = 2,
                 rangeMaximum = 5

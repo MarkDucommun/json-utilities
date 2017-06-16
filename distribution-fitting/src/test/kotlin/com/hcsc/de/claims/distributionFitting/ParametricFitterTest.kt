@@ -23,8 +23,8 @@ abstract class ParametricFitterTest {
 
         subject.weibullParameters(list) succeedsAnd { (shape, scale) ->
 
-            assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(10.0))
-            assertThat(scale).isCloseTo(20.0, Percentage.withPercentage(10.0))
+            assertThat(shape).isCloseTo(2.0, Percentage.withPercentage(15.0))
+            assertThat(scale).isCloseTo(20.0, Percentage.withPercentage(15.0))
         }
     }
 

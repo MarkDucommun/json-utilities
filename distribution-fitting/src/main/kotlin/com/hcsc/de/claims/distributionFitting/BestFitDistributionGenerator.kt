@@ -18,11 +18,11 @@ import java.util.*
 
 class BestFitDistributionGenerator(
         private val parametricFitter: ParametricFitter
-) : DistributionGenerator<Double> {
+) : DistributionGenerator<Double, DistributionProfile<Double, Distribution<Double>>, Distribution<Double>> {
 
     val random = Random()
 
-    override fun profile(list: List<Double>): Result<String, DistributionProfile<Double>> {
+    override fun profile(list: List<Double>): Result<String, DistributionProfile<Double, Distribution<Double>>> {
 
         return profileWith(
                 list = list,
@@ -33,7 +33,7 @@ class BestFitDistributionGenerator(
     fun profileWith(
             list: List<Double>,
             distributionCreators: List<(List<Double>) -> Result<String, Randomable<Double>>>
-    ): Result<String, DistributionProfile<Double>> {
+    ): Result<String, DistributionProfile<Double, Distribution<Double>>> {
 
         val doubleList = list.map { it }
 
@@ -92,14 +92,12 @@ class BestFitDistributionGenerator(
 
         val unknownVariableBinWidthDistribution: BinDistribution<Double, BinWithMembers<Double>> = it.minimizedBinSizeBinDistribution(it.size.toDouble().sqrt().ceiling().toInt())
 
-//        val result = unknownVariableBinWidthDistribution.toDistributedBinDistribution()
-//
-//        when (result) {
-//            is Success -> Success<String, Randomable<Double>>(result.content)
-//            is Failure -> Failure(result.content)
-//        }
+        val result = unknownVariableBinWidthDistribution.toDistributedBinDistribution()
 
-        TODO()
+        when (result) {
+            is Success -> Success<String, Randomable<Double>>(result.content)
+            is Failure -> Failure(result.content)
+        }
     }
 
     val shallowNonParametricDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = {

@@ -4,13 +4,14 @@ import com.hcsc.de.claims.distributions.generation.DistributionGenerator
 import com.hcsc.de.claims.distributions.Distribution
 import com.hcsc.de.claims.distributions.parametric.IntNormalDistribution
 import com.hcsc.de.claims.distributions.RatioProbability
+import com.hcsc.de.claims.distributions.generation.DistributionProfile
 import com.hcsc.de.claims.distributions.generation.asIntDistribution
 import com.hcsc.de.claims.results.*
 import kotlin.reflect.KClass
 
 class SingleThreadJsonSizeAnalyzer(
         analyzer: JsonSizeAnalyzer? = null,
-        private val distributionGenerator: DistributionGenerator<Double>
+        private val distributionGenerator: DistributionGenerator<Double, DistributionProfile<Double, Distribution<Double>>, Distribution<Double>>
 ) : JsonSizeAnalyzer {
 
     private val analyzer: JsonSizeAnalyzer = analyzer ?: this
