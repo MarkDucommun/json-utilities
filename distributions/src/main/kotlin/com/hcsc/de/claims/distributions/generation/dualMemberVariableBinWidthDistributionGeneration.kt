@@ -145,20 +145,20 @@ private fun <numberType : Number> DualMemberBin<numberType, BinWithMembers<numbe
     }
 }
 
-private val <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.smallestMemberCount: Int get() {
-    return if (binOne.size > binTwo.size) binTwo.size else binOne.size
-}
+private val <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.smallestMemberCount: Int
+    get() = if (binOne.size > binTwo.size) binTwo.size else binOne.size
 
-private fun <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.isValid(count: Int): Boolean {
-    return binOne.size >= count && binTwo.size >= count
-}
+private fun <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.isValid(count: Int): Boolean =
+        binOne.size >= count && binTwo.size >= count
 
 private fun <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.isSplittable(count: Int): Boolean {
 
     val memberOneSet = binOne.members.toSet()
     val memberTwoSet = binTwo.members.toSet()
 
-    return endValue.toDouble() - startValue.toDouble() > 0.0
+    val binWidthIsNotZero = endValue.toDouble() - startValue.toDouble() > 0.0
+
+    return binWidthIsNotZero
             && binOne.size >= count * 2 && binTwo.size >= count * 2
             && memberOneSet.size > 1 && memberTwoSet.size > 1
             && binOne.doubleMembers.filter { it < median.toDouble() }.size >= count

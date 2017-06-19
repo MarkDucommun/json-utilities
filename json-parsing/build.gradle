@@ -1,11 +1,9 @@
 apply from: "../gradle/scripts/kotlin.gradle"
+apply from: "../gradle/scripts/results.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
 
 dependencies {
 
-    compile project(':results')
-
-    testCompile project(':result-test-helpers')
     testCompile project(':file-reading')
 
     testCompile 'com.fasterxml.jackson.core:jackson-databind:2.8.8.1'

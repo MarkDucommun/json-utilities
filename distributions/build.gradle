@@ -1,4 +1,5 @@
 apply from: "../gradle/scripts/kotlin.gradle"
+apply from: "../gradle/scripts/results.gradle"
 apply from: "../gradle/scripts/statistics.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
 
@@ -7,9 +8,6 @@ dependencies {
 	compile project(':collection-helpers')
 	compile project(':kotlin-jackson-helpers')
 	compile project(':math-helpers')
-	compile project(':results')
 
 	testCompile 'com.nhaarman:mockito-kotlin:1.4.0'
-
-	testCompile project(':result-test-helpers')
 }

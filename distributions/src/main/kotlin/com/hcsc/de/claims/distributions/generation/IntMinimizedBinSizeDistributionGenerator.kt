@@ -4,6 +4,5 @@ import com.hcsc.de.claims.distributions.binDistributions.IntBinWithMembersDistri
 import com.hcsc.de.claims.distributions.bins.IntBinWithMembers
 
 class IntMinimizedBinSizeDistributionGenerator : MinimizedBinSizeDistributionGenerator<Int>(
-        toBinNumberType = { IntBinWithMembers(members = this.members.map(Double::toInt)) },
-        toBinDistribution = { IntBinWithMembersDistribution(bins = this) }
+        toType = { Math.round(this).toInt() }
 )

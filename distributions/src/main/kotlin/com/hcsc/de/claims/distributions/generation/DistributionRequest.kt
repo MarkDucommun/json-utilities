@@ -21,7 +21,9 @@ sealed class DistributionRequest<out numberType: Number>{
 
     data class FixedWidthBinCountDistributionRequest<out numberType: Number>(
             override val list: List<numberType>,
-            val binCount: Int
+            val binCount: Int,
+            val minimum: numberType? = null,
+            val maximum: numberType? = null
     ) : DistributionRequest<numberType>()
 
     data class IdealBinCountDistributionRequest<out numberType: Number>(

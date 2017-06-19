@@ -1,11 +1,11 @@
 apply from: "../gradle/scripts/kotlin.gradle"
 apply from: "../gradle/scripts/jackson.gradle"
+apply from: "../gradle/scripts/results.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
 
 dependencies {
 
 	compile project(':distributions')
-	compile project(':results')
 
 	compile 'jfree:jfreechart:1.0.13'
 
@@ -13,5 +13,4 @@ dependencies {
 
 	testCompile project(':distribution-fitting')
 	testCompile project(':file-reading')
-	testCompile project(':result-test-helpers')
 }

@@ -1,5 +1,2 @@
 apply from: "../gradle/scripts/kotlin.gradle"
-
-dependencies {
-    compile project(':results')
-}
+apply from: "../gradle/scripts/results.gradle"

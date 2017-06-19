@@ -1,5 +1,6 @@
 apply from: "../gradle/scripts/kotlin.gradle"
 apply from: "../gradle/scripts/jackson.gradle"
+apply from: "../gradle/scripts/results.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
 
 dependencies {
@@ -8,11 +9,9 @@ dependencies {
 	compile project(':json-schema-conversion')
 	compile project(':kotlin-jackson-helpers')
 	compile project(':math-helpers')
-	compile project(':results')
 
 	testCompile('com.nhaarman:mockito-kotlin:1.4.0')
 
 	testCompile project(':common-abstractions-test-helpers')
 	testCompile project(':file-reading')
-	testCompile project(':result-test-helpers')
 }

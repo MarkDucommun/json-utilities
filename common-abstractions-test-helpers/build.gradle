@@ -1,9 +1,9 @@
 apply from: "../gradle/scripts/kotlin.gradle"
+apply from: "../gradle/scripts/results.gradle"
 
 dependencies {
 
     compile project(':common-abstractions')
-    compile project(':results')
 
     compile('com.nhaarman:mockito-kotlin:1.4.0')
 }
