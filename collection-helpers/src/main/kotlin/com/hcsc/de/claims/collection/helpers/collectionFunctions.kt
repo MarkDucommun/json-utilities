@@ -1,5 +1,8 @@
 package com.hcsc.de.claims.collection.helpers
 
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
+
 fun <T, U> Collection<T>.ifNotEmptyOtherwiseNull(fn: Collection<T>.() -> U): U? {
     return if (this.isNotEmpty()) this.fn() else null
 }
@@ -26,6 +29,22 @@ fun List<Int>.filterByComparable(value: Int?, compareFn: Int.(Int) -> Boolean): 
 fun List<Int>.filterNotByComparable(value: Int?, compareFn: Int.(Int) -> Boolean): List<Int> =
         value?.let { filterNot { it.compareFn(value)} } ?: this
 
+
+fun NonEmptyList<Double>.filterNotLessThan(value: Double?) = filterNotByComparable(value, { this < it})
+
+fun NonEmptyList<Double>.filterNotGreaterThan(value: Double?) = filterNotByComparable(value, { this < it})
+
+fun NonEmptyList<Double>.filterByComparable(
+        value: Double?,
+        compareFn: Double.(Double) -> Boolean
+): Result<String, NonEmptyList<Double>> =
+        value?.let { filter { it.compareFn(value) } } ?: Success(this)
+
+fun NonEmptyList<Double>.filterNotByComparable(
+        value: Double?,
+        compareFn: Double.(Double) -> Boolean
+): Result<String, NonEmptyList<Double>> =
+        value?.let { filterNot { it.compareFn(value) } } ?: Success(this)
 
 
 fun List<Double>.filterLessThan(minimum: Double?): List<Double> = filterByComparable(minimum, { this < it })

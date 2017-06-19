@@ -4,7 +4,7 @@
 .gradle/
 build/
 /json-generator/src/test/resources/data/
-/json-generator/claim-size-list.csv
+/json-generator/claim-size-all.csv
 /data/yan0510.json
 /data/yan0511.json
 /src/test/resources/data/

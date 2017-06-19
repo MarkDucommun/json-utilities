@@ -1,13 +1,11 @@
 apply from: "../gradle/scripts/kotlin.gradle"
 apply from: "../gradle/scripts/jackson.gradle"
+apply from: "../gradle/scripts/results.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
 
 dependencies {
 
 	compile project(':kotlin-jackson-helpers')
-	compile project(':results')
 
 	testCompile 'com.nhaarman:mockito-kotlin:1.4.0'
-
-	testCompile project(':result-test-helpers')
 }

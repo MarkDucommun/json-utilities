@@ -6,11 +6,13 @@ import com.hcsc.de.claims.distributions.generation.DistributionRequest.FixedWidt
 import com.hcsc.de.claims.results.Failure
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.map
 
 class FixedWidthBinDistributionGenerator<numberType : Number>(
         private val toType: Double.() -> numberType
 ) : BinDistributionGenerator<
         numberType,
+
         FixedWidthBinDistributionRequest<numberType>,
         DistributionProfile<numberType, FixedWidthBinDistribution<numberType, Bin<numberType>>>,
         FixedWidthBinDistribution<numberType, Bin<numberType>>,
@@ -24,14 +26,12 @@ class FixedWidthBinDistributionGenerator<numberType : Number>(
 
         return if (list.isNotEmpty()) {
 
-            Success(DistributionProfile(
-                    pValue = 1.0,
-                    distribution = list.genericFixedWidthBinDistribution(
-                            binWidth = binWidth,
-                            rangeMinimum = null,
-                            rangeMaximum = null,
-                            toType = toType
-                    )))
+            list.genericFixedWidthBinDistribution(
+                    binWidth = binWidth,
+                    rangeMinimum = null,
+                    rangeMaximum = null,
+                    toType = toType
+            ).map { DistributionProfile(pValue = 1.0, distribution = it) }
         } else {
             Failure("")
         }

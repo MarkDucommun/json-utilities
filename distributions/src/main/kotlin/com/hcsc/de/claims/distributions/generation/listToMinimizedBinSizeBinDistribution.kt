@@ -1,67 +1,56 @@
 package com.hcsc.de.claims.distributions.generation
 
-import com.hcsc.de.claims.collection.helpers.filterNotGreaterThan
-import com.hcsc.de.claims.collection.helpers.filterNotLessThan
+import com.hcsc.de.claims.collection.helpers.*
 import com.hcsc.de.claims.distributions.binDistributions.BinDistribution
-import com.hcsc.de.claims.distributions.binDistributions.DoubleBinWithMembersDistribution
-import com.hcsc.de.claims.distributions.binDistributions.IntBinWithMembersDistribution
+import com.hcsc.de.claims.distributions.binDistributions.BinWithMembersDistribution
+import com.hcsc.de.claims.distributions.bins.AutomaticBinWithMembers
 import com.hcsc.de.claims.distributions.bins.BinWithMembers
 import com.hcsc.de.claims.distributions.bins.DoubleBinWithMembers
-import com.hcsc.de.claims.distributions.bins.IntBinWithMembers
-
-
-fun List<Double>.minimizedBinSizeBinDistribution(
-        minimumBinSize: Int = 5,
-        rangeMinimum: Double? = null,
-        rangeMaximum: Double? = null
-): BinDistribution<Double, BinWithMembers<Double>> =
-        genericMinimizedBinSizeBinDistribution(
-                minimumBinSize = minimumBinSize,
-                rangeMinimum = rangeMinimum,
-                rangeMaximum = rangeMaximum,
-                toBinNumberType = { this },
-                toBinDistribution = { DoubleBinWithMembersDistribution(bins = this) }
-        )
-
-fun List<Int>.minimizedBinSizeBinDistribution(
-        minimumBinSize: Int = 5,
-        rangeMinimum: Int? = null,
-        rangeMaximum: Int? = null
-): BinDistribution<Int, BinWithMembers<Int>> =
-        genericMinimizedBinSizeBinDistribution(
-                minimumBinSize = minimumBinSize,
-                rangeMinimum = rangeMinimum,
-                rangeMaximum = rangeMaximum,
-                toBinNumberType = { IntBinWithMembers(members = this.members.map(Double::toInt)) },
-                toBinDistribution = { IntBinWithMembersDistribution(bins = this) }
-        )
+import com.hcsc.de.claims.distributions.bins.SplitBinHolder
+import com.hcsc.de.claims.results.*
 
 fun <numberType : Number> List<numberType>.genericMinimizedBinSizeBinDistribution(
         minimumBinSize: Int = 5,
         rangeMinimum: numberType? = null,
         rangeMaximum: numberType? = null,
-        toBinNumberType: BinWithMembers<Double>.() -> BinWithMembers<numberType>,
-        toBinDistribution: List<BinWithMembers<numberType>>.() -> BinDistribution<numberType, BinWithMembers<numberType>>
-): BinDistribution<numberType, BinWithMembers<numberType>> =
+        toType: Double.() -> numberType
+): Result<String, BinDistribution<numberType, BinWithMembers<numberType>>> =
         this
                 .map(Number::toDouble)
                 .sorted()
                 .filterNotLessThan(rangeMinimum?.toDouble())
                 .filterNotGreaterThan(rangeMaximum?.toDouble())
+                .asNonEmptyList()
+                .map { it.map(toType) }
+                .map { it.genericMinimizedBinSizeBinDistribution(minimumBinSize = minimumBinSize, toType = toType) }
+
+fun <numberType : Number> NonEmptyList<numberType>.genericMinimizedBinSizeBinDistribution(
+        minimumBinSize: Int,
+        toType: Double.() -> numberType
+): BinDistribution<numberType, BinWithMembers<numberType>> =
+        this
+                .map(Number::toDouble)
+                .sorted()
                 .asDoubleBin
                 .maximizeBins(minimumBinSize)
-                .map(toBinNumberType)
-                .toBinDistribution()
+                .map { AutomaticBinWithMembers<numberType>(rawMembers = it.members.map(toType), toType = toType) }
+                .let { BinWithMembersDistribution(rawBins = it, toType = toType) }
 
 private fun BinWithMembers<Double>.maximizeBins(binCount: Int): List<BinWithMembers<Double>> =
-        splitByDouble(members.average()).let { (upper, lower) ->
-            if (lower.isValid(binCount) && upper.isValid(binCount)) {
-                listOf(lower.maximizeBins(binCount), upper.maximizeBins(binCount)).flatten()
-            } else {
-                listOf(this)
-            }
+        this
+                .split(members.average())
+                .flatMap { it.bothAreValid(binCount) }
+                .map { (lower, upper) -> listOf(lower.maximizeBins(binCount), upper.maximizeBins(binCount)).flatten() }
+                .getOrElse(alternate = listOf(this))
+
+private fun SplitBinHolder<Double, BinWithMembers<Double>>.bothAreValid(binCount: Int):
+        Result<String, SplitBinHolder<Double, BinWithMembers<Double>>> =
+        if (lower.isValid(binCount) && upper.isValid(binCount)) {
+            Success(this)
+        } else {
+            Failure("")
         }
 
-private val List<Double>.asDoubleBin: BinWithMembers<Double> get() = DoubleBinWithMembers(members = this)
+private val NonEmptyList<Double>.asDoubleBin: BinWithMembers<Double> get() = DoubleBinWithMembers(members = this.all)
 
 private fun BinWithMembers<Double>.isValid(binCount: Int): Boolean = endValue - startValue >= 0.0 && size >= binCount

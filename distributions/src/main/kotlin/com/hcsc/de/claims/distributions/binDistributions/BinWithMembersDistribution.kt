@@ -15,7 +15,7 @@ open class BinWithMembersDistribution<numberType : Number, out binType : BinWith
 
     override val binCount: Int = rawBins.size
 
-    val members: List<Double> = rawBins.flatMap { it.members }.map(Number::toDouble)
+    val members: List<Double> = rawBins.flatMap { it.members.all }.map(Number::toDouble)
 
     override val average: numberType = members.average().toType()
     override val minimum: numberType = (members.min() ?: 0.0).toType()

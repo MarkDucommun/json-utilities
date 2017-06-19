@@ -21,4 +21,8 @@ class DoubleWithinZeroAndOne private constructor(
         is DoubleWithinZeroAndOne -> value == other.value
         else -> false
     }
+
+    override fun hashCode(): Int {
+        return value.hashCode()
+    }
 }

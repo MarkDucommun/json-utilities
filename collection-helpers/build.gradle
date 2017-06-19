@@ -1,2 +1,8 @@
 apply from: "../gradle/scripts/kotlin.gradle"
+apply from: "../gradle/scripts/results.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
+
+dependencies {
+
+    compile project(':math-helpers')
+}

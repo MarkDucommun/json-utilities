@@ -1,0 +1,6 @@
+dependencies {
+
+    compile project(':results')
+
+    testCompile project(':result-test-helpers')
+}

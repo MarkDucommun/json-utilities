@@ -1,4 +1,5 @@
 apply from: "../gradle/scripts/kotlin.gradle"
+apply from: "../gradle/scripts/results.gradle"
 apply from: "../gradle/scripts/statistics.gradle"
 apply from: "../gradle/scripts/unitTest.gradle"
 
@@ -11,12 +12,10 @@ dependencies {
 	compile project(':distributions')
 	compile project(':distribution-fitting')
 	compile project(':kotlin-jackson-helpers')
-	compile project(':results')
 
 	compile name: 'flanagan'
 
 	testCompile 'com.nhaarman:mockito-kotlin:1.4.0'
 
 	testCompile project(':histogrammer')
-	testCompile project(':result-test-helpers')
 }
