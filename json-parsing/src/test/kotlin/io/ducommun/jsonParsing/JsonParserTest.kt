@@ -83,7 +83,7 @@ class JsonParserTest {
         val throwingErrors = results.filter { it.errorThrown }
 
         assertThat(notMatching.size).isLessThanOrEqualTo(0)
-        assertThat(throwingErrors.size).isLessThanOrEqualTo(7)
+        assertThat(throwingErrors.size).isLessThanOrEqualTo(0)
 
         if (true) {
 

@@ -1,5 +1,6 @@
 package io.ducommun.jsonParsing
 
+import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.flatMap
 
 class JsonParser {
@@ -8,7 +9,7 @@ class JsonParser {
     val jsonStructureNester = JsonStructureNester()
     val jsonStructureTranslator = JsonStructureTranslator()
 
-    fun parse(string: String): com.hcsc.de.claims.results.Result<String, JsonNode> {
+    fun parse(string: String): Result<String, JsonNode> {
 
         return jsonStructureParser.parse(string)
                 .flatMap { jsonStructureNester.nest(it) }

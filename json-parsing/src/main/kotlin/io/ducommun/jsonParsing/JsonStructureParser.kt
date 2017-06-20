@@ -20,16 +20,8 @@ class JsonStructureParser {
         }.flatMap {
 
             when (it.previousClosable) {
-                is LiteralStructureElement -> if (it.structureStack.size > 2) {
-                    Failure<String, Accumulator<*, *>>("Invalid JSON - must close all open elements")
-                } else {
-                    Success<String, Accumulator<*, *>>(it)
-                }
-                else -> if (it.structureStack.size > 1) {
-                    Failure<String, Accumulator<*, *>>("Invalid JSON - must close all open elements")
-                } else {
-                    Success<String, Accumulator<*, *>>(it)
-                }
+                is LiteralStructureElement -> it.ensureStructureStackLessThanOrEqualTo(2)
+                else -> it.ensureStructureStackLessThanOrEqualTo(1)
             }
         }.flatMap {
 
@@ -43,4 +35,15 @@ class JsonStructureParser {
 
     fun rootAccumulatorResult(): Result<String, Accumulator<JsonStructure, MainStructure<*>>> =
             Success(RootAccumulator)
+
+    fun Accumulator<*, *>.ensureAllStructuresAreClosed(): Result<String, Accumulator<*, *>> =
+
+    fun Accumulator<*, *>.ensureStructureStackLessThanOrEqualTo(size: Int): Result<String, Accumulator<*, *>> {
+
+        return if (structureStack.size > size) {
+            Failure<String, Accumulator<*, *>>("Invalid JSON - must close all open elements")
+        } else {
+            Success<String, Accumulator<*, *>>(this)
+        }
+    }
 }
