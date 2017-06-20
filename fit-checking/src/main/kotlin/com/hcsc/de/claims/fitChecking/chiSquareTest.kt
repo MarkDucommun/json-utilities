@@ -3,7 +3,7 @@ package com.hcsc.de.claims.fitChecking
 import com.hcsc.de.claims.distributions.binDistributions.BinDistribution
 import com.hcsc.de.claims.distributions.bins.Bin
 import com.hcsc.de.claims.distributions.generation.unknownDistribution
-import com.hcsc.de.claims.distributions.generation.unknownDualMemberVariableBinWidthDistribution
+import com.hcsc.de.claims.distributions.generation.idealBinCountMinimumSizedDualMemberBinDistribution
 import org.apache.commons.math3.distribution.ChiSquaredDistribution
 import umontreal.ssj.gof.GofStat
 import umontreal.ssj.probdist.ChiSquareDist
@@ -38,7 +38,7 @@ fun List<Int>.chiSquaredTestFromList(expected: List<Int>, binCount: Int = 5): co
 
 fun <numberType : Number> com.hcsc.de.claims.distributions.DistributionPair<numberType>.chiSquaredTest(binCount: Int = 10): com.hcsc.de.claims.results.Result<String, ChiSquareValue> {
 
-    val (distOne, distTwo) = this.unknownDualMemberVariableBinWidthDistribution(binCount).asTwoDistributions
+    val (distOne, distTwo) = this.idealBinCountMinimumSizedDualMemberBinDistribution(binCount).asTwoDistributions
 
     val actualBins = distOne.bins.count()
     print("actualBins: $actualBins, ")
@@ -115,7 +115,7 @@ fun List<Double>.chiSquaredTestFromDoubleList(expected: List<Double>, binCount: 
 
 fun com.hcsc.de.claims.distributions.DistributionPair<Double>.doubleChiSquaredTest(binCount: Int = 10): com.hcsc.de.claims.results.Result<String, ChiSquareValue> {
 
-    val (distOne, distTwo) = this.unknownDualMemberVariableBinWidthDistribution(binCount).asTwoDistributions
+    val (distOne, distTwo) = this.idealBinCountMinimumSizedDualMemberBinDistribution(binCount).asTwoDistributions
 
     return distOne.doubleChiSquaredTest(distTwo)
 }

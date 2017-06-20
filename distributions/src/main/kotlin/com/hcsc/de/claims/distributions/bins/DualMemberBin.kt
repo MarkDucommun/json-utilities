@@ -10,5 +10,5 @@ interface DualMemberBin<memberType : Number, binType : BinWithMembers<memberType
 
     fun plus(other: DualMemberBin<memberType, binType>): DualMemberBin<memberType, binType>
 
-    override fun split(value: memberType): Result<String, SplitBinHolder<memberType, DualMemberBin<memberType, binType>>>
+    fun splitDualBin(value: memberType): Result<String, SplitBinHolder<memberType, DualMemberBin<memberType, binType>>>
 }

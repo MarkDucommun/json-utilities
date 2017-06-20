@@ -37,7 +37,7 @@ fun <numberType: Number> NonEmptyList<numberType>.genericFixedWidthBinCountDistr
 
     val bins = doubleList.toFixedWidthBins(binWidth = binWidth, minimum = minimum)
 
-    return GenericFixedWidthBinDistribution<numberType>(
+    return GenericFixedWidthBinDistribution(
             average = doubleList.average().toType(),
             minimum = minimum.toType(),
             maximum = maximum.toType(),
