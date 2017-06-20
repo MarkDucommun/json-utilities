@@ -2,6 +2,7 @@
 
 package com.hcsc.de.claims.distributions.generation
 
+import com.hcsc.de.claims.collection.helpers.NonEmptyList
 import com.hcsc.de.claims.collection.helpers.asNonEmptyList
 import com.hcsc.de.claims.collection.helpers.filterNotGreaterThan
 import com.hcsc.de.claims.collection.helpers.filterNotLessThan
@@ -23,23 +24,9 @@ fun <numberType : Number> DistributionPair<numberType>.idealBinCountMinimumSized
 
     val (listOne, listTwo) = this
 
-    val resultListOne = listOne
-            .map(Number::toDouble)
-            .sorted()
-            .filterNotLessThan(rangeMinimum?.toDouble())
-            .filterNotGreaterThan(rangeMaximum?.toDouble())
-            .map(toType)
-            .asNonEmptyList()
+    fun List<numberType>.transformList() = transformList(min = rangeMinimum, max = rangeMaximum, toType = toType)
 
-    val resultListTwo = listTwo
-            .map(Number::toDouble)
-            .sorted()
-            .filterNotLessThan(rangeMinimum?.toDouble())
-            .filterNotGreaterThan(rangeMaximum?.toDouble())
-            .map(toType)
-            .asNonEmptyList()
-
-    return zip(resultListOne, resultListTwo).map {
+    return zip(listOne.transformList(), listTwo.transformList()).map {
 
         NonEmptyDistributionPair(it.first, it.second).idealBinCountMinimumSizedDualMemberBinDistribution(
                 minimumBinSize = minimumBinSize,
@@ -47,7 +34,6 @@ fun <numberType : Number> DistributionPair<numberType>.idealBinCountMinimumSized
         )
     }
 }
-
 
 fun <numberType : Number> NonEmptyDistributionPair<numberType>.idealBinCountMinimumSizedDualMemberBinDistribution(
         minimumBinSize: Int = 5,
@@ -115,6 +101,7 @@ fun <numberType : Number> NonEmptyDistributionPair<numberType>.idealBinCountMini
     )
 }
 
+
 private fun DualMemberBin<Double, BinWithMembers<Double>>.splitBin(binSize: Int): List<DualMemberBin<Double, BinWithMembers<Double>>> {
 
     val (low, high) = if (binOne.average < binTwo.average) binOne.average to binTwo.average else binTwo.average to binOne.average
@@ -164,6 +151,18 @@ private fun DualMemberBin<Double, BinWithMembers<Double>>.splitBin(binSize: Int)
         }
     }.bins
 }
+
+fun <numberType : Number> List<numberType>.transformList(
+        min: numberType?,
+        max: numberType?,
+        toType: Double.() -> numberType): Result<String, NonEmptyList<numberType>> =
+        this
+                .map(Number::toDouble)
+                .sorted()
+                .filterNotLessThan(min?.toDouble())
+                .filterNotGreaterThan(max?.toDouble())
+                .map(toType)
+                .asNonEmptyList()
 
 private val <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.smallestMemberCount: Int
     get() = if (binOne.size > binTwo.size) binTwo.size else binOne.size
