@@ -9,7 +9,6 @@ abstract class StringAccumulator<out previousElementType : StringElement>
     override fun processChar(char: Char): Result<String, Accumulator<*, *>> {
 
         return when (char) {
-            // TODO can this just be closeString() without the when?
             '"' -> when (enclosingStructure) {
                 is EmptyStructureElement -> closeString()
                 is ArrayStructureElement -> closeString()

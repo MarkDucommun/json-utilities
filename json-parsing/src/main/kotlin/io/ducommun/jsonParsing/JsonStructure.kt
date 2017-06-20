@@ -75,6 +75,13 @@ object StringEscape : StringElement() {
     override val id: Long = 0
 }
 
+data class StringUnicode(
+        override val id: Long,
+        val unicodeValue: String
+) : StringElement() {
+    val isFinal: Boolean = unicodeValue.length == 3
+}
+
 data class StringClose(
         override val id: Long
 ) : StringElement(), Close

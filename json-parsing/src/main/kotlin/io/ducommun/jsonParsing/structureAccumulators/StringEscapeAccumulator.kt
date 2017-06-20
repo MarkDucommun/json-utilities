@@ -1,10 +1,8 @@
 package io.ducommun.jsonParsing.structureAccumulators
 
-import io.ducommun.jsonParsing.JsonStructure
-import io.ducommun.jsonParsing.MainStructure
-import io.ducommun.jsonParsing.StringEscape
-import io.ducommun.jsonParsing.StringStructureElement
 import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
+import io.ducommun.jsonParsing.*
 
 data class StringEscapeAccumulator(
         override val idCounter: Long,
@@ -23,6 +21,15 @@ data class StringEscapeAccumulator(
             'f' -> addStringValue(12.toChar())
             'r' -> addStringValue('\r')
             't' -> addStringValue('\t')
+            'u' -> {
+                return Success(StringUnicodeAccumulator(
+                        idCounter = idCounter,
+                        structure = structure,
+                        structureStack = structureStack,
+                        previousElement = StringUnicode(id = previousClosable.id, unicodeValue = ""),
+                        previousClosable = previousClosable
+                ))
+            }
             else -> fail("only quotes and slashes and control characters may follow escape characters")
         }
     }

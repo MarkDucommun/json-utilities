@@ -88,4 +88,14 @@ class JsonStructureParserStringTest : JsonStructureParserBaseTest() {
 
         "\"a".jsonStructure failsWithMessage "Invalid JSON - must close all open elements"
     }
+
+    @Test
+    fun `it translates a unicode value`() {
+
+        "\"\\u0000\"".jsonStructure succeedsAndShouldReturn listOf(
+                StringOpen(id = 1),
+                StringValue(id = 1, value = '\u0000'),
+                StringClose(id = 1)
+        )
+    }
 }

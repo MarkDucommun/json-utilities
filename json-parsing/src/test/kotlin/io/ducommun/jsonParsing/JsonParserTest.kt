@@ -54,7 +54,7 @@ class JsonParserTest {
     @Test
     fun `it fails to parse literals with array closes in them`() {
 
-        subject.parse("1]") failsWithMessage "']' is not a valid literal character"
+        subject.parse("1]") failsWithMessage "Invalid JSON - ']' is not a valid literal character"
     }
 
     @Test
@@ -82,8 +82,8 @@ class JsonParserTest {
 
         val throwingErrors = results.filter { it.errorThrown }
 
-        assertThat(notMatching.size).isLessThanOrEqualTo(25)
-        assertThat(throwingErrors.size).isLessThanOrEqualTo(0)
+        assertThat(notMatching.size).isLessThanOrEqualTo(0)
+        assertThat(throwingErrors.size).isLessThanOrEqualTo(7)
 
         if (true) {
 
