@@ -10,7 +10,7 @@ object TrueNode : BooleanNode() { override val value = true }
 
 object FalseNode : BooleanNode() { override val value = false }
 
-abstract class NumberNode : JsonNode()
+sealed class NumberNode : JsonNode()
 
 data class IntegerNode(val value: Long) : NumberNode()
 

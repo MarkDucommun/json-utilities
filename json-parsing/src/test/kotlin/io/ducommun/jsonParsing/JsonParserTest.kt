@@ -1,7 +1,6 @@
 package io.ducommun.jsonParsing
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.hcsc.de.claims.fileReading.RawByteStringFileReader
@@ -85,6 +84,7 @@ class JsonParserTest {
         assertThat(notMatching.size).isLessThanOrEqualTo(0)
         assertThat(throwingErrors.size).isLessThanOrEqualTo(0)
 
+        // TODO this stuff should be in a gradle task probably
         if (true) {
 
             val jacksonNotMatching = results.filterNot { it.jacksonMatchedExpected }
@@ -184,8 +184,9 @@ class JsonParserTest {
         }
 
         val matchesJackson: Boolean =
-                result.result is Success && jacksonResult.result is Success ||
-                        result.result is Failure && jacksonResult.result is Failure
+                result.result is Success && jacksonResult.result is Success
+                        && (result.result as Success).content.equalsJackson((jacksonResult.result as Success).content)
+                        || result.result is Failure && jacksonResult.result is Failure
 
         val unclearFailure: Boolean = expected == Outcome.UNCLEAR && result.result is Failure
 

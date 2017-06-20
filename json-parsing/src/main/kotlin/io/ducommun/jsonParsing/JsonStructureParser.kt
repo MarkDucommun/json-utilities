@@ -11,39 +11,38 @@ import io.ducommun.jsonParsing.structureAccumulators.RootAccumulator
 
 class JsonStructureParser {
 
-    fun parse(string: String): Result<String, List<JsonStructure>> {
+    fun parse(string: String): Result<String, List<JsonStructure>> =
+            string
+                    .toCharArray()
+                    .parseCharsToStructure()
+                    .flatMap { it.ensureAllStructuresAreClosed() }
+                    .flatMap { it.getStructureList() }
 
-        return string.toCharArray().fold(rootAccumulatorResult()) { accumulatorResult, char ->
+    fun CharArray.parseCharsToStructure(): Result<String, Accumulator<*, *>> =
+            fold(rootAccumulatorResult()) { result, char -> result.flatMap { it.processChar(char) } }
 
-            accumulatorResult.flatMap { it.processChar(char) }
-
-        }.flatMap {
-
-            when (it.previousClosable) {
-                is LiteralStructureElement -> it.ensureStructureStackLessThanOrEqualTo(2)
-                else -> it.ensureStructureStackLessThanOrEqualTo(1)
+    fun Accumulator<*, *>.ensureAllStructuresAreClosed(): Result<String, Accumulator<*, *>> =
+            when (previousClosable) {
+                is LiteralStructureElement -> ensureStructureStackLessThanOrEqualTo(2)
+                else -> ensureStructureStackLessThanOrEqualTo(1)
             }
-        }.flatMap {
 
-            when (it) {
-                is EmptyAccumulator -> Success<String, List<JsonStructure>>(it.structure)
-                is LiteralValueAccumulator -> Success<String, List<JsonStructure>>(it.structure)
-                else -> Failure<String, List<JsonStructure>>("Invalid JSON - must close all open elements")
-            }
+    fun Accumulator<*, *>.getStructureList(): Result<String, List<JsonStructure>> {
+
+        return when (this) {
+            is EmptyAccumulator, is LiteralValueAccumulator -> Success(structure)
+            else -> Failure("Invalid JSON - must close all open elements")
         }
     }
+
+    fun Accumulator<*, *>.ensureStructureStackLessThanOrEqualTo(size: Int): Result<String, Accumulator<*, *>> =
+
+            if (structureStack.size > size) {
+                Failure("Invalid JSON - must close all open elements")
+            } else {
+                Success<String, Accumulator<*, *>>(this)
+            }
 
     fun rootAccumulatorResult(): Result<String, Accumulator<JsonStructure, MainStructure<*>>> =
             Success(RootAccumulator)
-
-    fun Accumulator<*, *>.ensureAllStructuresAreClosed(): Result<String, Accumulator<*, *>> =
-
-    fun Accumulator<*, *>.ensureStructureStackLessThanOrEqualTo(size: Int): Result<String, Accumulator<*, *>> {
-
-        return if (structureStack.size > size) {
-            Failure<String, Accumulator<*, *>>("Invalid JSON - must close all open elements")
-        } else {
-            Success<String, Accumulator<*, *>>(this)
-        }
-    }
 }
