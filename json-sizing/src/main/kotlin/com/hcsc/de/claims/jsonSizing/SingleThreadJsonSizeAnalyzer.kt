@@ -11,7 +11,10 @@ import kotlin.reflect.KClass
 
 class SingleThreadJsonSizeAnalyzer(
         analyzer: JsonSizeAnalyzer? = null,
-        private val distributionGenerator: DistributionGenerator<Double, DistributionProfile<Double, Distribution<Double>>, Distribution<Double>>
+        private val distributionGenerator: DistributionGenerator<
+                Double,
+                DistributionProfile<Double, Distribution<Double>>,
+                Distribution<Double>>
 ) : JsonSizeAnalyzer {
 
     private val analyzer: JsonSizeAnalyzer = analyzer ?: this

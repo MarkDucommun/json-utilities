@@ -7,7 +7,7 @@ import com.hcsc.de.claims.results.Result
 interface DistributionGenerator<
         numberType: Number,
         resultType: DistributionProfile<numberType, distributionType>,
-        distributionType: Distribution<numberType>> {
+        out distributionType: Distribution<numberType>> {
 
     fun profile(list: List<numberType>): Result<String, resultType>
 }

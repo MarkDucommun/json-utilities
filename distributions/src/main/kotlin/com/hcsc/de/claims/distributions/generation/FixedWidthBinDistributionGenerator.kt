@@ -12,7 +12,6 @@ class FixedWidthBinDistributionGenerator<numberType : Number>(
         private val toType: Double.() -> numberType
 ) : BinDistributionGenerator<
         numberType,
-
         FixedWidthBinDistributionRequest<numberType>,
         DistributionProfile<numberType, FixedWidthBinDistribution<numberType, Bin<numberType>>>,
         FixedWidthBinDistribution<numberType, Bin<numberType>>,
