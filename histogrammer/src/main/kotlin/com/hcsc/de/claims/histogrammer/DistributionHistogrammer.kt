@@ -14,8 +14,8 @@ class DistributionHistogrammer<numberType : Number>(
                 xLabel = "startValue",
                 yLabel = "Count",
                 dataSets = listOf(
-                        DataSet("One", dualDistribution.bins.map { Datapoint(xValue = it.startValue.toDouble(), count = it.binOne.size) }),
-                        DataSet("Two", dualDistribution.bins.map { Datapoint(xValue = it.startValue.toDouble(), count = it.binTwo.size * -1) })
+                        DataSet("One", dualDistribution.bins.map { Datapoint(xValue = it.startValue.toDouble(), count = it.sourceOneBin.size) }),
+                        DataSet("Two", dualDistribution.bins.map { Datapoint(xValue = it.startValue.toDouble(), count = it.sourceTwoBin.size * -1) })
                 )
         ))
     }

@@ -1,5 +1,6 @@
 package com.hcsc.de.claims.distributions
 
+import com.hcsc.de.claims.collection.helpers.nonEmptyListOf
 import com.hcsc.de.claims.distributions.binDistributions.IntFixedWidthBinWithMembersDistribution
 import com.hcsc.de.claims.distributions.bins.IntBinWithMembers
 import com.hcsc.de.claims.distributions.generation.DistributionProfile
@@ -21,9 +22,9 @@ class FixedWidthBinCountWithMembersDistributionGeneratorTest {
         )) succeedsAndShouldReturn DistributionProfile(
                 distribution = IntFixedWidthBinWithMembersDistribution(
                         bins = listOf(
-                                IntBinWithMembers(listOf(1)),
-                                IntBinWithMembers(listOf(2)),
-                                IntBinWithMembers(listOf(3))
+                                IntBinWithMembers(nonEmptyListOf(1)),
+                                IntBinWithMembers(nonEmptyListOf(2)),
+                                IntBinWithMembers(nonEmptyListOf(3))
                         ),
                         binWidth = 1),
                 pValue = 1.0

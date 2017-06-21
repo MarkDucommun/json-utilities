@@ -1,8 +1,6 @@
 package com.hcsc.de.claims.collection.helpers
 
 import com.hcsc.de.claims.results.failsWithMessage
-import com.hcsc.de.claims.results.get
-import com.hcsc.de.claims.results.succeedsAnd
 import com.hcsc.de.claims.results.succeedsAndShouldReturn
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
@@ -39,13 +37,13 @@ class SimpleNonEmptyListTest {
     @Test
     fun `get - returns a success if there is a value at the requested index`() {
 
-        nonEmptyListOf(1, 2, 3).get(2) succeedsAndShouldReturn 3
+        nonEmptyListOf(1, 2, 3).safeGet(2) succeedsAndShouldReturn 3
     }
 
     @Test
     fun `get - returns a failure if there is no value at the request index`() {
 
-        nonEmptyListOf(1, 2, 3).get(3) failsWithMessage "No value exists at this index"
+        nonEmptyListOf(1, 2, 3).safeGet(3) failsWithMessage "No value exists at this index"
     }
 
     @Test
@@ -242,5 +240,11 @@ class SimpleNonEmptyListTest {
     fun `returns true when to separate objects contain the same values`() {
 
         assertThat(nonEmptyListOf(1, 2, 3) == nonEmptyListOf(1, 2, 3)).isTrue()
+    }
+
+    @Test
+    fun `equals - can compare itself with normal lists`() {
+
+        assertThat(nonEmptyListOf(1, 2, 3) == listOf(1, 2, 3)).isTrue()
     }
 }

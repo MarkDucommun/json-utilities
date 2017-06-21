@@ -1,11 +1,7 @@
 package com.hcsc.de.claims.distributions.bins
 
 import com.hcsc.de.claims.collection.helpers.*
-import com.hcsc.de.claims.math.helpers.median
-import com.hcsc.de.claims.math.helpers.mode
-import com.hcsc.de.claims.results.Result
-import com.hcsc.de.claims.results.flatMap
-import com.hcsc.de.claims.results.map
+import com.hcsc.de.claims.results.*
 
 open class AutomaticBinWithMembers<numberType : Number>(
         rawMembers: NonEmptyList<numberType>,
@@ -28,17 +24,26 @@ open class AutomaticBinWithMembers<numberType : Number>(
     override fun plus(other: BinWithMembers<numberType>): BinWithMembers<numberType> =
             AutomaticBinWithMembers(rawMembers = members.plus(other.members), toType = toType)
 
-    override fun split(value: numberType): Result<String, SplitBinHolder<numberType, BinWithMembers<numberType>>> {
+    override fun split(splitPoint: numberType): Result<SplitFailure, SplitBinHolder<numberType, BinWithMembers<numberType>>> {
 
-        return members.filter { it.toDouble() > value.toDouble() }.flatMap { upperMembers ->
+        val membersAsDoubles = members.map(Number::toDouble)
 
-            members.filterNot { it.toDouble() > value.toDouble() }.map { lowerMembers ->
+        val splitPointDouble = splitPoint.toDouble()
 
-                SplitBinHolder<numberType, BinWithMembers<numberType>>(
-                        upper = AutomaticBinWithMembers(rawMembers = upperMembers, toType = toType),
-                        lower = AutomaticBinWithMembers(rawMembers = lowerMembers, toType = toType)
-                )
-            }
+        val upperResult = membersAsDoubles
+                .filter { it > splitPointDouble }
+                .mapError { UpperSplitFailure as SplitFailure } // TODO send this to Intellij
+
+        val lowerResult = membersAsDoubles
+                .filterNot { it > splitPointDouble }
+                .mapError { LowerSplitFailure as SplitFailure }
+
+        return zip(upperResult, lowerResult).map { (upperMembers, lowerMembers) ->
+
+            val typedUpper = AutomaticBinWithMembers(rawMembers = upperMembers.map(toType), toType = toType)
+            val typedLower = AutomaticBinWithMembers(rawMembers = lowerMembers.map(toType), toType = toType)
+
+            SplitBinHolder<numberType, BinWithMembers<numberType>>(upper = typedUpper, lower = typedLower)
         }
     }
 
@@ -46,4 +51,3 @@ open class AutomaticBinWithMembers<numberType : Number>(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
-

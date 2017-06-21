@@ -60,7 +60,8 @@ sealed class DistributionRequest<out numberType: Number>{
 
         data class IdealBinCountDualDistributionRequest<out numberType: Number>(
                 override val list: List<numberType>,
-                override val listTwo: List<numberType>
+                override val listTwo: List<numberType>,
+                val minimumBinSize: Int = 5
         ) : DualDistributionRequest<numberType>()
     }
 }

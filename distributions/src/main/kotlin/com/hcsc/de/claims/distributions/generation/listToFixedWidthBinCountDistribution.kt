@@ -33,6 +33,7 @@ fun <numberType: Number> NonEmptyList<numberType>.genericFixedWidthBinCountDistr
     val minimum = doubleList.minimum()
     val maximum = doubleList.maximum()
 
+    // TODO go back and make the minimum bin width be 1 elsewhere in the code
     val binWidth = (maximum - minimum + 1) / binCount
 
     val bins = doubleList.toFixedWidthBins(binWidth = binWidth, minimum = minimum)

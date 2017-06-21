@@ -1,12 +1,12 @@
 package com.hcsc.de.claims.distributions.binDistributions
 
 import com.hcsc.de.claims.distributions.bins.BinWithMembers
-import com.hcsc.de.claims.distributions.bins.DualMemberBin
+import com.hcsc.de.claims.distributions.bins.DualSourceBinWithMembers
 
 open class AutomaticDualMemberBinsDistribution<numberType : Number>(
-        rawBins: List<DualMemberBin<numberType, BinWithMembers<numberType>>>,
+        rawBins: List<DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>,
         val toType: Double.() -> numberType
-) : BinWithMembersDistribution<numberType, DualMemberBin<numberType, BinWithMembers<numberType>>>(
+) : BinWithMembersDistribution<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>(
         rawBins = rawBins,
         toType = toType
 ), DualMemberBinsDistribution<numberType> {
@@ -14,6 +14,6 @@ open class AutomaticDualMemberBinsDistribution<numberType : Number>(
     override val asTwoDistributions: Pair<
             BinDistribution<numberType, BinWithMembers<numberType>>,
             BinDistribution<numberType, BinWithMembers<numberType>>>
-        get() = BinWithMembersDistribution(rawBins = bins.map { it.binOne }, toType = toType) to
-                BinWithMembersDistribution(rawBins = bins.map { it.binTwo }, toType = toType)
+        get() = BinWithMembersDistribution(rawBins = bins.map { it.sourceOneBin }, toType = toType) to
+                BinWithMembersDistribution(rawBins = bins.map { it.sourceTwoBin }, toType = toType)
 }

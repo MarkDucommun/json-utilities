@@ -25,11 +25,16 @@ infix fun <failureType, successType> Result<failureType, successType>.failsAnd(o
 }
 
 infix fun <successType> Result<String, successType>.failsWithMessage(expectedMessage: String) {
+    failsAndShouldReturn(expectedFailure = expectedMessage)
+}
+
+infix fun <failureType, successType> Result<failureType, successType>.failsAndShouldReturn(expectedFailure: failureType) {
     when (this) {
         is Success -> fail("Result should have been a Failure")
-        is Failure -> assertThat(content).isEqualTo(expectedMessage)
+        is Failure -> assertThat(content).isEqualTo(expectedFailure)
     }
 }
+
 
 val <failureType, successType> Result<failureType, successType>.get: successType get() = when (this) {
     is Success -> content

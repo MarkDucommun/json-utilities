@@ -1,17 +1,15 @@
 package com.hcsc.de.claims.distributions
 
 import com.hcsc.de.claims.distributions.bins.BinWithMembers
-import com.hcsc.de.claims.distributions.bins.DualMemberBin
+import com.hcsc.de.claims.distributions.bins.DualSourceBinWithMembers
 
 data class SplitHolder(
-        val binSplit: DualMemberBin<Double, BinWithMembers<Double>>? = null,
-        val newBins: List<DualMemberBin<Double, BinWithMembers<Double>>> = emptyList()
+        val splitBin: DualSourceBinWithMembers<Double, BinWithMembers<Double>>? = null,
+        val newBins: List<DualSourceBinWithMembers<Double, BinWithMembers<Double>>> = emptyList()
 ){
-    fun notComplete(fn: () -> SplitHolder): SplitHolder {
-        return if (binSplit == null) {
-            fn.invoke()
-        } else {
-            this
-        }
-    }
+
+    val binWasSplit: Boolean = splitBin != null
+
+    fun runIfNoBinWasSplitYet(fn: () -> SplitHolder): SplitHolder =
+            if (binWasSplit) this else fn.invoke()
 }

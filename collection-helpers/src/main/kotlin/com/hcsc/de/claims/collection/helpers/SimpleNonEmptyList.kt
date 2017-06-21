@@ -1,11 +1,14 @@
 package com.hcsc.de.claims.collection.helpers
 
-import com.hcsc.de.claims.results.*
+import com.hcsc.de.claims.results.Failure
+import com.hcsc.de.claims.results.Result
+import com.hcsc.de.claims.results.Success
+import com.hcsc.de.claims.results.asSuccess
 
 open class SimpleNonEmptyList<type>(
         first: type,
         private val remaining: List<type> = emptyList()
-) : NonEmptyList<type> {
+) : NonEmptyList<type>, List<type> by listOf(first).plus(remaining) {
 
     override val first: type = first
 
@@ -15,10 +18,10 @@ open class SimpleNonEmptyList<type>(
 
     override val all: List<type> = listOf(first).plus(remaining)
 
-    operator override fun get(index: Int): Result<String, type> =
+    override fun safeGet(index: Int): Result<String, type> =
             getOrNull(index)?.asSuccess<String, type>() ?: Failure("No value exists at this index")
 
-    override fun getOrNull(index: Int): type? = listOf(first).plus(remaining).getOrNull(index)
+    override fun getOrNull(index: Int): type? = listOf(first()).plus(remaining).getOrNull(index)
 
     override fun plus(element: type): NonEmptyList<type> =
             SimpleNonEmptyList(first = first, remaining = remaining.plus(element))
@@ -38,7 +41,7 @@ open class SimpleNonEmptyList<type>(
 
     override fun safeDropLast(n: Int): List<type> = all.dropLast(n)
 
-    override fun contains(value: type): Boolean = find { it == value } is Success
+    override fun contains(element: type): Boolean = find { it == element } is Success
 
     override fun find(fn: (type) -> Boolean): Result<String, type> =
             all.find(fn)?.asSuccess() ?: Failure("Element meeting criteria was not found")
@@ -52,14 +55,14 @@ open class SimpleNonEmptyList<type>(
 
         val sorted = all.sortedBy(fn)
 
-        return SimpleNonEmptyList(first = sorted.first()!!, remaining = sorted.drop(1))
+        return SimpleNonEmptyList(first = sorted.firstOrNull() ?: first, remaining = sorted.drop(1))
     }
 
     override fun <sortableType : Comparable<sortableType>> sortByDescending(fn: (type) -> sortableType): NonEmptyList<type> {
 
         val sorted = all.sortedByDescending(fn)
 
-        return SimpleNonEmptyList(first = sorted.first()!!, remaining = sorted.drop(1))
+        return SimpleNonEmptyList(first = sorted.first() ?: first, remaining = sorted.drop(1))
     }
 
     override fun forEach(fn: (type) -> Unit) {
@@ -96,8 +99,12 @@ open class SimpleNonEmptyList<type>(
             )
 
     override fun equals(other: Any?): Boolean =
-            other is NonEmptyList<*> && size == other.size
-                    && zip(other).fold(true) { accumulator, (first, second) -> accumulator && first == second }
+            when (other) {
+                is NonEmptyList<*> -> all == other.all
+                is List<*> -> all == other
+                else -> false
+            }
 
-    override fun hashCode(): Int = remaining.hashCode().let { 31 * it + (first?.hashCode() ?: 0) }
+    // TODO why is first considered nullable here?
+    override fun hashCode(): Int = remaining.hashCode().let { 31 * it + (first!!.hashCode() ?: 0) }
 }

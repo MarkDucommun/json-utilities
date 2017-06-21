@@ -3,7 +3,6 @@ package com.hcsc.de.claims.collection.helpers
 import com.hcsc.de.claims.results.Failure
 import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.asSuccess
-import com.hcsc.de.claims.results.map
 
 fun <type> nonEmptyListOf(vararg elements: type): Result<String, NonEmptyList<type>> = elements.asList().asNonEmptyList()
 
@@ -26,6 +25,7 @@ fun <type> nonEmptyListOf(one: type, two: type, three: type, four: type, five: t
 fun <type> nonEmptyListOf(one: type, two: type, three: type, four: type, five: type, six: type, seven: type
 ): NonEmptyList<type> = SimpleNonEmptyList(first = one, remaining = listOf(two, three, four, five, six, seven))
 
+// TODO should return a failure object that is something like EmptyListFailure instead of a String
 fun <type> List<type>.asNonEmptyList(): Result<String, NonEmptyList<type>> =
         firstOrNull()?.let { first ->
 
