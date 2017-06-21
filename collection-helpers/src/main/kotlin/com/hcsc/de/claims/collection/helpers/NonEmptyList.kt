@@ -5,9 +5,7 @@ import com.hcsc.de.claims.results.Result
 import com.hcsc.de.claims.results.asSuccess
 
 
-interface NonEmptyList<type> {
-
-    val size: Int
+interface NonEmptyList<type> : List<type> {
 
     val first: type
 
@@ -15,7 +13,7 @@ interface NonEmptyList<type> {
 
     val all: List<type>
 
-    fun get(index: Int): Result<String, type>
+    fun safeGet(index: Int): Result<String, type>
 
     fun getOrNull(index: Int): type?
 
@@ -32,8 +30,6 @@ interface NonEmptyList<type> {
     fun safeDrop(n: Int): List<type>
 
     fun safeDropLast(n: Int): List<type>
-
-    fun contains(value: type): Boolean
 
     fun find(fn: (type) -> Boolean): Result<String, type>
 

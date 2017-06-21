@@ -10,5 +10,5 @@ interface BinWithMembers<memberType : Number> : BinWithWidth<memberType>, Distri
 
     fun plus(other: BinWithMembers<memberType>): BinWithMembers<memberType>
 
-    fun split(value: memberType): Result<String, SplitBinHolder<memberType, BinWithMembers<memberType>>>
+    fun split(splitPoint: memberType): Result<SplitFailure, SplitBinHolder<memberType, BinWithMembers<memberType>>>
 }

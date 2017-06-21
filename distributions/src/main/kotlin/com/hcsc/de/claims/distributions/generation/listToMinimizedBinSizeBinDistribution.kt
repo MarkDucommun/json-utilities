@@ -33,12 +33,13 @@ fun <numberType : Number> NonEmptyList<numberType>.genericMinimizedBinSizeBinDis
                 .sorted()
                 .asDoubleBin
                 .maximizeBins(minimumBinSize)
-                .map { AutomaticBinWithMembers<numberType>(rawMembers = it.members.map(toType), toType = toType) }
+                .map { AutomaticBinWithMembers(rawMembers = it.members.map(toType), toType = toType) }
                 .let { BinWithMembersDistribution(rawBins = it, toType = toType) }
 
 private fun BinWithMembers<Double>.maximizeBins(binCount: Int): List<BinWithMembers<Double>> =
         this
                 .split(members.average())
+                .mapError { "" /* TODO */ }
                 .flatMap { it.bothAreValid(binCount) }
                 .map { (lower, upper) -> listOf(lower.maximizeBins(binCount), upper.maximizeBins(binCount)).flatten() }
                 .getOrElse(alternate = listOf(this))
@@ -51,6 +52,6 @@ private fun SplitBinHolder<Double, BinWithMembers<Double>>.bothAreValid(binCount
             Failure("")
         }
 
-private val NonEmptyList<Double>.asDoubleBin: BinWithMembers<Double> get() = DoubleBinWithMembers(members = this.all)
+private val NonEmptyList<Double>.asDoubleBin: BinWithMembers<Double> get() = DoubleBinWithMembers(members = this)
 
 private fun BinWithMembers<Double>.isValid(binCount: Int): Boolean = endValue - startValue >= 0.0 && size >= binCount

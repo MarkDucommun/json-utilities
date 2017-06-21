@@ -2,10 +2,7 @@
 
 package com.hcsc.de.claims.distributions.generation
 
-import com.hcsc.de.claims.collection.helpers.NonEmptyList
-import com.hcsc.de.claims.collection.helpers.asNonEmptyList
-import com.hcsc.de.claims.collection.helpers.filterNotGreaterThan
-import com.hcsc.de.claims.collection.helpers.filterNotLessThan
+import com.hcsc.de.claims.collection.helpers.*
 import com.hcsc.de.claims.distributions.DistributionPair
 import com.hcsc.de.claims.distributions.NonEmptyDistributionPair
 import com.hcsc.de.claims.distributions.SplitHolder
@@ -15,8 +12,8 @@ import com.hcsc.de.claims.distributions.bins.*
 import com.hcsc.de.claims.math.helpers.ceiling
 import com.hcsc.de.claims.results.*
 
-fun <numberType : Number> DistributionPair<numberType>.idealBinCountMinimumSizedDualMemberBinDistribution(
-        minimumBinSize: Int = 5,
+fun <numberType : Number> DistributionPair<numberType>.idealBinCountMinimumSizedDualSourceBinWithMembersDistribution(
+        minimumSourceBinSize: Int = 5,
         rangeMinimum: numberType? = null,
         rangeMaximum: numberType? = null,
         toType: Double.() -> numberType
@@ -28,72 +25,75 @@ fun <numberType : Number> DistributionPair<numberType>.idealBinCountMinimumSized
 
     return zip(listOne.transformList(), listTwo.transformList()).map {
 
-        NonEmptyDistributionPair(it.first, it.second).idealBinCountMinimumSizedDualMemberBinDistribution(
-                minimumBinSize = minimumBinSize,
+        NonEmptyDistributionPair(it.first, it.second).idealBinCountMinimumSizedDualSourceBinWithMembersDistribution(
+                minimumSourceBinSize = minimumSourceBinSize,
                 toType = toType
         )
     }
 }
 
-fun <numberType : Number> NonEmptyDistributionPair<numberType>.idealBinCountMinimumSizedDualMemberBinDistribution(
-        minimumBinSize: Int = 5,
+fun <numberType : Number> NonEmptyDistributionPair<numberType>.idealBinCountMinimumSizedDualSourceBinWithMembersDistribution(
+        minimumSourceBinSize: Int = 5,
         toType: Double.() -> numberType
 ): DualMemberBinsDistribution<numberType> {
 
     val (listOne, listTwo) = this
 
-    val idealBinCount = Math.floor(Math.pow(1.88 * (listOne.size), (2.0 / 5.0))).toInt()
+    val idealBinCount = if (listOne.size > 35) {
+        Math.floor(Math.pow(1.88 * (listOne.size), (2.0 / 5.0))).toInt()
+    } else {
+        Math.round(listOne.size / 5.0).toInt()
+    }
 
-    val dualMemberBin = DoubleDualMemberBin(
+    fun <type> Int.loopWithAccumulator(initial: type, operation: (type) -> type): type {
+        return List(this) { it }.fold(initial) { acc, _ -> operation(acc) }
+    }
+
+    val initialBin = DoubleDualSourceBinWithMembers(
             DoubleBinWithMembers(members = listOne.map(Number::toDouble)),
             DoubleBinWithMembers(members = listTwo.map(Number::toDouble))
     )
 
-    val bins = List(idealBinCount - 1) { it }.fold(BinHolder(bins = listOf(dualMemberBin))) { binHolder, _ ->
+    val bins = (idealBinCount - 1).loopWithAccumulator(initial = BinHolder(bins = listOf(initialBin))) { binHolder ->
 
         if (binHolder.isComplete) {
+
             binHolder
+
         } else {
 
-            val sortedBins = binHolder.bins.sortedBy { it.width }
+            val sortedBins = binHolder.bins.sortedByDescending { it.width }
 
-            val splittableSortedBins = sortedBins.filter { it.binOne.size / 2 >= minimumBinSize && it.binTwo.size / 2 >= minimumBinSize }
+            // TODO make a result of a splitholder
+            val splitBins = sortedBins.fold(SplitHolder()) { splitHolder, bin ->
 
-            if (splittableSortedBins.isNotEmpty()) {
+                splitHolder.runIfNoBinWasSplitYet {
 
-                val splitBins = splittableSortedBins.reversed().fold(SplitHolder()) { acc, bin ->
-
-                    acc.notComplete {
-                        val bins: List<DualMemberBin<Double, BinWithMembers<Double>>> = bin.splitBin(minimumBinSize)
-
-                        if (bins.size == 2) {
-                            SplitHolder(binSplit = bin, newBins = bins)
-                        } else {
-                            acc
-                        }
-                    }
+                    bin
+                            .splitBin(minimumSourceBinSize = minimumSourceBinSize)
+                            .map { SplitHolder(splitBin = bin, newBins = it) }
+                            .getOrElse(splitHolder)
                 }
+            }
 
-                if (splitBins.binSplit != null) {
+            if (splitBins.binWasSplit) {
 
-                    val newBins = sortedBins.filterNot { splitBins.binSplit.identifyingCharacteristic == it.identifyingCharacteristic }.plus(splitBins.newBins)
+                // TODO get rid of the double bangs, also make this into a remove function
+                val newBins = sortedBins.filterNot { splitBins.splitBin!!.identifyingCharacteristic == it.identifyingCharacteristic }.plus(splitBins.newBins)
 
-                    binHolder.copy(bins = newBins)
-                } else {
-                    binHolder
-                }
-
+                binHolder.copy(bins = newBins)
             } else {
                 binHolder.copy(isComplete = true)
             }
         }
+
     }.bins
 
     return AutomaticDualMemberBinsDistribution(
-            rawBins = bins.map {
-                AutomaticDualMemberBin(
-                        binOne = AutomaticBinWithMembers(rawMembers = it.binOne.members.map(toType), toType = toType),
-                        binTwo = AutomaticBinWithMembers(rawMembers = it.binTwo.members.map(toType), toType = toType),
+            rawBins = bins.sortedBy { it.startValue }.map {
+                AutomaticDualSourceBinWithMembers(
+                        sourceOneBin = AutomaticBinWithMembers(rawMembers = it.sourceOneBin.members.map(toType), toType = toType),
+                        sourceTwoBin = AutomaticBinWithMembers(rawMembers = it.sourceTwoBin.members.map(toType), toType = toType),
                         toType = toType
                 )
             },
@@ -101,55 +101,109 @@ fun <numberType : Number> NonEmptyDistributionPair<numberType>.idealBinCountMini
     )
 }
 
+private fun DualSourceBinWithMembers<Double, BinWithMembers<Double>>.splitBin(
+        minimumSourceBinSize: Int
+): Result<String, List<DualSourceBinWithMembers<Double, BinWithMembers<Double>>>> {
 
-private fun DualMemberBin<Double, BinWithMembers<Double>>.splitBin(binSize: Int): List<DualMemberBin<Double, BinWithMembers<Double>>> {
+    val highestMinimum = Math.max(sourceOneBin.minimum, sourceTwoBin.minimum)
+    val lowestMaximum = Math.min(sourceOneBin.maximum, sourceTwoBin.maximum)
+    val splitPoint = (lowestMaximum + highestMinimum) / 2
 
-    val (low, high) = if (binOne.average < binTwo.average) binOne.average to binTwo.average else binTwo.average to binOne.average
+    if (highestMinimum >= lowestMaximum) {
+        return Failure("Bin not split")
+    }
 
-    val rangeHolder = RangeHolder(low = low, middle = (low + high) / 2, high = high, bins = listOf(this))
+    val rangeHolder = RangeHolder(low = highestMinimum, middle = splitPoint, high = lowestMaximum, bins = listOf(this))
 
-    return List(Math.log(low + high).ceiling().toInt()) { it }.fold(rangeHolder) { rangeHolder, _ ->
+    val bins: List<DualSourceBinWithMembers<Double, BinWithMembers<Double>>> = List(10000) { it }.fold(rangeHolder) { rangeHolder, _ ->
 
-        if (rangeHolder.isIncomplete) {
+        if (!rangeHolder.isComplete) {
 
-            val splitOneResult = binOne.split(rangeHolder.middle).flatMap { it.isValid(binSize) }
-            val splitTwoResult = binTwo.split(rangeHolder.middle).flatMap { it.isValid(binSize) }
+            val result = AutomaticDualSourceBinWithMembers(
+                    sourceOneBin = sourceOneBin,
+                    sourceTwoBin = sourceTwoBin,
+                    toType = doubleToDouble
+            ).splitDualSourceBin(splitPoint = splitPoint, minimumSourceBinSize = minimumSourceBinSize)
 
-            if (splitOneResult is Success && splitTwoResult is Success) {
+            when (result) {
+                is Success -> {
+                    rangeHolder.copy(
+                            isComplete = true,
+                            bins = listOf(
+                                    result.content.lower,
+                                    result.content.upper
+                            )
+                    )
 
-                val splitOne = splitOneResult.content
-                val splitTwo = splitTwoResult.content
-
-                rangeHolder.copy(
-                        isFinalBin = false,
-                        isIncomplete = false,
-                        bins = listOf(
-                                DoubleDualMemberBin(
-                                        binOne = splitOne.upper,
-                                        binTwo = splitTwo.upper
-                                ),
-                                DoubleDualMemberBin(
-                                        binOne = splitOne.lower,
-                                        binTwo = splitTwo.lower
-                                )
-                        ))
-
-            } else if (splitOneResult is Success) {
-
-                rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
-
-            } else if (splitTwoResult is Success) {
-
-                rangeHolder.copy(low = rangeHolder.middle, middle = (rangeHolder.high + rangeHolder.middle) / 2)
-
-            } else {
-
-                rangeHolder.copy(isFinalBin = true, isIncomplete = false)
+                }
+                is Failure -> {
+                    when (result.content) {
+                        is SourceOneUpperSplitFailure, is SourceTwoUpperSplitFailure -> {
+                            rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
+                        }
+                        is SourceOneLowerSplitFailure -> TODO()
+                        is SourceTwoLowerSplitFailure -> TODO()
+                        is BothSourceUpperSplitFailure -> TODO()
+                        is BothSourceLowerSplitFailure -> TODO()
+                        is BothSourceUpperLowerSplitFailure, is BothSourceLowerUpperSplitFailure -> TODO()
+                    }
+                }
             }
+
+//            val splitOneResult = sourceOneBin.split(rangeHolder.middle).mapError { "" }.flatMap { it.isValid(minimumBinSize) }
+//            val splitTwoResult = sourceTwoBin.split(rangeHolder.middle).mapError { "" }.flatMap { it.isValid(minimumBinSize) }
+//
+//            if (splitOneResult is Success && splitTwoResult is Success) {
+//
+//                val (splitOneUpper, splitOneLower) = splitOneResult.content
+//                val (splitTwoUpper, splitTwoLower) = splitTwoResult.content
+//
+//                rangeHolder.copy(
+//                        isComplete = true,
+//                        bins = listOf(
+//                                DoubleDualSourceBinWithMembers(
+//                                        sourceOneBin = splitOneUpper,
+//                                        sourceTwoBin = splitTwoUpper
+//                                ),
+//                                DoubleDualSourceBinWithMembers(
+//                                        sourceOneBin = splitOneLower,
+//                                        sourceTwoBin = splitTwoLower
+//                                )
+//                        ))
+//
+//            } else if (splitOneResult is Success) {
+//
+//                rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
+//
+//            } else if (splitTwoResult is Success) {
+//
+//                // TODO we are here, so are you. PS its broken
+//
+//                val filterHighResult = sourceOneBin.members.filter { it > rangeHolder.middle }
+//
+//                if (filterHighResult is Success && filterHighResult.content.size >= minimumBinSize) {
+//
+//                } else {
+//
+//                }
+//
+//                rangeHolder.copy(low = rangeHolder.middle, middle = (rangeHolder.high + rangeHolder.middle) / 2)
+//
+//            } else {
+//                rangeHolder.copy(isComplete = true)
+//            }
         } else {
             rangeHolder
         }
     }.bins
+
+
+    return if (bins.size == 2) {
+        Success(bins)
+    } else {
+        Failure("Bin not split")
+    }
+
 }
 
 fun <numberType : Number> List<numberType>.transformList(
@@ -164,11 +218,11 @@ fun <numberType : Number> List<numberType>.transformList(
                 .map(toType)
                 .asNonEmptyList()
 
-private val <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.smallestMemberCount: Int
-    get() = if (binOne.size > binTwo.size) binTwo.size else binOne.size
+private val <numberType : Number> DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>.smallestMemberCount: Int
+    get() = if (sourceOneBin.size > sourceTwoBin.size) sourceTwoBin.size else sourceOneBin.size
 
-private fun <numberType : Number> DualMemberBin<numberType, BinWithMembers<numberType>>.isValid(count: Int): Boolean =
-        binOne.size >= count && binTwo.size >= count
+private fun <numberType : Number> DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>.isValid(count: Int): Boolean =
+        sourceOneBin.size >= count && sourceTwoBin.size >= count
 
 private fun <numberType : Number> SplitBinHolder<numberType, BinWithMembers<numberType>>.isValid(binSize: Int): Result<String, SplitBinHolder<numberType, BinWithMembers<numberType>>> {
 
