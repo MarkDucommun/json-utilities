@@ -13,7 +13,7 @@ import umontreal.ssj.randvar.NormalGen
 
 class ChiSquareFitCheckerTest {
 
-    val subject = ChiSquareFitChecker<Double>()
+    val subject = ChiSquareFitChecker({this})
 
     @Test
     @Ignore("No assertions, do better")

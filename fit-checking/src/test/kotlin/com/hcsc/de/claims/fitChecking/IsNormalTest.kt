@@ -2,6 +2,7 @@ package com.hcsc.de.claims.fitChecking
 
 import com.hcsc.de.claims.distributions.DistributionPair
 import com.hcsc.de.claims.distributions.generation.minimizedBinSizeBinDistribution
+import com.hcsc.de.claims.results.get
 import com.hcsc.de.claims.results.succeedsAnd
 import net.sourceforge.jdistlib.Weibull
 import net.sourceforge.jdistlib.disttest.DistributionTest
@@ -24,7 +25,7 @@ class IsNormalTest {
 
         val otherList = List(1000000) { (anotherNormal.sample()).toInt() }
 
-        DistributionPair(list, otherList).chiSquaredTest() succeedsAnd { (statistic, pValue) ->
+        DistributionPair(list, otherList).chiSquaredTestOfLists(toType = {this}) succeedsAnd { (statistic, pValue) ->
 
             println("Chi Square - $statistic")
             println("P-Value - $pValue")
@@ -41,7 +42,7 @@ class IsNormalTest {
 
         val initialList = List(10000) { (initialDistribution.random()).toInt() }
 
-        val unknownDistribution = initialList.minimizedBinSizeBinDistribution(1000)
+        val unknownDistribution = initialList.minimizedBinSizeBinDistribution(1000).get
 
         val generatedList = List(500000) { unknownDistribution.random() }
 
@@ -67,7 +68,7 @@ class IsNormalTest {
         println("P-Value - ${ansariResult[1]}")
         println("-")
 
-        DistributionPair(initialList, generatedList).chiSquaredTest(100) succeedsAnd { (statistic, pValue) ->
+        DistributionPair(initialList, generatedList).chiSquaredTestOfLists(100, { Math.round(this).toInt() }) succeedsAnd { (statistic, pValue) ->
 
             println("Chi-Square - $statistic")
             println("P-Value - $pValue")
@@ -114,7 +115,7 @@ class IsNormalTest {
 
         val initialList = List(10) { (initialDistribution.random()).toInt() }
 
-        val unknownDistribution = initialList.minimizedBinSizeBinDistribution(minimumBinSize = 5)
+        val unknownDistribution = initialList.minimizedBinSizeBinDistribution(minimumBinSize = 5).get
 
         val generatedList: List<Int> = List(500) { unknownDistribution.random() }
 

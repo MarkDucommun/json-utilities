@@ -90,19 +90,14 @@ class BestFitDistributionGenerator(
     val deepNonParametricDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = {
 
 
-        val unknownVariableBinWidthDistribution: BinDistribution<Double, BinWithMembers<Double>> = it.minimizedBinSizeBinDistribution(it.size.toDouble().sqrt().ceiling().toInt())
+        val unknownVariableBinWidthDistribution = it.minimizedBinSizeBinDistribution(minimumBinSize = it.size.toDouble().sqrt().ceiling().toInt())
 
-        val result = unknownVariableBinWidthDistribution.toDistributedBinDistribution()
-
-        when (result) {
-            is Success -> Success<String, Randomable<Double>>(result.content)
-            is Failure -> Failure(result.content)
-        }
+        unknownVariableBinWidthDistribution.flatMap { it.toDistributedBinDistribution() }.map { it }
     }
 
     val shallowNonParametricDistributionGenerator: (List<Double>) -> Result<String, Randomable<Double>> = {
 
-        Success(it.minimizedBinSizeBinDistribution(it.size.toDouble().sqrt().ceiling().toInt()))
+        it.minimizedBinSizeBinDistribution(minimumBinSize = 50).map { it }
     }
 
     data class DistributionGeneratorAndPValue(

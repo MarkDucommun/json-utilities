@@ -147,8 +147,6 @@ class SingleThreadJsonSizeAnalyzer(
                 }
             }.map { it }
 
-    private val EMPTY_DISTRIBUTION = IntNormalDistribution(average = 0, minimum = 0, maximum = 0, mode = 0, median = 0, standardDeviation = 0.0)
-
     private fun List<JsonSizeObject>.findAllChildrenByName(name: String): List<JsonSizeNode?> =
             map { it.children.find { it.name == name } }
 

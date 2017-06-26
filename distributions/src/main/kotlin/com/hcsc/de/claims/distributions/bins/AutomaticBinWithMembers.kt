@@ -24,7 +24,10 @@ open class AutomaticBinWithMembers<numberType : Number>(
     override fun plus(other: BinWithMembers<numberType>): BinWithMembers<numberType> =
             AutomaticBinWithMembers(rawMembers = members.plus(other.members), toType = toType)
 
-    override fun split(splitPoint: numberType): Result<SplitFailure, SplitBinHolder<numberType, BinWithMembers<numberType>>> {
+    override fun split(splitPoint: numberType, minimumBinSize: Int): Result<SplitFailure, SplitBinHolder<numberType, BinWithMembers<numberType>>> {
+
+        if (width == 0) return Failure(SingleMemberValueSplitFailure)
+        if (members.size / 2 < minimumBinSize) return Failure(NotEnoughMembersToSplitFailure)
 
         val membersAsDoubles = members.map(Number::toDouble)
 
@@ -32,10 +35,12 @@ open class AutomaticBinWithMembers<numberType : Number>(
 
         val upperResult = membersAsDoubles
                 .filter { it > splitPointDouble }
+                .flatMap { if (it.size < minimumBinSize) Failure<String, NonEmptyList<Double>>("Not enough members") else Success<String, NonEmptyList<Double>>(it) }
                 .mapError { UpperSplitFailure as SplitFailure } // TODO send this to Intellij
 
         val lowerResult = membersAsDoubles
                 .filterNot { it > splitPointDouble }
+                .flatMap { if (it.size < minimumBinSize) Failure<String, NonEmptyList<Double>>("Not enough members") else Success<String, NonEmptyList<Double>>(it) }
                 .mapError { LowerSplitFailure as SplitFailure }
 
         return zip(upperResult, lowerResult).map { (upperMembers, lowerMembers) ->

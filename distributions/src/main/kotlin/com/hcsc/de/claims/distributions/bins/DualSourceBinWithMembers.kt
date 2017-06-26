@@ -9,5 +9,8 @@ interface DualSourceBinWithMembers<memberType : Number, binType : BinWithMembers
 
     fun plus(other: DualSourceBinWithMembers<memberType, binType>): DualSourceBinWithMembers<memberType, binType>
 
-    fun splitDualSourceBin(minimumSourceBinSize: Int, splitPoint: memberType): Result<DualSourceSplitFailure, SplitBinHolder<memberType, DualSourceBinWithMembers<memberType, binType>>>
+    fun splitDualSourceBin(
+            minimumSourceBinSize: Int,
+            splitPoint: memberType
+    ): Result<DualSourceSplitFailure, SplitBinHolder<memberType, DualSourceBinWithMembers<memberType, binType>>>
 }

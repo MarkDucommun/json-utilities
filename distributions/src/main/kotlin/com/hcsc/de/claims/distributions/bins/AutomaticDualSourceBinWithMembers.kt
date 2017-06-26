@@ -27,14 +27,14 @@ open class AutomaticDualSourceBinWithMembers<numberType : Number>(
             splitPoint: numberType
     ): Result<DualSourceSplitFailure, SplitBinHolder<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>> {
 
-        val sourceOneResult = sourceOneBin.split(splitPoint)
-        val sourceTwoResult = sourceTwoBin.split(splitPoint)
+        val sourceOneResult = sourceOneBin.split(splitPoint = splitPoint, minimumBinSize = minimumSourceBinSize)
+        val sourceTwoResult = sourceTwoBin.split(splitPoint = splitPoint, minimumBinSize = minimumSourceBinSize)
 
         return when (sourceOneResult) {
             is Success -> {
                 when (sourceTwoResult) {
                     is Success -> {
-                        Success(SplitBinHolder<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>(
+                        Success<DualSourceSplitFailure, SplitBinHolder<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>>(SplitBinHolder<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>(
                                 upper = AutomaticDualSourceBinWithMembers(
                                         sourceOneBin = sourceOneResult.content.upper,
                                         sourceTwoBin = sourceTwoResult.content.upper,
@@ -47,41 +47,13 @@ open class AutomaticDualSourceBinWithMembers<numberType : Number>(
                                 )
                         ))
                     }
-                    is Failure -> {
-                        when (sourceTwoResult.content) {
-                            is UpperSplitFailure -> {
-                                Failure(SourceTwoUpperSplitFailure as DualSourceSplitFailure)
-                            }
-                            is LowerSplitFailure -> {
-                                Failure(SourceTwoLowerSplitFailure as DualSourceSplitFailure)
-                            }
-                        }
-                    }
+                    is Failure -> Failure<DualSourceSplitFailure, SplitBinHolder<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>>(SourceTwoSplitFailureWithValue(sourceTwoResult.content))
                 }
             }
             is Failure -> {
                 when (sourceTwoResult) {
-                    is Success -> {
-                        when (sourceOneResult.content) {
-                            is UpperSplitFailure -> {
-                                Failure(SourceOneUpperSplitFailure as DualSourceSplitFailure)
-                            }
-                            is LowerSplitFailure -> {
-                                Failure(SourceOneLowerSplitFailure as DualSourceSplitFailure)
-                            }
-                        }
-                    }
-                    is Failure -> {
-
-                        val failure = when {
-                            sourceOneResult.content is UpperSplitFailure && sourceTwoResult.content is UpperSplitFailure -> BothSourceUpperSplitFailure
-                            sourceOneResult.content is LowerSplitFailure && sourceTwoResult.content is LowerSplitFailure -> BothSourceLowerSplitFailure
-                            sourceOneResult.content is UpperSplitFailure && sourceTwoResult.content is LowerSplitFailure -> BothSourceUpperLowerSplitFailure
-                            else -> BothSourceLowerUpperSplitFailure
-                        }
-
-                        Failure(failure as DualSourceSplitFailure)
-                    }
+                    is Success -> Failure<DualSourceSplitFailure, SplitBinHolder<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>>(SourceOneSplitFailureWithValue(sourceOneResult.content))
+                    is Failure -> Failure<DualSourceSplitFailure, SplitBinHolder<numberType, DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>>>(BothSourceSplitFailureWithValues(sourceOneResult.content, sourceTwoResult.content))
                 }
             }
         }
@@ -90,17 +62,10 @@ open class AutomaticDualSourceBinWithMembers<numberType : Number>(
 
 sealed class DualSourceSplitFailure
 
-sealed class SourceOneSplitFailure<splitFailure : SplitFailure> : DualSourceSplitFailure()
+sealed class SingleSourceSplitFailure : DualSourceSplitFailure() {
+    abstract val failure: SplitFailure
+}
 
-sealed class SourceTwoSplitFailure<splitFailure : SplitFailure> : DualSourceSplitFailure()
-
-sealed class BothSourceSplitFailure<sourceOneFailure : SplitFailure, sourceTwoFailure : SplitFailure> : DualSourceSplitFailure()
-
-object SourceOneUpperSplitFailure : SourceOneSplitFailure<UpperSplitFailure>()
-object SourceOneLowerSplitFailure : SourceOneSplitFailure<LowerSplitFailure>()
-object SourceTwoUpperSplitFailure : SourceTwoSplitFailure<UpperSplitFailure>()
-object SourceTwoLowerSplitFailure : SourceTwoSplitFailure<LowerSplitFailure>()
-object BothSourceUpperSplitFailure : BothSourceSplitFailure<UpperSplitFailure, UpperSplitFailure>()
-object BothSourceLowerSplitFailure : BothSourceSplitFailure<LowerSplitFailure, LowerSplitFailure>()
-object BothSourceUpperLowerSplitFailure : BothSourceSplitFailure<UpperSplitFailure, LowerSplitFailure>()
-object BothSourceLowerUpperSplitFailure : BothSourceSplitFailure<LowerSplitFailure, UpperSplitFailure>()
+data class SourceOneSplitFailureWithValue(override val failure: SplitFailure) : SingleSourceSplitFailure()
+data class SourceTwoSplitFailureWithValue(override val failure: SplitFailure) : SingleSourceSplitFailure()
+data class BothSourceSplitFailureWithValues(val sourceOneFailure: SplitFailure, val sourceTwoFailure: SplitFailure) : DualSourceSplitFailure()

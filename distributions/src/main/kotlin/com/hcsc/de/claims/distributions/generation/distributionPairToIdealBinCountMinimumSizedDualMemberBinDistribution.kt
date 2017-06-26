@@ -9,7 +9,6 @@ import com.hcsc.de.claims.distributions.SplitHolder
 import com.hcsc.de.claims.distributions.binDistributions.AutomaticDualMemberBinsDistribution
 import com.hcsc.de.claims.distributions.binDistributions.DualMemberBinsDistribution
 import com.hcsc.de.claims.distributions.bins.*
-import com.hcsc.de.claims.math.helpers.ceiling
 import com.hcsc.de.claims.results.*
 
 fun <numberType : Number> DistributionPair<numberType>.idealBinCountMinimumSizedDualSourceBinWithMembersDistribution(
@@ -34,19 +33,16 @@ fun <numberType : Number> DistributionPair<numberType>.idealBinCountMinimumSized
 
 fun <numberType : Number> NonEmptyDistributionPair<numberType>.idealBinCountMinimumSizedDualSourceBinWithMembersDistribution(
         minimumSourceBinSize: Int = 5,
+        binCount: Int? = null,
         toType: Double.() -> numberType
 ): DualMemberBinsDistribution<numberType> {
 
     val (listOne, listTwo) = this
 
-    val idealBinCount = if (listOne.size > 35) {
+    val idealBinCount = binCount ?: if (listOne.size > 35) {
         Math.floor(Math.pow(1.88 * (listOne.size), (2.0 / 5.0))).toInt()
     } else {
         Math.round(listOne.size / 5.0).toInt()
-    }
-
-    fun <type> Int.loopWithAccumulator(initial: type, operation: (type) -> type): type {
-        return List(this) { it }.fold(initial) { acc, _ -> operation(acc) }
     }
 
     val initialBin = DoubleDualSourceBinWithMembers(
@@ -107,6 +103,7 @@ private fun DualSourceBinWithMembers<Double, BinWithMembers<Double>>.splitBin(
 
     val highestMinimum = Math.max(sourceOneBin.minimum, sourceTwoBin.minimum)
     val lowestMaximum = Math.min(sourceOneBin.maximum, sourceTwoBin.maximum)
+
     val splitPoint = (lowestMaximum + highestMinimum) / 2
 
     if (highestMinimum >= lowestMaximum) {
@@ -115,95 +112,59 @@ private fun DualSourceBinWithMembers<Double, BinWithMembers<Double>>.splitBin(
 
     val rangeHolder = RangeHolder(low = highestMinimum, middle = splitPoint, high = lowestMaximum, bins = listOf(this))
 
-    val bins: List<DualSourceBinWithMembers<Double, BinWithMembers<Double>>> = List(10000) { it }.fold(rangeHolder) { rangeHolder, _ ->
+    val bins = rangeHolder.whileTrue(continueFn = { it.isComplete.not() && Math.abs(it.low - it.high) > 0.0001 }) {
 
-        if (!rangeHolder.isComplete) {
+        val result = AutomaticDualSourceBinWithMembers(
+                sourceOneBin = sourceOneBin,
+                sourceTwoBin = sourceTwoBin,
+                toType = doubleToDouble
+        ).splitDualSourceBin(splitPoint = splitPoint, minimumSourceBinSize = minimumSourceBinSize)
 
-            val result = AutomaticDualSourceBinWithMembers(
-                    sourceOneBin = sourceOneBin,
-                    sourceTwoBin = sourceTwoBin,
-                    toType = doubleToDouble
-            ).splitDualSourceBin(splitPoint = splitPoint, minimumSourceBinSize = minimumSourceBinSize)
+        when (result) {
+            is Success -> {
+                rangeHolder.copy(
+                        isComplete = true,
+                        bins = listOf(
+                                result.content.lower,
+                                result.content.upper
+                        )
+                )
 
-            when (result) {
-                is Success -> {
-                    rangeHolder.copy(
-                            isComplete = true,
-                            bins = listOf(
-                                    result.content.lower,
-                                    result.content.upper
-                            )
-                    )
+            }
+            is Failure -> {
+                when (result.content) {
+                    is SingleSourceSplitFailure -> {
+                        val content = result.content as SourceOneSplitFailureWithValue
 
-                }
-                is Failure -> {
-                    when (result.content) {
-                        is SourceOneUpperSplitFailure, is SourceTwoUpperSplitFailure -> {
-                            rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
+                        if (content.failure is UpperSplitFailure) {
+                            rangeHolder.shiftDown()
+                        } else if (content.failure is LowerSplitFailure) {
+                            rangeHolder.shiftUp()
+                        } else {
+                            rangeHolder.complete()
                         }
-                        is SourceOneLowerSplitFailure -> TODO()
-                        is SourceTwoLowerSplitFailure -> TODO()
-                        is BothSourceUpperSplitFailure -> TODO()
-                        is BothSourceLowerSplitFailure -> TODO()
-                        is BothSourceUpperLowerSplitFailure, is BothSourceLowerUpperSplitFailure -> TODO()
+                    }
+                    is BothSourceSplitFailureWithValues -> {
+                        val content = result.content as BothSourceSplitFailureWithValues
+
+                        if (content.sourceOneFailure is UpperSplitFailure && content.sourceTwoFailure is UpperSplitFailure) {
+                            rangeHolder.shiftDown()
+                        } else if (content.sourceOneFailure is LowerSplitFailure && content.sourceTwoFailure is LowerSplitFailure) {
+                            rangeHolder.shiftUp()
+                        } else {
+                            rangeHolder.complete()
+                        }
                     }
                 }
             }
-
-//            val splitOneResult = sourceOneBin.split(rangeHolder.middle).mapError { "" }.flatMap { it.isValid(minimumBinSize) }
-//            val splitTwoResult = sourceTwoBin.split(rangeHolder.middle).mapError { "" }.flatMap { it.isValid(minimumBinSize) }
-//
-//            if (splitOneResult is Success && splitTwoResult is Success) {
-//
-//                val (splitOneUpper, splitOneLower) = splitOneResult.content
-//                val (splitTwoUpper, splitTwoLower) = splitTwoResult.content
-//
-//                rangeHolder.copy(
-//                        isComplete = true,
-//                        bins = listOf(
-//                                DoubleDualSourceBinWithMembers(
-//                                        sourceOneBin = splitOneUpper,
-//                                        sourceTwoBin = splitTwoUpper
-//                                ),
-//                                DoubleDualSourceBinWithMembers(
-//                                        sourceOneBin = splitOneLower,
-//                                        sourceTwoBin = splitTwoLower
-//                                )
-//                        ))
-//
-//            } else if (splitOneResult is Success) {
-//
-//                rangeHolder.copy(high = rangeHolder.middle, middle = (rangeHolder.middle + rangeHolder.low) / 2)
-//
-//            } else if (splitTwoResult is Success) {
-//
-//                // TODO we are here, so are you. PS its broken
-//
-//                val filterHighResult = sourceOneBin.members.filter { it > rangeHolder.middle }
-//
-//                if (filterHighResult is Success && filterHighResult.content.size >= minimumBinSize) {
-//
-//                } else {
-//
-//                }
-//
-//                rangeHolder.copy(low = rangeHolder.middle, middle = (rangeHolder.high + rangeHolder.middle) / 2)
-//
-//            } else {
-//                rangeHolder.copy(isComplete = true)
-//            }
-        } else {
-            rangeHolder
         }
     }.bins
-
 
     return if (bins.size == 2) {
         Success(bins)
     } else {
         Failure("Bin not split")
     }
-
 }
 
 fun <numberType : Number> List<numberType>.transformList(
@@ -221,14 +182,19 @@ fun <numberType : Number> List<numberType>.transformList(
 private val <numberType : Number> DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>.smallestMemberCount: Int
     get() = if (sourceOneBin.size > sourceTwoBin.size) sourceTwoBin.size else sourceOneBin.size
 
-private fun <numberType : Number> DualSourceBinWithMembers<numberType, BinWithMembers<numberType>>.isValid(count: Int): Boolean =
-        sourceOneBin.size >= count && sourceTwoBin.size >= count
-
-private fun <numberType : Number> SplitBinHolder<numberType, BinWithMembers<numberType>>.isValid(binSize: Int): Result<String, SplitBinHolder<numberType, BinWithMembers<numberType>>> {
-
-    return if (lower.size >= binSize && upper.size >= binSize) {
-        Success(this)
+tailrec fun <accumulator> accumulator.whileTrue(iteration: Int = 0, maxIterations: Int = 1000, continueFn: (accumulator) -> Boolean, operation: (accumulator) -> accumulator): accumulator {
+    return if (iteration < maxIterations && continueFn(this)) {
+        operation(this).whileTrue(iteration + 1, maxIterations, continueFn, operation)
     } else {
-        Failure("")
+        this
     }
 }
+
+fun <type> Int.loopWithAccumulator(initial: type, operation: (type) -> type): type {
+    return List(this) { it }.fold(initial) { acc, _ -> operation(acc) }
+}
+
+fun RangeHolder.shiftUp(): RangeHolder { return copy(low = middle, middle = (high + middle) / 2) }
+fun RangeHolder.shiftDown(): RangeHolder { return copy(high = middle, middle = (low + middle) / 2) }
+fun RangeHolder.complete(): RangeHolder { return copy(isComplete = true) }
+

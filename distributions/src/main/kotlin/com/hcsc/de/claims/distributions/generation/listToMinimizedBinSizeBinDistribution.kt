@@ -34,7 +34,10 @@ fun <numberType : Number> NonEmptyList<numberType>.genericMinimizedBinSizeBinDis
                 .asDoubleBin
                 .maximizeBins(minimumBinSize)
                 .map { AutomaticBinWithMembers(rawMembers = it.members.map(toType), toType = toType) }
-                .let { BinWithMembersDistribution(rawBins = it, toType = toType) }
+                .let { BinWithMembersDistribution(
+                        rawBins = it.sortedBy { it.identifyingCharacteristic.toDouble() },
+                        toType = toType)
+                }
 
 private fun BinWithMembers<Double>.maximizeBins(binCount: Int): List<BinWithMembers<Double>> =
         this

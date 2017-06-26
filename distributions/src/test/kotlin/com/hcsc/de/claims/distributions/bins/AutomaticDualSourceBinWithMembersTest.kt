@@ -5,6 +5,7 @@ import com.hcsc.de.claims.results.failsAndShouldReturn
 import com.hcsc.de.claims.results.succeedsAnd
 import org.assertj.core.api.KotlinAssertions.assertThat
 import org.junit.Test
+import org.mockito.internal.matchers.Not
 
 class AutomaticDualSourceBinWithMembersTest {
 
@@ -42,87 +43,142 @@ class AutomaticDualSourceBinWithMembersTest {
     fun `it fails when source-one upper bin fails`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(1, 1),
-                sourceTwo = nonEmptyListOf(1, 3)
+                sourceOne = nonEmptyListOf(1, 2),
+                sourceTwo = nonEmptyListOf(1, 4)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn SourceOneUpperSplitFailure
+        subject.splitDualSourceBin(splitPoint = 3, minimumSourceBinSize = 1) failsAndShouldReturn SourceOneSplitFailureWithValue(UpperSplitFailure)
     }
 
     @Test
     fun `it fails when source-one lower bin fails`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(3, 3),
-                sourceTwo = nonEmptyListOf(1, 3)
+                sourceOne = nonEmptyListOf(4, 5),
+                sourceTwo = nonEmptyListOf(1, 4)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn SourceOneLowerSplitFailure
+        subject.splitDualSourceBin(splitPoint = 3, minimumSourceBinSize = 1) failsAndShouldReturn SourceOneSplitFailureWithValue(LowerSplitFailure)
     }
 
     @Test
     fun `it fails when source-two upper bin fails`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(1, 3),
-                sourceTwo = nonEmptyListOf(1, 1)
+                sourceOne = nonEmptyListOf(1, 5),
+                sourceTwo = nonEmptyListOf(1, 2)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn SourceTwoUpperSplitFailure
+        subject.splitDualSourceBin(splitPoint = 3, minimumSourceBinSize = 1) failsAndShouldReturn SourceTwoSplitFailureWithValue(UpperSplitFailure)
     }
 
     @Test
     fun `it fails when source-two lower bin fails`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(1, 3),
-                sourceTwo = nonEmptyListOf(3, 3)
+                sourceOne = nonEmptyListOf(1, 4),
+                sourceTwo = nonEmptyListOf(4, 5)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn SourceTwoLowerSplitFailure
+        subject.splitDualSourceBin(splitPoint = 3, minimumSourceBinSize = 1) failsAndShouldReturn SourceTwoSplitFailureWithValue(LowerSplitFailure)
     }
 
     @Test
     fun `it fails when both upper sources fail`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(1, 1),
-                sourceTwo = nonEmptyListOf(1, 1)
+                sourceOne = nonEmptyListOf(1, 2),
+                sourceTwo = nonEmptyListOf(1, 2)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceUpperSplitFailure
+        subject.splitDualSourceBin(splitPoint = 3, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceSplitFailureWithValues(UpperSplitFailure, UpperSplitFailure)
     }
 
     @Test
     fun `it fails when both lower sources fail`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(3, 3),
-                sourceTwo = nonEmptyListOf(3, 3)
+                sourceOne = nonEmptyListOf(3, 4),
+                sourceTwo = nonEmptyListOf(3, 4)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceLowerSplitFailure
+        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceSplitFailureWithValues(LowerSplitFailure, LowerSplitFailure)
     }
 
     @Test
     fun `it fails when source-one lower bin and source-two upper bin fail`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(3, 3),
-                sourceTwo = nonEmptyListOf(1, 1)
+                sourceOne = nonEmptyListOf(4, 5),
+                sourceTwo = nonEmptyListOf(1, 2)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceLowerUpperSplitFailure
+        subject.splitDualSourceBin(splitPoint = 3, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceSplitFailureWithValues(LowerSplitFailure, UpperSplitFailure)
     }
 
     @Test
     fun `it fails when source-one upper bin and source-two lower bin fail`() {
 
         val subject = dualSourceBinWithMembers(
-                sourceOne = nonEmptyListOf(1, 1),
-                sourceTwo = nonEmptyListOf(3, 3)
+                sourceOne = nonEmptyListOf(1, 2),
+                sourceTwo = nonEmptyListOf(4, 5)
         )
 
-        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceUpperLowerSplitFailure
+        subject.splitDualSourceBin(splitPoint = 3, minimumSourceBinSize = 1) failsAndShouldReturn BothSourceSplitFailureWithValues(UpperSplitFailure, LowerSplitFailure)
+    }
+
+    @Test
+    fun `it respects the minimum bin size when both cant be split`() {
+
+        val subject = dualSourceBinWithMembers(
+                sourceOne = nonEmptyListOf(1, 3),
+                sourceTwo = nonEmptyListOf(1, 3)
+        )
+
+        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 2) failsAndShouldReturn BothSourceSplitFailureWithValues(NotEnoughMembersToSplitFailure, NotEnoughMembersToSplitFailure)
+    }
+
+    @Test
+    fun `it respects the minimum bin size when upper cant be split`() {
+
+        val subject = dualSourceBinWithMembers(
+                sourceOne = nonEmptyListOf(1, 3),
+                sourceTwo = nonEmptyListOf(1, 1, 3, 3)
+        )
+
+        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 2) failsAndShouldReturn SourceOneSplitFailureWithValue(NotEnoughMembersToSplitFailure)
+    }
+
+    @Test
+    fun `it respects the minimum bin size when lower cant be split`() {
+
+        val subject = dualSourceBinWithMembers(
+                sourceOne = nonEmptyListOf(1, 1, 3, 3),
+                sourceTwo = nonEmptyListOf(1, 3)
+        )
+
+        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 2) failsAndShouldReturn SourceTwoSplitFailureWithValue(NotEnoughMembersToSplitFailure)
+    }
+
+    @Test
+    fun `it respects the minimum bin size`() {
+
+        val subject = dualSourceBinWithMembers(
+                sourceOne = nonEmptyListOf(1, 3),
+                sourceTwo = nonEmptyListOf(1, 3)
+        )
+
+        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 2) failsAndShouldReturn BothSourceSplitFailureWithValues(NotEnoughMembersToSplitFailure, NotEnoughMembersToSplitFailure)
+    }
+
+    @Test
+    fun `it respects the minimum bin size even more`() {
+
+        val subject = dualSourceBinWithMembers(
+                sourceOne = nonEmptyListOf(1, 1, 1, 3),
+                sourceTwo = nonEmptyListOf(1, 1, 1, 3)
+        )
+
+        subject.splitDualSourceBin(splitPoint = 2, minimumSourceBinSize = 2) failsAndShouldReturn BothSourceSplitFailureWithValues(UpperSplitFailure, UpperSplitFailure)
     }
 }

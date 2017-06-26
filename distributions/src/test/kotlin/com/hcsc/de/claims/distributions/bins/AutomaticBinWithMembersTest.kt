@@ -51,4 +51,36 @@ class AutomaticBinWithMembersTest {
 
         result failsAndShouldReturn LowerSplitFailure
     }
+
+    @Test
+    fun `it returns a NotEnoughMembersFailure when there are fewer members than the possible to split`() {
+
+        val subject = IntBinWithMembers(members = nonEmptyListOf(1, 3))
+
+        subject.split(splitPoint = 2, minimumBinSize = 2) failsAndShouldReturn NotEnoughMembersToSplitFailure
+    }
+
+    @Test
+    fun `it returns a LowerSplitFailure when there are fewer members than the possible to split because of minimum bin size`() {
+
+        val subject = IntBinWithMembers(members = nonEmptyListOf(1, 3, 3, 3))
+
+        subject.split(splitPoint = 2, minimumBinSize = 2) failsAndShouldReturn LowerSplitFailure
+    }
+
+    @Test
+    fun `it returns a UpperSplitFailure when there are fewer members than the possible to split because of minimum bin size`() {
+
+        val subject = IntBinWithMembers(members = nonEmptyListOf(1, 1, 1, 3))
+
+        subject.split(splitPoint = 2, minimumBinSize = 2) failsAndShouldReturn UpperSplitFailure
+    }
+
+    @Test
+    fun `it returns a SingleMemberValueFailure when there is only one member value`() {
+
+        val subject = IntBinWithMembers(members = nonEmptyListOf(1, 1))
+
+        subject.split(splitPoint = 2, minimumBinSize = 1) failsAndShouldReturn SingleMemberValueSplitFailure
+    }
 }

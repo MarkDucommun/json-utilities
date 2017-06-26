@@ -70,8 +70,8 @@ class IdealBinCountMinimumSizedDualSourceBinWithMembersDistributionGeneratorTest
 
             assertThat(dist.binCount).isEqualTo(2)
 
-            assertThat(dist.bins[0].members).containsExactlyElementsOf(List(100) { 1 })
-            assertThat(dist.bins[1].members).containsExactlyElementsOf(List(50) { 2 }.plus(List(50) { 6 }))
+            assertThat(dist.bins[0].members).containsExactlyInAnyOrder(*List(100) { 1 }.toTypedArray())
+            assertThat(dist.bins[1].members).containsExactlyInAnyOrder(*List(50) { 2 }.plus(List(50) { 6 }).toTypedArray())
         }
     }
 
@@ -79,15 +79,15 @@ class IdealBinCountMinimumSizedDualSourceBinWithMembersDistributionGeneratorTest
     fun `it properly bins when all members of source-two are below the middle of the bounds of all members`() {
 
         subject.create(IdealBinCountDualDistributionRequest(
-                list = List(50) { 1 }.plus(List(50) { 6 }),
-                listTwo = List(50) { 1 }.plus(List(50) { 2 }),
+                list = List(5) { 1 }.plus(List(5) { 6 }),
+                listTwo = List(5) { 1 }.plus(List(5) { 2 }),
                 minimumBinSize = 1
         )) succeedsAnd { (_, dist) ->
 
             assertThat(dist.binCount).isEqualTo(2)
 
-            assertThat(dist.bins[0].members).containsExactlyElementsOf(List(50) { 2 }.plus(List(50) { 6 }))
-            assertThat(dist.bins[1].members).containsExactlyElementsOf(List(100) { 1 })
+            assertThat(dist.bins[1].members).containsExactlyInAnyOrder(*List(5) { 2 }.plus(List(5) { 6 }).toTypedArray())
+            assertThat(dist.bins[0].members).containsExactlyInAnyOrder(*List(10) { 1 }.toTypedArray())
         }
     }
 
@@ -95,20 +95,21 @@ class IdealBinCountMinimumSizedDualSourceBinWithMembersDistributionGeneratorTest
     fun `it properly bins when all members of source-one are above the middle of the bounds of all members`() {
 
         subject.create(IdealBinCountDualDistributionRequest(
-                list = List(50) { 5 }.plus(List(50) { 6 }),
-                listTwo = List(50) { 1 }.plus(List(50) { 6 }),
+                list = listOf(1, 6).flatMap { i -> List(50) { i } },
+                listTwo = listOf(5, 6).flatMap { i -> List(50) { i } },
                 minimumBinSize = 1
         )) succeedsAnd { (_, dist) ->
 
             assertThat(dist.binCount).isEqualTo(2)
 
-            assertThat(dist.bins[0].members).containsExactlyInAnyOrder(*List(50) { 1 }.plus(List(50) { 5 }).toTypedArray())
-            assertThat(dist.bins[1].members).containsExactlyInAnyOrder(*List(100) { 6 }.toTypedArray())
+            assertThat(dist.bins[0].members.toSet()).containsExactlyInAnyOrder(1, 5)
+            assertThat(dist.bins[1].members.toSet()).containsExactlyInAnyOrder(6)
         }
     }
 
     @Test
     fun `it respects the minimum bin size`() {
+
         subject.create(IdealBinCountDualDistributionRequest(
                 list = List(6) { 5 }.plus(List(4) { 6 }),
                 listTwo = List(6) { 1 }.plus(List(4) { 6 }),
